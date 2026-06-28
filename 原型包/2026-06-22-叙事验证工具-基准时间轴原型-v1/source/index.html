@@ -504,7 +504,7 @@
             <button id="resetView" type="button" class="active">复位</button>
             <button id="zoomIn" type="button">放大</button>
             <button id="expandAll" type="button">全展</button>
-            <button id="collapseAll" type="button">收起</button>
+            <button id="resetDatasetState" type="button">重置状态</button>
           </div>
         </div>
 
@@ -677,8 +677,10 @@
       paddingTop: 0
     };
 
+    const DEFAULT_VIEW_SCALE = 0.72;
+
     const state = {
-      scale: 0.72,
+      scale: DEFAULT_VIEW_SCALE,
       offsetX: 0,
       axisMode: "realTime",
       selected: null,
@@ -702,7 +704,11 @@
       end: parseTime(timelineConfig.defaultEnd)
     };
     const STORY_MANIFEST_URL = "data/stories/index.json";
+    const VIEW_STATE_STORAGE_KEY = "hs-novel-editor:timeline-view-state:v1";
+    const VIEW_STATE_VERSION = 1;
     const storyCatalog = [];
+    let persistedViewState = null;
+    let defaultExpandedTrackIds = new Set();
     let activeStoryId = "";
     let storyDataSource = "内置演示投影数据";
     let storyDataError = "";
@@ -747,10 +753,215 @@
       timeline.end = parseTime(timelineConfig.defaultEnd);
       document.getElementById("timelineStart").value = timelineConfig.defaultStart;
       document.getElementById("timelineEnd").value = timelineConfig.defaultEnd;
+      defaultExpandedTrackIds = new Set(
+        tracks
+          .filter((track) => track.characters.length > 0 && track.expanded)
+          .map((track) => track.id)
+      );
     }
 
     function updateDataSourceState() {
       document.getElementById("data-source-state").textContent = `DATA ${storyDataSource}`;
+    }
+
+    function normalizePersistedState(value = {}) {
+      const datasets = value.datasets && typeof value.datasets === "object" && !Array.isArray(value.datasets)
+        ? value.datasets
+        : {};
+      return {
+        version: VIEW_STATE_VERSION,
+        activeStoryId: typeof value.activeStoryId === "string" ? value.activeStoryId : "",
+        datasets
+      };
+    }
+
+    function loadPersistedState() {
+      try {
+        const raw = localStorage.getItem(VIEW_STATE_STORAGE_KEY);
+        if (!raw) return normalizePersistedState();
+        const parsed = JSON.parse(raw);
+        return normalizePersistedState(parsed);
+      } catch (error) {
+        return normalizePersistedState();
+      }
+    }
+
+    function savePersistedState(nextState) {
+      persistedViewState = normalizePersistedState(nextState);
+      try {
+        localStorage.setItem(VIEW_STATE_STORAGE_KEY, JSON.stringify(persistedViewState));
+      } catch (error) {
+        // localStorage can fail in private or quota-limited browser contexts.
+      }
+    }
+
+    function ensurePersistedViewState() {
+      if (!persistedViewState) persistedViewState = loadPersistedState();
+      return persistedViewState;
+    }
+
+    function getDatasetViewState(storyId = activeStoryId) {
+      if (!storyId) return null;
+      const viewState = ensurePersistedViewState();
+      const datasetState = viewState.datasets[storyId];
+      return datasetState && typeof datasetState === "object" ? datasetState : null;
+    }
+
+    function setDatasetViewState(storyId, viewState) {
+      if (!storyId) return;
+      const current = ensurePersistedViewState();
+      savePersistedState({
+        ...current,
+        activeStoryId: storyId,
+        datasets: {
+          ...current.datasets,
+          [storyId]: viewState
+        }
+      });
+    }
+
+    function clearDatasetViewState(storyId = activeStoryId) {
+      if (!storyId) return;
+      const current = ensurePersistedViewState();
+      const datasets = { ...current.datasets };
+      delete datasets[storyId];
+      savePersistedState({
+        ...current,
+        activeStoryId: storyId,
+        datasets
+      });
+    }
+
+    function isValidAxisMode(mode) {
+      return mode === AXIS_MODE_REAL || mode === AXIS_MODE_CHAPTER;
+    }
+
+    function setTimelineInputValues(startValue, endValue) {
+      document.getElementById("timelineStart").value = startValue;
+      document.getElementById("timelineEnd").value = endValue;
+    }
+
+    function captureCurrentDatasetState() {
+      const selected = state.selected ? { ...state.selected } : null;
+      return {
+        version: VIEW_STATE_VERSION,
+        axisMode: state.axisMode,
+        timelineStart: document.getElementById("timelineStart").value,
+        timelineEnd: document.getElementById("timelineEnd").value,
+        scale: state.scale,
+        offsetX: state.offsetX,
+        selected,
+        expandedTrackIds: tracks
+          .filter((track) => track.characters.length > 0 && track.expanded)
+          .map((track) => track.id)
+      };
+    }
+
+    function persistCurrentDatasetState() {
+      if (!activeStoryId) return;
+      setDatasetViewState(activeStoryId, captureCurrentDatasetState());
+    }
+
+    function applyTrackExpansion(expandedTrackIds) {
+      const expanded = Array.isArray(expandedTrackIds)
+        ? new Set(expandedTrackIds.map((id) => String(id)))
+        : defaultExpandedTrackIds;
+      tracks.forEach((track) => {
+        if (track.characters.length > 0) track.expanded = expanded.has(track.id);
+      });
+    }
+
+    function resolvePersistedSelection(selected) {
+      if (!selected || typeof selected !== "object") return null;
+      if (selected.type === "event" && events.some((item) => item.id === selected.id)) {
+        return { type: "event", id: selected.id };
+      }
+      if (selected.type === "chapter" && chapters.some((item) => item.id === selected.id)) {
+        return { type: "chapter", id: selected.id };
+      }
+      if (selected.type === "track" && trackById(selected.id)) {
+        return { type: "track", id: selected.id };
+      }
+      if (selected.type === "character") {
+        const [idTrack, idCharacter] = String(selected.id || "").split(":");
+        const trackId = selected.track || idTrack;
+        const characterId = selected.character || idCharacter;
+        const track = trackById(trackId);
+        if (track && track.characters.includes(characterId) && characterById(characterId)) {
+          track.expanded = true;
+          return {
+            type: "character",
+            id: `${trackId}:${characterId}`,
+            track: trackId,
+            character: characterId
+          };
+        }
+      }
+      return null;
+    }
+
+    function applyPersistedSelection(selected) {
+      const region = resolvePersistedSelection(selected);
+      if (!region) return false;
+      selectRegion(region, { persist: false, restore: true });
+      return true;
+    }
+
+    function applyDefaultDatasetViewState() {
+      timeline.start = parseTime(timelineConfig.defaultStart);
+      timeline.end = parseTime(timelineConfig.defaultEnd);
+      setTimelineInputValues(timelineConfig.defaultStart, timelineConfig.defaultEnd);
+      state.scale = DEFAULT_VIEW_SCALE;
+      state.offsetX = 0;
+      state.axisMode = AXIS_MODE_REAL;
+      state.selected = null;
+      state.detailMode = "summary";
+      applyTrackExpansion(null);
+      hideDetails();
+      updateInspectorEmpty();
+      clampOffset();
+      draw();
+    }
+
+    function applyDatasetViewState(viewState) {
+      if (!viewState || typeof viewState !== "object") {
+        applyDefaultDatasetViewState();
+        return;
+      }
+
+      const startValue = typeof viewState.timelineStart === "string" ? viewState.timelineStart : timelineConfig.defaultStart;
+      const endValue = typeof viewState.timelineEnd === "string" ? viewState.timelineEnd : timelineConfig.defaultEnd;
+      const start = parseTime(startValue);
+      const end = parseTime(endValue);
+      if (Number.isFinite(start) && Number.isFinite(end) && end > start + MS_HOUR) {
+        timeline.start = start;
+        timeline.end = end;
+        setTimelineInputValues(startValue, endValue);
+      } else {
+        timeline.start = parseTime(timelineConfig.defaultStart);
+        timeline.end = parseTime(timelineConfig.defaultEnd);
+        setTimelineInputValues(timelineConfig.defaultStart, timelineConfig.defaultEnd);
+      }
+
+      state.axisMode = isValidAxisMode(viewState.axisMode) ? viewState.axisMode : AXIS_MODE_REAL;
+      state.scale = Number.isFinite(Number(viewState.scale))
+        ? Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, Number(viewState.scale)))
+        : DEFAULT_VIEW_SCALE;
+      state.offsetX = Number.isFinite(Number(viewState.offsetX)) ? Number(viewState.offsetX) : 0;
+      state.selected = null;
+      state.detailMode = "summary";
+      applyTrackExpansion(viewState.expandedTrackIds);
+      hideDetails();
+      updateInspectorEmpty();
+      clampOffset();
+      draw();
+      applyPersistedSelection(viewState.selected);
+    }
+
+    function resetDatasetState() {
+      clearDatasetViewState(activeStoryId);
+      applyDefaultDatasetViewState();
+      document.getElementById("route-state").textContent = "当前数据集状态已重置";
     }
 
     function validateStoryManifest(manifest) {
@@ -796,7 +1007,10 @@
       const manifest = await response.json();
       const list = validateStoryManifest(manifest);
       storyCatalog.splice(0, storyCatalog.length, ...list);
-      activeStoryId = manifest.defaultStoryId && list.some((item) => item.id === manifest.defaultStoryId)
+      persistedViewState = loadPersistedState();
+      activeStoryId = persistedViewState.activeStoryId && list.some((item) => item.id === persistedViewState.activeStoryId)
+        ? persistedViewState.activeStoryId
+        : manifest.defaultStoryId && list.some((item) => item.id === manifest.defaultStoryId)
         ? manifest.defaultStoryId
         : list[0].id;
       renderStoryOptions();
@@ -820,11 +1034,8 @@
       updateDataSourceState();
 
       if (!options.keepView) {
-        state.offsetX = 0;
-        state.selected = null;
-        state.detailMode = "summary";
-        hideDetails();
-        updateInspectorEmpty();
+        applyDatasetViewState(getDatasetViewState(activeStoryId));
+        return;
       }
       clampOffset();
       draw();
@@ -842,7 +1053,7 @@
     async function loadStoryData() {
       try {
         await loadStoryManifest();
-        await applySelectedStory(activeStoryId, { keepView: true });
+        await applySelectedStory(activeStoryId);
       } catch (error) {
         try {
           storyCatalog.splice(0, storyCatalog.length);
@@ -1151,6 +1362,10 @@
 
     function trackById(id) {
       return tracks.find((track) => track.id === id);
+    }
+
+    function eventById(id) {
+      return events.find((eventItem) => eventItem.id === id);
     }
 
     function characterById(id) {
@@ -1571,21 +1786,25 @@
       return null;
     }
 
-    function selectRegion(region) {
+    function selectRegion(region, options = {}) {
       state.detailMode = "summary";
       hideDetails();
       if (!region) {
         state.selected = null;
         updateInspectorEmpty();
         draw();
+        if (options.persist !== false) persistCurrentDatasetState();
         return;
       }
-      state.selected = { type: region.type, id: region.id };
+      state.selected = region.type === "character"
+        ? { type: region.type, id: region.id, track: region.track, character: region.character }
+        : { type: region.type, id: region.id };
       if (region.type === "event") updateInspectorEvent(region.id);
       if (region.type === "chapter") updateInspectorChapter(region.id);
-      if (region.type === "track") updateInspectorTrack(region.id);
+      if (region.type === "track") updateInspectorTrack(region.id, { toggle: !options.restore });
       if (region.type === "character") updateInspectorCharacter(region.track, region.character);
       draw();
+      if (options.persist !== false) persistCurrentDatasetState();
     }
 
     function updateInspectorEmpty() {
@@ -1647,10 +1866,10 @@
       document.getElementById("route-state").textContent = "事件已选中";
     }
 
-    function updateInspectorTrack(id) {
+    function updateInspectorTrack(id, options = {}) {
       const track = trackById(id);
       const personCount = track.characters.length;
-      if (personCount > 0) track.expanded = !track.expanded;
+      if (personCount > 0 && options.toggle !== false) track.expanded = !track.expanded;
       const names = track.characters.map((characterId) => characterById(characterId).name).join(" / ") || "无人物条";
       document.getElementById("selectionKind").textContent = "Selected Story Line";
       document.getElementById("selectionTitle").textContent = track.name;
@@ -1823,6 +2042,7 @@
       updateAxisModeButtons();
       draw();
       document.getElementById("route-state").textContent = `轴模式：${axisModeLabel()}`;
+      persistCurrentDatasetState();
     }
 
     function applyTimelineRange() {
@@ -1844,6 +2064,7 @@
       updateInspectorEmpty();
       draw();
       document.getElementById("route-state").textContent = "时间范围已应用";
+      persistCurrentDatasetState();
     }
 
     function setScale(nextScale, anchorX = world.labelWidth + plotWidth() / 2) {
@@ -1853,6 +2074,7 @@
       state.offsetX = worldAtAnchor - (anchorX - world.labelWidth) / state.scale;
       if (oldScale !== state.scale) clampOffset();
       draw();
+      persistCurrentDatasetState();
     }
 
     canvas.addEventListener("wheel", (event) => {
@@ -1888,6 +2110,7 @@
       canvas.classList.remove("dragging");
       const region = hitTest(event.offsetX, event.offsetY);
       if (!state.moved) selectRegion(region);
+      if (state.moved) persistCurrentDatasetState();
     });
 
     document.getElementById("zoomSlider").addEventListener("input", (event) => {
@@ -1898,6 +2121,7 @@
       const nextStoryId = event.target.value;
       if (!nextStoryId || nextStoryId === activeStoryId) return;
       try {
+        persistCurrentDatasetState();
         document.getElementById("route-state").textContent = "投影数据加载中";
         await applySelectedStory(nextStoryId);
         document.getElementById("route-state").textContent = "投影数据已切换";
@@ -1921,20 +2145,17 @@
         if (track.characters.length > 0) track.expanded = true;
       });
       draw();
-    });
-    document.getElementById("collapseAll").addEventListener("click", () => {
-      tracks.forEach((track) => {
-        if (track.characters.length > 0) track.expanded = false;
-      });
-      draw();
+      persistCurrentDatasetState();
     });
     document.getElementById("resetView").addEventListener("click", () => {
-      state.scale = 0.72;
+      state.scale = DEFAULT_VIEW_SCALE;
       state.offsetX = 0;
       state.detailMode = "summary";
       hideDetails();
       draw();
+      persistCurrentDatasetState();
     });
+    document.getElementById("resetDatasetState").addEventListener("click", () => resetDatasetState());
     document.getElementById("enterEvent").addEventListener("click", enterEventDetail);
     document.getElementById("enterChapter").addEventListener("click", enterChapterDetail);
     document.getElementById("backToCanvas").addEventListener("click", () => {
@@ -1995,7 +2216,7 @@
     async function boot() {
       await loadStoryData();
       resizeCanvas();
-      updateInspectorEmpty();
+      if (!state.selected) updateInspectorEmpty();
       applyInitialRoute();
     }
 
