@@ -78,7 +78,7 @@
     .main {
       min-width: 0;
       display: grid;
-      grid-template-rows: 46px 1fr;
+      grid-template-rows: 46px auto minmax(0, 1fr);
       background: #f9fbfa;
     }
 
@@ -129,25 +129,26 @@
       min-height: 0;
       border-right: 1px solid var(--line);
       display: grid;
-      grid-template-rows: auto 1fr;
-      padding: 14px 22px 16px 26px;
-      gap: 10px;
+      grid-template-rows: minmax(0, 1fr);
+      padding: 10px 12px 16px 26px;
     }
 
     .toolbar {
-      border: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
       background: #fff;
-      min-height: 52px;
+      min-height: 48px;
       display: grid;
       grid-template-columns: max-content minmax(320px, 1fr) auto auto auto auto;
       align-items: center;
-      gap: 16px;
-      padding: 9px 12px;
+      gap: 14px;
+      padding: 7px 26px;
     }
 
     .toolbar h3 {
-      margin: 0 0 3px;
-      font-size: 16px;
+      margin: 0;
+      font-size: 14px;
+      line-height: 1;
+      white-space: nowrap;
     }
 
     .zoom-control {
@@ -242,6 +243,10 @@
       font-size: 11px;
     }
 
+    .story-settings span {
+      white-space: nowrap;
+    }
+
     .story-settings select {
       width: 100%;
       min-height: 27px;
@@ -303,7 +308,7 @@
 
     .inspector {
       min-width: 0;
-      padding: 16px 22px 18px;
+      padding: 10px 22px 18px;
       display: grid;
       grid-template-rows: auto minmax(0, 1fr) auto;
       gap: 12px;
@@ -349,14 +354,19 @@
 
     .kv div {
       display: grid;
-      grid-template-columns: 78px 1fr;
-      gap: 10px;
+      grid-template-columns: max-content minmax(0, 1fr);
+      gap: 12px;
       font-size: 12px;
       line-height: 1.5;
     }
 
     .kv span {
       color: #657471;
+    }
+
+    .kv strong {
+      min-width: 0;
+      overflow-wrap: anywhere;
     }
 
     .tag-list {
@@ -444,13 +454,6 @@
       line-height: 1.55;
     }
 
-    .notes {
-      margin: 0;
-      padding-left: 18px;
-      color: #23302e;
-      font-size: 13px;
-      line-height: 1.75;
-    }
   </style>
 </head>
 <body>
@@ -464,48 +467,49 @@
           <div class="route">时间轴 / <strong id="route-state">画布模式</strong> / <span id="data-source-state">DATA 内置演示数据</span></div>
         </header>
 
+        <div class="toolbar">
+          <div>
+            <h3>基准时间轴画布</h3>
+          </div>
+
+          <label class="story-settings" aria-label="基准时间轴投影数据集选择">
+            <span>投影数据集</span>
+            <select id="storySelect">
+              <option value="">加载中</option>
+            </select>
+          </label>
+
+          <div class="time-settings" aria-label="时间范围设置">
+            <span>起</span>
+            <input id="timelineStart" type="datetime-local" value="2025-07-07T08:00">
+            <span>止</span>
+            <input id="timelineEnd" type="datetime-local" value="2025-08-01T00:00">
+            <button id="applyTimeline" type="button">应用</button>
+          </div>
+
+          <div class="axis-settings" aria-label="轴模式切换">
+            <span>轴模式</span>
+            <button type="button" class="active" data-axis-mode="realTime">真实时间</button>
+            <button type="button" data-axis-mode="chapterEqual">章节等宽</button>
+          </div>
+
+          <label class="zoom-control">
+            <span>缩放</span>
+            <input id="zoomSlider" type="range" min="45" max="750" value="72">
+            <strong id="zoomLabel">72%</strong>
+          </label>
+
+          <div class="tool-buttons" aria-label="画布工具">
+            <button id="zoomOut" type="button">缩小</button>
+            <button id="resetView" type="button" class="active">复位</button>
+            <button id="zoomIn" type="button">放大</button>
+            <button id="expandAll" type="button">全展</button>
+            <button id="collapseAll" type="button">收起</button>
+          </div>
+        </div>
+
         <section class="workspace">
           <section class="canvas-zone">
-            <div class="toolbar">
-              <div>
-                <h3>基准时间轴画布</h3>
-              </div>
-
-              <label class="story-settings" aria-label="基准时间轴投影数据集选择">
-                <span>投影数据集</span>
-                <select id="storySelect">
-                  <option value="">加载中</option>
-                </select>
-              </label>
-
-              <div class="time-settings" aria-label="时间范围设置">
-                <span>起</span>
-                <input id="timelineStart" type="datetime-local" value="2025-07-07T08:00">
-                <span>止</span>
-                <input id="timelineEnd" type="datetime-local" value="2025-08-01T00:00">
-                <button id="applyTimeline" type="button">应用</button>
-              </div>
-
-              <div class="axis-settings" aria-label="轴模式切换">
-                <span>轴模式</span>
-                <button type="button" class="active" data-axis-mode="realTime">真实时间</button>
-                <button type="button" data-axis-mode="chapterEqual">章节等宽</button>
-              </div>
-
-              <label class="zoom-control">
-                <span>缩放</span>
-                <input id="zoomSlider" type="range" min="45" max="750" value="72">
-                <strong id="zoomLabel">72%</strong>
-              </label>
-
-              <div class="tool-buttons" aria-label="画布工具">
-                <button id="zoomOut" type="button">缩小</button>
-                <button id="resetView" type="button" class="active">复位</button>
-                <button id="zoomIn" type="button">放大</button>
-                <button id="expandAll" type="button">全展</button>
-                <button id="collapseAll" type="button">收起</button>
-              </div>
-            </div>
 
             <div class="canvas-wrap" id="canvasWrap">
               <canvas id="timelineCanvas" aria-label="Canvas 多轨时间线"></canvas>
@@ -549,16 +553,6 @@
                 <div class="logic-item risk"><strong>章节输出</strong><p id="chapterOutput">等待选择章节。</p></div>
               </section>
 
-              <section class="inspect-card">
-                <h3>操作约束</h3>
-                <ul class="notes">
-                  <li>误触不会进入详情。</li>
-                  <li>Inspector 只解释当前选中的对象。</li>
-                  <li>事件可以是小跨度，也可以跨章节。</li>
-                  <li>故事线只显示正文可见事件。</li>
-                  <li>人物条虚段不能替代故事线事件。</li>
-                </ul>
-              </section>
             </div>
 
             <div class="action-stack">
@@ -1982,10 +1976,8 @@
         const interview = trackById("interview");
         if (interview) interview.expanded = true;
         selectRegion({ type: "event", id: "E005" });
-        enterEventDetail();
       } else if (hash === "chapter-detail") {
         selectRegion({ type: "chapter", id: chapters.some((chapter) => chapter.id === "C15") ? "C15" : chapters[0]?.id });
-        enterChapterDetail();
       } else if (hash === "all-expanded") {
         tracks.forEach((track) => {
           if (track.characters.length > 0) track.expanded = true;
