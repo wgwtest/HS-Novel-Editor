@@ -1,0 +1,1212 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>叙事验证工具 人物条实虚段原型</title>
+  <style>
+    :root {
+      --bg: #e9edeb;
+      --panel: #fbfcfb;
+      --panel-soft: #f2f6f4;
+      --ink: #101716;
+      --muted: #5f6e6b;
+      --line: #98a9a5;
+      --line-soft: #d4ddda;
+      --teal: #087268;
+      --teal-soft: #dcefed;
+      --amber: #a66a10;
+      --amber-soft: #f3e4c8;
+      --red: #b42b40;
+      --red-soft: #f3d7de;
+      --blue: #315f83;
+      --blue-soft: #dbe8f1;
+      --violet: #67558a;
+      --violet-soft: #e7e2ef;
+      --mono: Consolas, "Cascadia Mono", "Courier New", monospace;
+      --sans: "Microsoft YaHei UI", "Noto Sans CJK SC", "PingFang SC", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: var(--sans);
+      background:
+        linear-gradient(rgba(16, 23, 22, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16, 23, 22, 0.035) 1px, transparent 1px),
+        var(--bg);
+      background-size: 24px 24px;
+      overflow: hidden;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .frame {
+      width: 1920px;
+      height: 1080px;
+      margin: 0 auto;
+      padding: 18px;
+    }
+
+    .app {
+      height: 100%;
+      display: grid;
+      grid-template-columns: 1fr;
+      border: 1px solid var(--line);
+      background: rgba(251, 252, 251, 0.98);
+      box-shadow: 0 28px 80px rgba(27, 42, 39, 0.15);
+    }
+
+    .eyebrow {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #53625f;
+    }
+
+    .main {
+      min-width: 0;
+      display: grid;
+      grid-template-rows: 74px 1fr;
+      background: #f9fbfa;
+    }
+
+    .topbar {
+      border-bottom: 1px solid var(--line);
+      padding: 14px 26px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .topbar h2 {
+      margin: 0;
+      font-size: 27px;
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    .topbar p {
+      margin: 5px 0 0;
+      color: #51625f;
+      font-size: 14px;
+    }
+
+    .route {
+      text-align: right;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      color: #4e5d5a;
+    }
+
+    .route strong {
+      color: var(--teal);
+    }
+
+    .workspace {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1fr 354px;
+    }
+
+    .canvas-zone {
+      min-width: 0;
+      border-right: 1px solid var(--line);
+      display: grid;
+      grid-template-rows: auto 1fr;
+      padding: 14px 22px 16px 26px;
+      gap: 10px;
+    }
+
+    .toolbar {
+      border: 1px solid var(--line);
+      background: #fff;
+      min-height: 52px;
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 18px;
+      padding: 9px 12px;
+    }
+
+    .toolbar h3 {
+      margin: 0 0 3px;
+      font-size: 16px;
+    }
+
+    .toolbar p {
+      margin: 0;
+      color: #586865;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .zoom-control {
+      display: grid;
+      grid-template-columns: auto 136px auto;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #53625f;
+    }
+
+    .zoom-control input {
+      width: 136px;
+      accent-color: var(--teal);
+    }
+
+    .tool-buttons {
+      display: inline-grid;
+      grid-auto-flow: column;
+      border: 1px solid var(--line);
+      background: #f7faf9;
+    }
+
+    .tool-buttons button {
+      min-height: 34px;
+      border: 0;
+      border-right: 1px solid var(--line);
+      background: transparent;
+      padding: 0 12px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .tool-buttons button:last-child {
+      border-right: 0;
+    }
+
+    .tool-buttons button.active {
+      background: var(--ink);
+      color: #fff;
+    }
+
+    .canvas-wrap {
+      min-height: 0;
+      border: 1px solid var(--line);
+      background: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #timelineCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: grab;
+    }
+
+    #timelineCanvas.dragging {
+      cursor: grabbing;
+    }
+
+    .inspector {
+      min-width: 0;
+      padding: 16px 22px 18px;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      gap: 12px;
+      background: #f7faf9;
+    }
+
+    .inspect-card {
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 14px;
+    }
+
+    .inspect-card.accent {
+      border-left: 5px solid var(--teal);
+    }
+
+    .inspect-card h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .inspect-card p {
+      margin: 0;
+      color: #4d5d5a;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .inspect-body {
+      min-height: 0;
+      overflow: auto;
+      display: grid;
+      align-content: start;
+      gap: 12px;
+    }
+
+    .kv {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .kv div {
+      display: grid;
+      grid-template-columns: 78px 1fr;
+      gap: 10px;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .kv span {
+      color: #657471;
+    }
+
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 12px;
+    }
+
+    .tag {
+      border: 1px solid var(--line);
+      background: #f3f6f5;
+      padding: 4px 7px;
+      font-family: var(--mono);
+      font-size: 10px;
+    }
+
+    .action-stack {
+      display: grid;
+      gap: 8px;
+    }
+
+    .primary-action,
+    .secondary-action {
+      min-height: 38px;
+      border: 1px solid var(--ink);
+      cursor: pointer;
+      padding: 0 14px;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .primary-action {
+      background: var(--teal);
+      color: #fff;
+      border-color: var(--teal);
+    }
+
+    .primary-action:disabled,
+    .secondary-action:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .secondary-action {
+      background: #fff;
+      color: var(--ink);
+    }
+
+    .detail-panel {
+      display: none;
+    }
+
+    .detail-panel.active {
+      display: grid;
+      gap: 12px;
+    }
+
+    .logic-item {
+      border: 1px solid var(--line-soft);
+      background: #f7faf9;
+      padding: 10px 12px;
+      min-height: 58px;
+    }
+
+    .logic-item.warn {
+      border-color: var(--amber);
+      background: var(--amber-soft);
+    }
+
+    .logic-item.risk {
+      border-color: var(--red);
+      background: var(--red-soft);
+    }
+
+    .logic-item strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 13px;
+    }
+
+    .logic-item p {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .notes {
+      margin: 0;
+      padding-left: 18px;
+      color: #23302e;
+      font-size: 13px;
+      line-height: 1.75;
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="app">
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <h2>故事线与人物实虚段</h2>
+            <p>故事线只放正文可见事件；人物条再区分实写行为和后台状态。</p>
+          </div>
+          <div class="route">时间轴 / <strong id="route-state">画布模式</strong></div>
+        </header>
+
+        <section class="workspace">
+          <section class="canvas-zone">
+            <div class="toolbar">
+              <div>
+                <h3>时间轴画布</h3>
+                <p>单击主线左侧标题展开或折叠；实框表示正文写到，虚框表示后台存在但未直接写出。</p>
+              </div>
+
+              <label class="zoom-control">
+                <span>缩放</span>
+                <input id="zoomSlider" type="range" min="45" max="150" value="72">
+                <strong id="zoomLabel">72%</strong>
+              </label>
+
+              <div class="tool-buttons" aria-label="画布工具">
+                <button id="zoomOut" type="button">缩小</button>
+                <button id="resetView" type="button" class="active">复位</button>
+                <button id="zoomIn" type="button">放大</button>
+                <button id="expandAll" type="button">全展</button>
+                <button id="collapseAll" type="button">收起</button>
+              </div>
+            </div>
+
+            <div class="canvas-wrap" id="canvasWrap">
+              <canvas id="timelineCanvas" aria-label="Canvas 多轨时间线"></canvas>
+            </div>
+
+          </section>
+
+          <aside class="inspector">
+            <section class="inspect-card accent" id="selectionCard">
+              <div class="eyebrow" id="selectionKind">No Selection</div>
+              <h3 id="selectionTitle">尚未选中对象</h3>
+               <p id="selectionDesc">请在画布中点击章节、主线标题、人物条或事件块。系统会先显示 Inspector，不会自动进入详情。</p>
+              <div class="tag-list" id="selectionTags">
+                <span class="tag">WAITING</span>
+              </div>
+            </section>
+
+            <div class="inspect-body">
+              <section class="inspect-card" id="summaryPanel">
+                <h3>Inspector 摘要</h3>
+                <div class="kv">
+                  <div><span>坐标</span><strong id="summaryCoord">未选中</strong></div>
+                  <div><span>轨道</span><strong id="summaryTrack">未选中</strong></div>
+                  <div><span>输入</span><strong id="summaryInput">等待选择对象。</strong></div>
+                  <div><span>输出</span><strong id="summaryOutput">等待选择对象。</strong></div>
+                  <div><span>风险</span><strong id="summaryRisk">等待选择对象。</strong></div>
+                </div>
+              </section>
+
+              <section class="inspect-card detail-panel" id="eventDetail">
+                <h3>事件检查器</h3>
+                <div class="logic-item"><strong>事件输入</strong><p id="eventInput">等待选择事件。</p></div>
+                <div class="logic-item warn"><strong>事件内部</strong><p id="eventInside">等待选择事件。</p></div>
+                <div class="logic-item risk"><strong>事件输出</strong><p id="eventOutput">等待选择事件。</p></div>
+              </section>
+
+              <section class="inspect-card detail-panel" id="chapterDetail">
+                <h3>章节函数</h3>
+                <div class="logic-item"><strong>章节输入</strong><p id="chapterInput">等待选择章节。</p></div>
+                <div class="logic-item warn"><strong>黑盒运作</strong><p id="chapterInside">等待选择章节。</p></div>
+                <div class="logic-item risk"><strong>章节输出</strong><p id="chapterOutput">等待选择章节。</p></div>
+              </section>
+
+              <section class="inspect-card">
+                <h3>操作约束</h3>
+                <ul class="notes">
+                  <li>误触不会进入详情。</li>
+                  <li>Inspector 只解释当前选中的对象。</li>
+                  <li>事件可以是小跨度，也可以跨章节。</li>
+                  <li>故事线只显示正文可见事件。</li>
+                  <li>人物条虚段不能替代故事线事件。</li>
+                </ul>
+              </section>
+            </div>
+
+            <div class="action-stack">
+              <button id="enterEvent" class="primary-action" type="button" disabled>拆解事件</button>
+              <button id="enterChapter" class="secondary-action" type="button" disabled>进入章节函数</button>
+              <button id="backToCanvas" class="secondary-action" type="button">回到画布状态</button>
+            </div>
+          </aside>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("timelineCanvas");
+    const wrap = document.getElementById("canvasWrap");
+    const ctx = canvas.getContext("2d");
+    const dpr = window.devicePixelRatio || 1;
+
+    const colors = {
+      ink: "#101716",
+      muted: "#5f6e6b",
+      line: "#98a9a5",
+      lineSoft: "#d4ddda",
+      panel: "#fbfcfb",
+      panelSoft: "#f2f6f4",
+      teal: "#087268",
+      tealSoft: "#dcefed",
+      selectionFill: "rgba(8, 114, 104, 0.075)",
+      selectionBorder: "rgba(8, 114, 104, 0.62)",
+      childLine: "#6f807c",
+      childSoft: "#edf2f1",
+      amber: "#a66a10",
+      amberSoft: "#f3e4c8",
+      red: "#b42b40",
+      redSoft: "#f3d7de",
+      blue: "#315f83",
+      blueSoft: "#dbe8f1",
+      violet: "#67558a",
+      violetSoft: "#e7e2ef"
+    };
+
+    const chapters = [
+      { id: "C10", title: "采访启动", input: "专题裂开，叶依人进入记者身份。", inside: "建立采访身份和第一个爆点。", output: "采访主线启动，张航远发现爆点。" },
+      { id: "C11", title: "样本成形", input: "走访材料进入叙事。", inside: "把苦难转成可追踪事实。", output: "职业病证据线获得初步材料。" },
+      { id: "C12", title: "显形加压", input: "大仙祠救助和操控同时显形。", inside: "判断压力升高。", output: "会议结果和秩序吸收获得前置。" },
+      { id: "C13", title: "会议结果", input: "会议暂缓和电视台口径变化。", inside: "压力被转入体面秩序。", output: "会后缓冲开始。" },
+      { id: "C14", title: "会后吸收", input: "慈善、媒体和资源口径吸收冲突。", inside: "缓冲不是静止，而是再分配。", output: "C15 私线偏移获得条件。" },
+      { id: "C15", title: "私线偏移", input: "多轨事件同时进入章节。", inside: "张航远从边缘化走向私线证明。", output: "C16 诱导风险和群众争夺前置。" },
+      { id: "C16", title: "群众争夺", input: "群众真实处境和解释权冲突。", inside: "各方争夺解释权。", output: "流血冲突获得社会压力。" },
+      { id: "C17", title: "流血冲突", input: "诱导、镜头压力和群众情绪叠加。", inside: "现实冲突被点燃。", output: "吕玉线接管的入口出现。" },
+      { id: "C18", title: "吕玉接管", input: "前台崩塌后主线切换。", inside: "吕玉接管更深层敌手结构。", output: "后续进入新主线。" },
+      { id: "C19", title: "深入敌境", input: "冲突后果需要处理。", inside: "主线深入敌方系统。", output: "现实反制被打开。" },
+      { id: "C20", title: "现实反制", input: "敌境信息返回现实层。", inside: "叶伊人现实手段反制。", output: "吕玉主线巩固。" }
+    ];
+
+    const characters = {
+      yiren: { name: "叶依人", short: "叶", color: "#087268", soft: "#e0f0ed" },
+      zhang: { name: "张航远", short: "张", color: "#b42b40", soft: "#f3d7de" },
+      yushu: { name: "禹树", short: "禹", color: "#6b4f86", soft: "#e9e1f0" },
+      lvyu: { name: "吕玉", short: "吕", color: "#315f83", soft: "#dbe8f1" },
+      linqian: { name: "林倩", short: "林", color: "#a66a10", soft: "#f3e4c8" }
+    };
+
+    const tracks = [
+      { id: "main", name: "故事主轴", sub: "跨章节推进", expanded: false, characters: [] },
+      { id: "interview", name: "采访线", sub: "叶依人行动", expanded: true, characters: ["yiren", "zhang", "yushu"] },
+      { id: "temple", name: "大仙祠线", sub: "解释权争夺", expanded: true, characters: ["yushu", "lvyu", "yiren"] },
+      { id: "media", name: "电视台线", sub: "口径和资源", expanded: false, characters: ["yiren", "zhang"] },
+      { id: "proof", name: "职业病证据线", sub: "材料和边界", expanded: false, characters: ["yiren", "linqian"] },
+      { id: "zhang", name: "张航远线", sub: "目标漂移", expanded: true, characters: ["zhang", "yushu"] },
+      { id: "lvyu", name: "吕玉线", sub: "后段接管", expanded: false, characters: ["lvyu"] },
+      { id: "fragment", name: "碎片伏笔", sub: "必须对齐章节", expanded: false, characters: ["yushu"] }
+    ];
+
+    const events = [
+      storyEvent("e-main-10", "main", 0, 2, "采访启动", "E010-E014", "main", "专题裂开，采访身份建立。", "完成主轴启动。", "如果前置不足，后续压力会失真。"),
+      storyEvent("e-main-13", "main", 3, 5, "会议结果落地", "E021-E028", "main", "会议暂缓被各方吸收。", "把冲突转入会后缓冲。", "缓冲不能写成静止。"),
+      storyEvent("e-main-15", "main", 5, 7, "会后转争夺", "E029-E041", "main", "会后吸收完成。", "转入群众争夺。", "主轴必须压住碎片线。"),
+      storyEvent("e-interview-11", "interview", 1, 3, "走访与材料整理", "C11-C12", "main", "叶依人开始形成事实链。", "事实链可被追踪。", "材料不能变成纯说明。"),
+      storyEvent("e-interview-15", "interview", 5, 6, "重新接触群众", "C15", "main", "会后口径重写。", "群众真实处境重新进入视野。", "需要显示解释权变化。"),
+      storyEvent("e-temple-11", "temple", 1, 3, "救助显形", "C11-C12", "temple", "大仙祠从背景进入可见层。", "救助与控制同时出现。", "不要只写成善意救助。"),
+      storyEvent("e-temple-16", "temple", 6, 7, "重新争夺解释权", "C16", "risk", "群众争夺启动。", "大仙祠重新争夺叙述。", "可能抢走采访线。"),
+      storyEvent("e-media-13", "media", 3, 5, "口径重写", "C13-C14", "media", "会议结果进入电视台系统。", "媒体口径改写现实感知。", "需要和采访线形成压力。"),
+      storyEvent("e-media-16", "media", 6, 7, "镜头压力", "C16", "risk", "群众争夺升级。", "镜头介入现实冲突。", "可能提前引爆。"),
+      storyEvent("e-proof-14", "proof", 4, 6, "化学证据预热", "C14-C15", "warn", "样本和材料尚未闭合。", "建立取样边界。", "不能提前裁决职业病真相。"),
+      storyEvent("e-proof-17", "proof", 7, 8, "不能提前裁决", "C17", "risk", "证据线压力上升。", "提醒证据边界。", "过强会压过采访和群众争夺。"),
+      storyEvent("e-zhang-10", "zhang", 0, 1, "发现爆点", "C10", "warn", "张航远发现新闻价值。", "形成自我证明欲。", "需要后续承接。"),
+      storyEvent("e-zhang-15", "zhang", 3, 6, "边缘化到私线偏移", "C13-C15", "risk", "会议暂缓，张航远被边缘化。", "他把私线理解为补足采访线。", "缺少诱导链会显得突兀。"),
+      storyEvent("e-zhang-16", "zhang", 6, 7, "诱导风险", "C16", "risk", "私线动机形成。", "外部压力推他错站边。", "需要连续诱导链。"),
+      storyEvent("e-lvyu-17", "lvyu", 7, 9, "主线接管", "C17-C18", "main", "前台崩塌，现实冲突升级。", "吕玉接管更深层敌手结构。", "不能来得太突然。"),
+      storyEvent("e-frag-14", "fragment", 4, 5, "基金入口", "C14", "warn", "碎片伏笔落入章节格。", "提供群众争夺入口。", "必须服务主轴。"),
+      characterEvent("ce-interview-yiren-11", "interview", "yiren", 1, 3, "事实链走访", "叶依人", "main", "她进入群众材料。", "采访线获得可追踪事实。", "材料不能只做情绪展示。"),
+      characterEvent("ce-interview-zhang-13", "interview", "zhang", 3, 5, "被边缘化", "张航远", "risk", "会议暂缓后失去主导感。", "形成私线证明欲。", "容易抢走叶依人的采访判断。"),
+      characterEvent("ce-interview-yushu-15", "interview", "yushu", 5, 6, "被纳入采访压力", "禹树", "warn", "采访线触及外围资源入口。", "禹树成为被询问和被误读的对象。", "不能让他直接替代采访主角。"),
+      characterEvent("ce-temple-yushu-12", "temple", "yushu", 2, 3, "情报入口显露", "禹树", "warn", "大仙祠线暴露解释权入口。", "禹树的资源信息被卷入争夺。", "他在此线是情报节点，不是硬资产本身。"),
+      characterEvent("ce-temple-yushu-bg-13", "temple", "yushu", 3, 6, "情报后台发酵", "禹树", "warn", "情报入口已经被看见，但正文没有持续跟拍禹树行动。", "后台状态解释后续争夺为何仍有压力。", "虚段必须保留触发依据，不能当成正文事件。", "background"),
+      characterEvent("ce-temple-lvyu-16", "temple", "lvyu", 6, 8, "接管阴影", "吕玉", "main", "群众争夺后出现更深层敌手。", "吕玉线准备接管。", "过早显形会削弱前台冲突。", "background"),
+      characterEvent("ce-temple-yiren-11", "temple", "yiren", 1, 2, "观察救助逻辑", "叶依人", "main", "她看到救助和控制并存。", "采访线获得解释权冲突材料。", "不要写成单纯善恶判断。"),
+      characterEvent("ce-media-yiren-13", "media", "yiren", 3, 4, "口径受压", "叶依人", "media", "电视台口径变化。", "她的采访空间被压缩。", "媒体线不能只做背景板。"),
+      characterEvent("ce-media-zhang-15", "media", "zhang", 5, 6, "私线找镜头", "张航远", "risk", "他寻找绕开主采访的表达方式。", "诱导风险进入镜头压力。", "需要外部压力链承接。"),
+      characterEvent("ce-proof-yiren-14", "proof", "yiren", 4, 6, "样本边界", "叶依人", "warn", "材料尚未闭合。", "她维持采访和证据边界。", "不能提前裁决职业病真相。"),
+      characterEvent("ce-proof-linqian-14", "proof", "linqian", 4, 5, "数据校验", "林倩", "warn", "样本需要技术校验。", "证据线获得方法支撑。", "工具人化会削弱真实感。"),
+      characterEvent("ce-zhang-zhang-15", "zhang", "zhang", 3, 6, "私线偏移", "张航远", "risk", "他把边缘化理解成失败。", "行动从补采访变成自我证明。", "缺少诱导链会突兀。"),
+      characterEvent("ce-zhang-yushu-15", "zhang", "yushu", 5, 6, "成为诱导锚点", "禹树", "risk", "禹树的信息被张航远误读。", "同一人物在张航远线里变成诱导锚点。", "需要和采访线中的禹树区分语义。"),
+      characterEvent("ce-lvyu-lvyu-17", "lvyu", "lvyu", 7, 9, "后段接管", "吕玉", "main", "前台冲突崩塌。", "吕玉开始承接后段主线。", "不能来得太突然。"),
+      characterEvent("ce-frag-yushu-14", "fragment", "yushu", 4, 5, "资源碎片", "禹树", "warn", "碎片伏笔落入章节格。", "为后续资源争夺留入口。", "必须服务主轴，不可漂浮。")
+    ];
+
+    const world = {
+      chapterWidth: 220,
+      labelWidth: 176,
+      headerHeight: 74,
+      trackHeight: 52,
+      characterHeight: 26,
+      paddingTop: 0
+    };
+
+    const state = {
+      scale: 0.72,
+      offsetX: 0,
+      selected: null,
+      detailMode: "summary",
+      hover: null,
+      isDragging: false,
+      dragStartX: 0,
+      dragStartOffset: 0,
+      moved: false
+    };
+
+    const hitRegions = [];
+    let rowLayout = [];
+
+    function storyEvent(id, track, start, end, title, code, tone, input, output, risk) {
+      return { id, kind: "story", track, start, end, title, code, tone, input, output, risk };
+    }
+
+    function characterEvent(id, track, character, start, end, title, code, tone, input, output, risk, visibility = "explicit") {
+      return { id, kind: "character", track, character, start, end, title, code, tone, input, output, risk, visibility };
+    }
+
+    function resizeCanvas() {
+      const rect = wrap.getBoundingClientRect();
+      canvas.width = Math.round(rect.width * dpr);
+      canvas.height = Math.round(rect.height * dpr);
+      canvas.style.width = `${rect.width}px`;
+      canvas.style.height = `${rect.height}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      draw();
+    }
+
+    function plotWidth() {
+      return canvas.clientWidth - world.labelWidth;
+    }
+
+    function maxOffset() {
+      const total = chapters.length * world.chapterWidth;
+      return Math.max(0, total - plotWidth() / state.scale);
+    }
+
+    function clampOffset() {
+      state.offsetX = Math.max(0, Math.min(maxOffset(), state.offsetX));
+    }
+
+    function screenToWorldX(x) {
+      return (x - world.labelWidth) / state.scale + state.offsetX;
+    }
+
+    function worldToScreenX(x) {
+      return world.labelWidth + (x - state.offsetX) * state.scale;
+    }
+
+    function toneColors(tone) {
+      if (tone === "main") return [colors.tealSoft, colors.teal];
+      if (tone === "warn") return [colors.amberSoft, colors.amber];
+      if (tone === "risk") return [colors.redSoft, colors.red];
+      if (tone === "media") return [colors.blueSoft, colors.blue];
+      if (tone === "temple") return [colors.violetSoft, colors.violet];
+      return ["#e7eceb", "#53625f"];
+    }
+
+    function trackById(id) {
+      return tracks.find((track) => track.id === id);
+    }
+
+    function characterById(id) {
+      return characters[id];
+    }
+
+    function buildRowLayout() {
+      const rows = [];
+      let y = world.headerHeight;
+      tracks.forEach((track) => {
+        rows.push({
+          type: "track",
+          id: track.id,
+          trackId: track.id,
+          y,
+          height: world.trackHeight
+        });
+        y += world.trackHeight;
+        if (track.expanded) {
+          track.characters.forEach((characterId) => {
+            rows.push({
+              type: "character",
+              id: `${track.id}:${characterId}`,
+              trackId: track.id,
+              characterId,
+              y,
+              height: world.characterHeight
+            });
+            y += world.characterHeight;
+          });
+        }
+      });
+      return rows;
+    }
+
+    function rowForEvent(item) {
+      if (item.kind === "character") {
+        return rowLayout.find((row) => row.type === "character" && row.trackId === item.track && row.characterId === item.character);
+      }
+      return rowLayout.find((row) => row.type === "track" && row.trackId === item.track);
+    }
+
+    function draw() {
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      ctx.clearRect(0, 0, w, h);
+      hitRegions.length = 0;
+      rowLayout = buildRowLayout();
+
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, w, h);
+      drawHeader(w);
+      drawTracks(w, h);
+      drawSelectedChapterColumn(w, h);
+      drawEvents(w);
+      updateStateLabels();
+    }
+
+    function drawHeader(w) {
+      ctx.fillStyle = colors.panelSoft;
+      ctx.fillRect(0, 0, w, world.headerHeight);
+      ctx.strokeStyle = colors.ink;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, world.headerHeight);
+      ctx.lineTo(w, world.headerHeight);
+      ctx.stroke();
+
+      ctx.fillStyle = "#e8eeec";
+      ctx.fillRect(0, 0, world.labelWidth, world.headerHeight);
+      ctx.strokeStyle = colors.line;
+      ctx.lineWidth = 1;
+      ctx.strokeRect(0, 0, world.labelWidth, world.headerHeight);
+
+      ctx.fillStyle = colors.ink;
+      ctx.font = "700 14px Microsoft YaHei UI";
+      ctx.fillText("时间根轴", 14, 28);
+      ctx.fillStyle = colors.muted;
+      ctx.font = "12px Microsoft YaHei UI";
+      ctx.fillText("章节是基础刻度", 14, 49);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(world.labelWidth, 0, w - world.labelWidth, world.headerHeight);
+      ctx.clip();
+      chapters.forEach((chapter, index) => {
+        const x = worldToScreenX(index * world.chapterWidth);
+        const cw = world.chapterWidth * state.scale;
+        const visibleX = Math.max(x, world.labelWidth);
+        const visibleRight = Math.min(x + cw, w);
+        const visibleWidth = visibleRight - visibleX;
+        if (visibleWidth <= 0) return;
+        const selected = state.selected?.type === "chapter" && state.selected.id === chapter.id;
+        ctx.fillStyle = selected ? colors.tealSoft : "#f7faf9";
+        ctx.fillRect(x, 0, cw, world.headerHeight);
+        ctx.strokeStyle = colors.lineSoft;
+        ctx.strokeRect(x, 0, cw, world.headerHeight);
+        if (selected) {
+          ctx.strokeStyle = colors.ink;
+          ctx.lineWidth = 3;
+          ctx.strokeRect(x + 2, 3, cw - 4, world.headerHeight - 7);
+          ctx.lineWidth = 1;
+        }
+        ctx.fillStyle = colors.ink;
+        ctx.font = "700 16px Microsoft YaHei UI";
+        ctx.fillText(chapter.id, x + 12, 25);
+        ctx.fillStyle = colors.muted;
+        ctx.font = "12px Microsoft YaHei UI";
+        ctx.fillText(chapter.title, x + 12, 48);
+        hitRegions.push({ type: "chapter", id: chapter.id, x: visibleX, y: 0, w: visibleWidth, h: world.headerHeight });
+      });
+      ctx.restore();
+    }
+
+    function drawTracks(w, h) {
+      rowLayout.forEach((row, index) => {
+        const selectedTrack = state.selected?.type === "track" && state.selected.id === row.trackId;
+        const selectedCharacter = state.selected?.type === "character" && state.selected.id === row.id;
+        const track = trackById(row.trackId);
+        const character = row.type === "character" ? characterById(row.characterId) : null;
+        const isTrack = row.type === "track";
+        const y = row.y;
+        const rh = row.height;
+
+        ctx.fillStyle = isTrack ? (index % 2 === 0 ? "#ffffff" : "#fcfdfc") : "#fbfdfc";
+        ctx.fillRect(world.labelWidth, y, w - world.labelWidth, rh);
+        ctx.fillStyle = isTrack ? (selectedTrack ? colors.tealSoft : "#f3f6f5") : (selectedCharacter ? character.soft : "#f8faf9");
+        ctx.fillRect(0, y, world.labelWidth, rh);
+        ctx.strokeStyle = isTrack ? colors.lineSoft : "#e5ece9";
+        ctx.beginPath();
+        ctx.moveTo(0, y + rh);
+        ctx.lineTo(w, y + rh);
+        ctx.stroke();
+        ctx.strokeStyle = colors.line;
+        ctx.beginPath();
+        ctx.moveTo(world.labelWidth, y);
+        ctx.lineTo(world.labelWidth, y + rh);
+        ctx.stroke();
+
+        if (isTrack) {
+          const canExpand = track.characters.length > 0;
+          ctx.fillStyle = colors.ink;
+          ctx.font = "700 13px Microsoft YaHei UI";
+          ctx.fillText(canExpand ? (track.expanded ? "▾" : "▸") : "•", 12, y + 31);
+          ctx.fillText(track.name, 34, y + 31);
+          if (canExpand) {
+            ctx.fillStyle = colors.muted;
+            ctx.font = "11px Microsoft YaHei UI";
+            ctx.textAlign = "right";
+            ctx.fillText(`${track.characters.length} 人`, world.labelWidth - 14, y + 31);
+            ctx.textAlign = "left";
+          }
+          hitRegions.push({ type: "track", id: track.id, x: 0, y, w: world.labelWidth, h: rh });
+        } else {
+          ctx.strokeStyle = character.color;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(28, y + 4);
+          ctx.lineTo(28, y + rh - 4);
+          ctx.stroke();
+          ctx.lineWidth = 1;
+          ctx.fillStyle = character.color;
+          ctx.fillRect(38, y + 7, 7, 7);
+          ctx.fillStyle = colors.ink;
+          ctx.font = "700 11px Microsoft YaHei UI";
+          ctx.fillText(character.name, 52, y + 14);
+          hitRegions.push({ type: "character", id: row.id, track: row.trackId, character: row.characterId, x: 0, y, w: world.labelWidth, h: rh });
+        }
+      });
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(world.labelWidth, 0, w - world.labelWidth, h);
+      ctx.clip();
+      chapters.forEach((_, index) => {
+        const x = worldToScreenX(index * world.chapterWidth);
+        ctx.strokeStyle = colors.lineSoft;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      });
+      ctx.restore();
+    }
+
+    function drawEvents(w) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(world.labelWidth, world.headerHeight, w - world.labelWidth, canvas.clientHeight - world.headerHeight);
+      ctx.clip();
+
+      events.forEach((item) => {
+        const row = rowForEvent(item);
+        if (!row) return;
+        const isCharacter = item.kind === "character";
+        const isBackground = isCharacter && item.visibility === "background";
+        const character = isCharacter ? characterById(item.character) : null;
+        const x = worldToScreenX(item.start * world.chapterWidth) + 10;
+        const height = isCharacter ? 20 : 38;
+        const y = row.y + (isCharacter ? Math.round((row.height - height) / 2) : Math.max(4, (row.height - height) / 2));
+        const width = (item.end - item.start) * world.chapterWidth * state.scale - 20;
+        if (x + width < world.labelWidth || x > w || width < 22) return;
+        const [storyFill, storyStroke] = toneColors(item.tone);
+        const fill = isCharacter ? character.soft : storyFill;
+        const stroke = isCharacter ? character.color : storyStroke;
+        const selected = state.selected?.type === "event" && state.selected.id === item.id;
+
+        ctx.save();
+        ctx.fillStyle = fill;
+        if (isBackground) ctx.globalAlpha = 0.42;
+        ctx.fillRect(x, y, width, height);
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = selected ? colors.ink : stroke;
+        ctx.lineWidth = selected ? (isCharacter ? 3 : 4) : (isBackground ? 1.5 : 1);
+        if (isBackground) ctx.setLineDash([7, 5]);
+        ctx.strokeRect(x, y, width, height);
+        ctx.setLineDash([]);
+        ctx.lineWidth = 1;
+        ctx.fillStyle = stroke;
+        if (isBackground) {
+          ctx.strokeStyle = stroke;
+          ctx.lineWidth = 2;
+          ctx.setLineDash([6, 5]);
+          ctx.beginPath();
+          ctx.moveTo(x + 2, y + height - 3);
+          ctx.lineTo(x + width - 2, y + height - 3);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.lineWidth = 1;
+        } else {
+          ctx.fillRect(x, y + height - (isCharacter ? 3 : 4), width, isCharacter ? 3 : 4);
+        }
+
+        ctx.fillStyle = colors.ink;
+        ctx.font = isCharacter ? "700 9px Microsoft YaHei UI" : "700 12px Microsoft YaHei UI";
+        if (isBackground) ctx.fillStyle = "#34413f";
+        const label = isCharacter ? `${character.short} ${item.title}` : item.title;
+        clipText(label, x + 8, y + (isCharacter ? 13 : 18), Math.max(20, width - 16));
+        if (!isCharacter) {
+          ctx.fillStyle = "#3c4b48";
+          ctx.font = "10px Consolas";
+          clipText(item.code, x + 10, y + 31, Math.max(20, width - 20));
+        }
+        ctx.restore();
+
+        hitRegions.push({ type: "event", id: item.id, x, y: y - 3, w: width, h: height + 6 });
+      });
+
+      ctx.restore();
+    }
+
+    function drawSelectedChapterColumn(w, h) {
+      if (state.selected?.type !== "chapter") return;
+      const index = chapters.findIndex((chapter) => chapter.id === state.selected.id);
+      if (index < 0) return;
+      const x = worldToScreenX(index * world.chapterWidth);
+      const cw = world.chapterWidth * state.scale;
+      if (x + cw < world.labelWidth || x > w) return;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(world.labelWidth, world.headerHeight, w - world.labelWidth, h - world.headerHeight);
+      ctx.clip();
+      ctx.fillStyle = colors.selectionFill;
+      ctx.fillRect(x, world.headerHeight, cw, h - world.headerHeight);
+      ctx.strokeStyle = colors.selectionBorder;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x + 1, world.headerHeight + 1, Math.max(0, cw - 2), Math.max(0, h - world.headerHeight - 2));
+      ctx.restore();
+      ctx.lineWidth = 1;
+    }
+
+    function clipText(text, x, y, maxWidth) {
+      let output = text;
+      while (ctx.measureText(output).width > maxWidth && output.length > 1) {
+        output = output.slice(0, -1);
+      }
+      if (output !== text && output.length > 1) output = output.slice(0, -1) + "...";
+      ctx.fillText(output, x, y);
+    }
+
+    function hitTest(x, y) {
+      for (let i = hitRegions.length - 1; i >= 0; i -= 1) {
+        const r = hitRegions[i];
+        if (x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h) return r;
+      }
+      return null;
+    }
+
+    function selectRegion(region) {
+      state.detailMode = "summary";
+      hideDetails();
+      if (!region) {
+        state.selected = null;
+        updateInspectorEmpty();
+        draw();
+        return;
+      }
+      state.selected = { type: region.type, id: region.id };
+      if (region.type === "event") updateInspectorEvent(region.id);
+      if (region.type === "chapter") updateInspectorChapter(region.id);
+      if (region.type === "track") updateInspectorTrack(region.id);
+      if (region.type === "character") updateInspectorCharacter(region.track, region.character);
+      draw();
+    }
+
+    function updateInspectorEmpty() {
+      document.getElementById("selectionKind").textContent = "No Selection";
+      document.getElementById("selectionTitle").textContent = "尚未选中对象";
+      document.getElementById("selectionDesc").textContent = "请在画布中点击章节、主线标题、人物条或事件块。系统会先显示 Inspector，不会自动进入详情。";
+      document.getElementById("selectionTags").innerHTML = '<span class="tag">WAITING</span>';
+      document.getElementById("summaryCoord").textContent = "未选中";
+      document.getElementById("summaryTrack").textContent = "未选中";
+      document.getElementById("summaryInput").textContent = "等待选择对象。";
+      document.getElementById("summaryOutput").textContent = "等待选择对象。";
+      document.getElementById("summaryRisk").textContent = "等待选择对象。";
+      document.getElementById("enterEvent").disabled = true;
+      document.getElementById("enterChapter").disabled = true;
+      document.getElementById("route-state").textContent = "画布模式";
+    }
+
+    function updateInspectorEvent(id) {
+      const item = events.find((eventItem) => eventItem.id === id);
+      const track = trackById(item.track);
+      const character = item.kind === "character" ? characterById(item.character) : null;
+      const isBackground = item.kind === "character" && item.visibility === "background";
+      const start = chapters[item.start].id;
+      const end = chapters[item.end - 1].id;
+      document.getElementById("selectionKind").textContent = item.kind === "character"
+        ? (isBackground ? "Selected Character Background" : "Selected Character Event")
+        : "Selected Story Event";
+      document.getElementById("selectionTitle").textContent = item.title;
+      document.getElementById("selectionDesc").textContent = item.kind === "character"
+        ? (isBackground
+          ? "当前选中的是人物条虚段：逻辑上持续，但正文未直接描写；它不会扩大故事线事件边界。"
+          : "当前选中的是人物条实段：正文已经写到的人物参与片段。需要点击“拆解事件”，才进入事件检查器。")
+        : "当前只是选中故事线事件块。需要点击“拆解事件”，才进入事件检查器。";
+      const personTag = character ? `<span class="tag">${character.name}</span>` : "";
+      const visibilityTag = character ? `<span class="tag">${isBackground ? "BACKGROUND" : "EXPLICIT"}</span>` : "";
+      document.getElementById("selectionTags").innerHTML = `<span class="tag">${start}-${end}</span><span class="tag">${track.name}</span>${personTag}${visibilityTag}<span class="tag">${item.tone.toUpperCase()}</span>`;
+      document.getElementById("summaryCoord").textContent = `${start}-${end}`;
+      document.getElementById("summaryTrack").textContent = character ? `${track.name} / ${character.name}` : track.name;
+      document.getElementById("summaryInput").textContent = item.input;
+      document.getElementById("summaryOutput").textContent = item.output;
+      document.getElementById("summaryRisk").textContent = isBackground
+        ? `${item.risk} 注意：虚段只解释后台状态，不能当成文中已经发生的事件。`
+        : item.risk;
+      document.getElementById("eventInput").textContent = item.input;
+      document.getElementById("eventInside").textContent = character
+        ? (isBackground
+          ? `${character.name} 在“${track.name}”里的后台状态片段；它需要触发依据，只能解释逻辑延续，不能替代正文事件。`
+          : `${character.name} 在“${track.name}”里的正文可见参与片段；同一人物可以在其他故事线下出现，但语义由所在故事线决定。`)
+        : "事件检查器服务于当前选中的故事线事件块，可以是单章节事件，也可以是跨章节事件。";
+      document.getElementById("eventOutput").textContent = `${item.output} 风险：${isBackground ? `${item.risk} 不能把虚段反向写成事件线延长。` : item.risk}`;
+      document.getElementById("enterEvent").disabled = false;
+      document.getElementById("enterChapter").disabled = true;
+      document.getElementById("route-state").textContent = "事件已选中";
+    }
+
+    function updateInspectorTrack(id) {
+      const track = trackById(id);
+      const personCount = track.characters.length;
+      if (personCount > 0) track.expanded = !track.expanded;
+      const names = track.characters.map((characterId) => characterById(characterId).name).join(" / ") || "无人物条";
+      document.getElementById("selectionKind").textContent = "Selected Story Line";
+      document.getElementById("selectionTitle").textContent = track.name;
+      document.getElementById("selectionDesc").textContent = personCount > 0
+        ? `已${track.expanded ? "展开" : "折叠"}这条故事线。展开后下方显示人物条，人物条高度低于主故事线。`
+        : "这条故事线当前没有人物条，只作为主轨展示。";
+      document.getElementById("selectionTags").innerHTML = `<span class="tag">${track.expanded ? "EXPANDED" : "COLLAPSED"}</span><span class="tag">${personCount} PERSON</span>`;
+      document.getElementById("summaryCoord").textContent = "跨章节";
+      document.getElementById("summaryTrack").textContent = track.name;
+      document.getElementById("summaryInput").textContent = `故事线下人物：${names}`;
+      document.getElementById("summaryOutput").textContent = track.expanded ? "人物条已显示，可继续选择人物或其实虚片段。" : "人物条已收起，主轨仍保留。";
+      document.getElementById("summaryRisk").textContent = "人物不是主轨的替代品；展开只用于观察该故事线下的人物参与，不能拉长事件线。";
+      document.getElementById("enterEvent").disabled = true;
+      document.getElementById("enterChapter").disabled = true;
+      document.getElementById("route-state").textContent = track.expanded ? "故事线已展开" : "故事线已折叠";
+    }
+
+    function updateInspectorCharacter(trackId, characterId) {
+      const track = trackById(trackId);
+      const character = characterById(characterId);
+      const samePersonTracks = tracks
+        .filter((trackItem) => trackItem.characters.includes(characterId))
+        .map((trackItem) => trackItem.name)
+        .join(" / ");
+      document.getElementById("selectionKind").textContent = "Selected Character Lane";
+      document.getElementById("selectionTitle").textContent = `${character.name} / ${track.name}`;
+      document.getElementById("selectionDesc").textContent = "当前选中的是某条故事线下的人物条。它不是全局人物传记，而是该人物在这条故事线里的局部作用；其中实框写正文动作，虚框写后台状态。";
+      document.getElementById("selectionTags").innerHTML = `<span class="tag">${character.name}</span><span class="tag">${track.name}</span><span class="tag">EXPLICIT/BACKGROUND</span>`;
+      document.getElementById("summaryCoord").textContent = "随故事线展开";
+      document.getElementById("summaryTrack").textContent = `${track.name} / 人物条`;
+      document.getElementById("summaryInput").textContent = `${character.name} 可同时出现在：${samePersonTracks}`;
+      document.getElementById("summaryOutput").textContent = "选择人物条下的实段或虚段，可检查他在该故事线里的具体动作或后台状态。";
+      document.getElementById("summaryRisk").textContent = "多对多关系成立，但需要避免把人物后台状态混进事件线边界。";
+      document.getElementById("enterEvent").disabled = true;
+      document.getElementById("enterChapter").disabled = true;
+      document.getElementById("route-state").textContent = "人物条已选中";
+    }
+
+    function updateInspectorChapter(id) {
+      const item = chapters.find((chapter) => chapter.id === id);
+      document.getElementById("selectionKind").textContent = "Selected Chapter";
+      document.getElementById("selectionTitle").textContent = `${item.id} ${item.title}`;
+      document.getElementById("selectionDesc").textContent = "当前只是选中章节列。需要点击“进入章节函数”，才进入章节内部。";
+      document.getElementById("selectionTags").innerHTML = `<span class="tag">${item.id}</span><span class="tag">章节刻度</span><span class="tag">CONFIRM</span>`;
+      document.getElementById("summaryCoord").textContent = item.id;
+      document.getElementById("summaryTrack").textContent = "章节时间格";
+      document.getElementById("summaryInput").textContent = item.input;
+      document.getElementById("summaryOutput").textContent = item.output;
+      document.getElementById("summaryRisk").textContent = "如果误触即进入，会打断时间线编辑。";
+      document.getElementById("chapterInput").textContent = item.input;
+      document.getElementById("chapterInside").textContent = item.inside;
+      document.getElementById("chapterOutput").textContent = item.output;
+      document.getElementById("enterEvent").disabled = true;
+      document.getElementById("enterChapter").disabled = false;
+      document.getElementById("route-state").textContent = "章节已选中";
+    }
+
+    function hideDetails() {
+      document.getElementById("eventDetail").classList.remove("active");
+      document.getElementById("chapterDetail").classList.remove("active");
+    }
+
+    function enterEventDetail() {
+      if (state.selected?.type !== "event") return;
+      hideDetails();
+      document.getElementById("eventDetail").classList.add("active");
+      document.getElementById("route-state").textContent = "事件检查器";
+      state.detailMode = "event";
+    }
+
+    function enterChapterDetail() {
+      if (state.selected?.type !== "chapter") return;
+      hideDetails();
+      document.getElementById("chapterDetail").classList.add("active");
+      document.getElementById("route-state").textContent = "章节函数";
+      state.detailMode = "chapter";
+    }
+
+    function selectedRouteLabel() {
+      if (!state.selected) return "画布模式";
+      if (state.selected.type === "event") return "事件已选中";
+      if (state.selected.type === "chapter") return "章节已选中";
+      if (state.selected.type === "track") return "故事线已选中";
+      if (state.selected.type === "character") return "人物条已选中";
+      return "画布模式";
+    }
+
+    function updateStateLabels() {
+      const zoom = Math.round(state.scale * 100);
+      document.getElementById("zoomLabel").textContent = `${zoom}%`;
+      document.getElementById("zoomSlider").value = zoom;
+    }
+
+    function setScale(nextScale, anchorX = world.labelWidth + plotWidth() / 2) {
+      const oldScale = state.scale;
+      const worldAtAnchor = screenToWorldX(anchorX);
+      state.scale = Math.max(0.45, Math.min(1.5, nextScale));
+      state.offsetX = worldAtAnchor - (anchorX - world.labelWidth) / state.scale;
+      if (oldScale !== state.scale) clampOffset();
+      draw();
+    }
+
+    canvas.addEventListener("wheel", (event) => {
+      event.preventDefault();
+      const factor = event.deltaY < 0 ? 1.08 : 0.92;
+      setScale(state.scale * factor, event.offsetX);
+    }, { passive: false });
+
+    canvas.addEventListener("pointerdown", (event) => {
+      try {
+        canvas.setPointerCapture(event.pointerId);
+      } catch (error) {
+        // Synthetic pointer events used by automated checks may not be capturable.
+      }
+      state.isDragging = true;
+      state.dragStartX = event.clientX;
+      state.dragStartOffset = state.offsetX;
+      state.moved = false;
+      canvas.classList.add("dragging");
+    });
+
+    canvas.addEventListener("pointermove", (event) => {
+      if (!state.isDragging) return;
+      const dx = event.clientX - state.dragStartX;
+      if (Math.abs(dx) > 3) state.moved = true;
+      state.offsetX = state.dragStartOffset - dx / state.scale;
+      clampOffset();
+      draw();
+    });
+
+    canvas.addEventListener("pointerup", (event) => {
+      state.isDragging = false;
+      canvas.classList.remove("dragging");
+      const region = hitTest(event.offsetX, event.offsetY);
+      if (!state.moved) selectRegion(region);
+    });
+
+    document.getElementById("zoomSlider").addEventListener("input", (event) => {
+      setScale(Number(event.target.value) / 100);
+    });
+
+    document.getElementById("zoomIn").addEventListener("click", () => setScale(state.scale * 1.15));
+    document.getElementById("zoomOut").addEventListener("click", () => setScale(state.scale * 0.85));
+    document.getElementById("expandAll").addEventListener("click", () => {
+      tracks.forEach((track) => {
+        if (track.characters.length > 0) track.expanded = true;
+      });
+      draw();
+    });
+    document.getElementById("collapseAll").addEventListener("click", () => {
+      tracks.forEach((track) => {
+        if (track.characters.length > 0) track.expanded = false;
+      });
+      draw();
+    });
+    document.getElementById("resetView").addEventListener("click", () => {
+      state.scale = 0.72;
+      state.offsetX = 0;
+      state.detailMode = "summary";
+      hideDetails();
+      draw();
+    });
+    document.getElementById("enterEvent").addEventListener("click", enterEventDetail);
+    document.getElementById("enterChapter").addEventListener("click", enterChapterDetail);
+    document.getElementById("backToCanvas").addEventListener("click", () => {
+      hideDetails();
+      state.detailMode = "summary";
+      document.getElementById("route-state").textContent = selectedRouteLabel();
+    });
+
+    window.addEventListener("resize", resizeCanvas);
+
+    resizeCanvas();
+    updateInspectorEmpty();
+
+    const hash = location.hash.replace("#", "");
+    if (hash === "track-selected") {
+      const media = trackById("media");
+      media.expanded = false;
+      selectRegion({ type: "track", id: "media" });
+    } else if (hash === "character-selected") {
+      trackById("interview").expanded = true;
+      selectRegion({ type: "character", id: "interview:yushu", track: "interview", character: "yushu" });
+    } else if (hash === "event-selected") {
+      trackById("interview").expanded = true;
+      selectRegion({ type: "event", id: "ce-interview-yushu-15" });
+    } else if (hash === "background-selected") {
+      trackById("temple").expanded = true;
+      selectRegion({ type: "event", id: "ce-temple-yushu-bg-13" });
+    } else if (hash === "chapter-selected") {
+      selectRegion({ type: "chapter", id: "C15" });
+    } else if (hash === "event-detail") {
+      trackById("interview").expanded = true;
+      selectRegion({ type: "event", id: "ce-interview-yushu-15" });
+      enterEventDetail();
+    } else if (hash === "chapter-detail") {
+      selectRegion({ type: "chapter", id: "C15" });
+      enterChapterDetail();
+    } else if (hash === "all-expanded") {
+      tracks.forEach((track) => {
+        if (track.characters.length > 0) track.expanded = true;
+      });
+      draw();
+    } else if (hash === "zoomed") {
+      state.scale = 1.16;
+      state.offsetX = world.chapterWidth * 2.2;
+      clampOffset();
+      draw();
+    }
+  </script>
+</body>
+</html>

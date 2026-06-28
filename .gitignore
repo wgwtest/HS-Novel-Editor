@@ -1,0 +1,9 @@
+.playwright-cli/
+node_modules/
+.env
+.env.*
+*.tmp
+*.log
+验证作品/
+Thumbs.db
+.DS_Store

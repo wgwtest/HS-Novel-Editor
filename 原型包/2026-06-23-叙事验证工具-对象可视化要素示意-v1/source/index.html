@@ -1,0 +1,1432 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>叙事验证工具 - 对象可视化要素示意</title>
+  <style>
+    :root {
+      --ink: #071411;
+      --muted: #52635f;
+      --line: #9fb4ae;
+      --grid: #d8e5e1;
+      --panel: #f8fbfa;
+      --paper: #ffffff;
+      --track-teal: #087268;
+      --track-teal-soft: #dcefed;
+      --track-blue: #315f83;
+      --track-blue-soft: #dbe8f1;
+      --track-amber: #a66a10;
+      --track-amber-soft: #f3e4c8;
+      --track-red: #b42b40;
+      --track-red-soft: #f3d7de;
+      --track-violet: #67558a;
+      --track-violet-soft: #e7e2ef;
+      --track-gray: #536761;
+      --track-gray-soft: #edf2f0;
+      --accent: #0b7b73;
+      --black: #06100d;
+      --mono: Consolas, "Cascadia Mono", "Courier New", monospace;
+      --sans: "Microsoft YaHei UI", "Noto Sans CJK SC", "PingFang SC", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      color: var(--ink);
+      font-family: var(--sans);
+      background:
+        linear-gradient(90deg, rgba(8, 114, 104, 0.05) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(8, 114, 104, 0.05) 1px, transparent 1px),
+        #eef5f3;
+      background-size: 24px 24px;
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+    }
+
+    .screen {
+      display: none;
+      width: 1920px;
+      height: 1080px;
+      padding: 36px;
+      gap: 16px;
+      grid-template-rows: 58px 1fr;
+    }
+
+    .screen.active {
+      display: grid;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.92);
+      height: 58px;
+      padding: 0 28px;
+    }
+
+    .titleline {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .nav {
+      display: flex;
+      border: 1px solid var(--line);
+      height: 32px;
+    }
+
+    .nav a {
+      min-width: 92px;
+      display: grid;
+      place-items: center;
+      padding: 0 14px;
+      border-right: 1px solid var(--line);
+      color: var(--ink);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 700;
+      background: #fff;
+    }
+
+    .nav a:last-child {
+      border-right: 0;
+    }
+
+    .nav a.active-link {
+      color: #fff;
+      background: var(--black);
+    }
+
+    .board {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.94);
+      min-height: 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .board::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(90deg, rgba(8, 114, 104, 0.07) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(8, 114, 104, 0.05) 1px, transparent 1px);
+      background-size: 72px 72px;
+      opacity: 0.65;
+    }
+
+    .board-content {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      padding: 28px;
+    }
+
+    .eyebrow {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      color: var(--accent);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .section-title {
+      margin: 4px 0 4px;
+      font-size: 26px;
+      line-height: 1.1;
+    }
+
+    .note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .overview-layout {
+      height: 100%;
+      display: grid;
+      grid-template-columns: 1fr 430px;
+      gap: 20px;
+    }
+
+    .object-table {
+      margin-top: 22px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.82);
+    }
+
+    .table-row {
+      display: grid;
+      grid-template-columns: 145px 290px 1fr 350px;
+      min-height: 118px;
+      border-bottom: 1px solid #cfdcd8;
+    }
+
+    .table-row:last-child {
+      border-bottom: 0;
+    }
+
+    .table-head {
+      min-height: 40px;
+      background: #edf4f2;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--muted);
+    }
+
+    .cell {
+      padding: 14px 16px;
+      border-right: 1px solid #cfdcd8;
+      min-width: 0;
+    }
+
+    .cell:last-child {
+      border-right: 0;
+    }
+
+    .object-name {
+      font-size: 20px;
+      font-weight: 900;
+      margin-bottom: 7px;
+    }
+
+    .object-type {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--accent);
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-content: flex-start;
+    }
+
+    .chip {
+      border: 1px solid #91aaa4;
+      background: #fff;
+      padding: 5px 8px;
+      font-size: 12px;
+      line-height: 1;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .chip.strong {
+      border-color: var(--accent);
+      background: var(--track-teal-soft);
+      color: #073f39;
+    }
+
+    .rule-panel {
+      border: 1px solid var(--line);
+      background: rgba(248, 251, 250, 0.9);
+      padding: 20px;
+    }
+
+    .rule-panel h3 {
+      margin: 0 0 14px;
+      font-size: 20px;
+    }
+
+    .priority-stack {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .priority-item {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      align-items: center;
+      gap: 10px;
+      min-height: 46px;
+      border: 1px solid #cfdcd8;
+      background: #fff;
+      padding: 8px;
+    }
+
+    .priority-no {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      background: var(--black);
+      color: #fff;
+      font-family: var(--mono);
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .priority-item strong {
+      display: block;
+      font-size: 14px;
+    }
+
+    .priority-item span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .legend-line {
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 10px;
+      align-items: start;
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .swatch {
+      width: 22px;
+      height: 14px;
+      border: 2px solid var(--track-teal);
+      background: var(--track-teal-soft);
+      margin-top: 2px;
+    }
+
+    .swatch.dash {
+      border-style: dashed;
+      border-color: var(--track-violet);
+      background: #fff;
+    }
+
+    .swatch.badge {
+      border-color: var(--track-red);
+      background: var(--track-red-soft);
+    }
+
+    .strategy-layout {
+      height: 100%;
+      display: grid;
+      grid-template-rows: auto 1fr 190px;
+      gap: 18px;
+    }
+
+    .strategy-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      min-height: 0;
+    }
+
+    .strategy-card {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.9);
+      display: grid;
+      grid-template-rows: 92px 1fr 70px;
+      min-width: 0;
+    }
+
+    .strategy-card.recommended {
+      border-color: var(--accent);
+      box-shadow: inset 0 4px 0 var(--accent);
+    }
+
+    .strategy-head {
+      padding: 16px 18px;
+      border-bottom: 1px solid #cfdcd8;
+    }
+
+    .strategy-head h3 {
+      margin: 0 0 7px;
+      font-size: 19px;
+    }
+
+    .strategy-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .mini-timeline {
+      position: relative;
+      padding: 28px 24px;
+      overflow: hidden;
+      background:
+        linear-gradient(90deg, rgba(83, 103, 97, 0.25) 1px, transparent 1px),
+        #f8fbfa;
+      background-size: 96px 100%;
+    }
+
+    .lane-label {
+      height: 38px;
+      border-left: 6px solid var(--track-teal);
+      background: rgba(220, 239, 237, 0.55);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px 0 10px;
+      font-weight: 900;
+      font-size: 14px;
+      margin-bottom: 26px;
+    }
+
+    .lane-sub {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .event-bar {
+      position: absolute;
+      height: 46px;
+      border: 2px solid var(--track-teal);
+      background: var(--track-teal-soft);
+      padding: 8px 10px;
+      font-weight: 900;
+      font-size: 12px;
+    }
+
+    .event-bar small {
+      display: block;
+      margin-top: 4px;
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--muted);
+    }
+
+    .bad-status .event-bar.warn {
+      border-color: var(--track-amber);
+      background: var(--track-amber-soft);
+    }
+
+    .bad-status .event-bar.risk {
+      border-color: var(--track-red);
+      background: var(--track-red-soft);
+    }
+
+    .good-track .event-bar.warn::before,
+    .good-track .event-bar.risk::before {
+      content: "";
+      position: absolute;
+      left: -2px;
+      top: -2px;
+      bottom: -2px;
+      width: 8px;
+    }
+
+    .good-track .event-bar.warn::before {
+      background: var(--track-amber);
+    }
+
+    .good-track .event-bar.risk::before {
+      background: var(--track-red);
+    }
+
+    .good-track .event-bar.warn,
+    .good-track .event-bar.risk {
+      padding-left: 16px;
+    }
+
+    .mono-status .event-bar {
+      border-color: #536761;
+      background: #edf2f0;
+    }
+
+    .status-pill {
+      position: absolute;
+      right: 8px;
+      top: 8px;
+      font-family: var(--mono);
+      font-size: 9px;
+      border: 1px solid currentColor;
+      padding: 2px 4px;
+      background: #fff;
+    }
+
+    .status-pill.warn {
+      color: var(--track-amber);
+    }
+
+    .status-pill.risk {
+      color: var(--track-red);
+    }
+
+    .strategy-foot {
+      border-top: 1px solid #cfdcd8;
+      padding: 13px 18px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .decision-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .decision {
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 14px;
+      min-height: 140px;
+    }
+
+    .decision strong {
+      display: block;
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    .decision p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .event-layout {
+      height: 100%;
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 20px;
+    }
+
+    .anatomy {
+      border: 1px solid var(--line);
+      background: rgba(248, 251, 250, 0.9);
+      padding: 22px;
+      position: relative;
+    }
+
+    .anatomy-canvas {
+      position: relative;
+      height: 500px;
+      margin-top: 22px;
+      border: 1px solid #cfdcd8;
+      background:
+        linear-gradient(90deg, rgba(83, 103, 97, 0.22) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(83, 103, 97, 0.12) 1px, transparent 1px),
+        #fff;
+      background-size: 110px 74px;
+    }
+
+    .big-event {
+      position: absolute;
+      left: 250px;
+      top: 185px;
+      width: 520px;
+      height: 90px;
+      border: 3px solid var(--track-teal);
+      background: var(--track-teal-soft);
+      padding: 16px 18px;
+      box-shadow: 0 0 0 4px rgba(8, 114, 104, 0.08);
+    }
+
+    .big-event h3 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .big-event .meta {
+      margin-top: 8px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .big-event .left-stripe {
+      position: absolute;
+      left: -3px;
+      top: -3px;
+      bottom: -3px;
+      width: 10px;
+      background: var(--track-amber);
+    }
+
+    .big-event .port {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      transform: rotate(45deg);
+      border: 3px solid var(--track-teal);
+      background: #fff;
+      top: 36px;
+    }
+
+    .big-event .port.left {
+      left: -12px;
+    }
+
+    .big-event .port.right {
+      right: -12px;
+    }
+
+    .callout {
+      position: absolute;
+      width: 210px;
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 10px 12px;
+      font-size: 12px;
+      line-height: 1.4;
+      color: var(--muted);
+    }
+
+    .callout strong {
+      display: block;
+      color: var(--ink);
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .callout::after {
+      content: "";
+      position: absolute;
+      width: 92px;
+      border-top: 2px solid #6f817b;
+    }
+
+    .callout.title {
+      left: 310px;
+      top: 56px;
+    }
+
+    .callout.title::after {
+      left: 90px;
+      top: 100%;
+      transform: rotate(70deg);
+      transform-origin: left top;
+    }
+
+    .callout.time {
+      left: 635px;
+      top: 75px;
+    }
+
+    .callout.time::after {
+      left: 12px;
+      top: 100%;
+      transform: rotate(116deg);
+      transform-origin: left top;
+    }
+
+    .callout.state {
+      left: 48px;
+      top: 202px;
+    }
+
+    .callout.state::after {
+      right: -92px;
+      top: 38px;
+    }
+
+    .callout.relation {
+      right: 46px;
+      top: 202px;
+    }
+
+    .callout.relation::after {
+      left: -92px;
+      top: 38px;
+    }
+
+    .callout.inspector {
+      left: 390px;
+      bottom: 52px;
+      width: 300px;
+    }
+
+    .callout.inspector::after {
+      left: 120px;
+      bottom: 100%;
+      transform: rotate(-65deg);
+      transform-origin: left bottom;
+    }
+
+    .variant-panel {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.92);
+      padding: 22px;
+      min-width: 0;
+    }
+
+    .variant-grid {
+      margin-top: 18px;
+      display: grid;
+      gap: 13px;
+    }
+
+    .variant {
+      display: grid;
+      grid-template-columns: 170px 1fr;
+      align-items: center;
+      min-height: 72px;
+      border-bottom: 1px solid #dbe5e1;
+      padding-bottom: 12px;
+    }
+
+    .variant:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .variant strong {
+      font-size: 14px;
+    }
+
+    .sample-bar {
+      height: 42px;
+      border: 2px solid var(--track-teal);
+      background: var(--track-teal-soft);
+      padding: 7px 10px;
+      font-size: 12px;
+      font-weight: 900;
+      position: relative;
+    }
+
+    .sample-bar.continuing::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: -2px;
+      bottom: -2px;
+      width: 7px;
+      background: var(--track-blue);
+    }
+
+    .sample-bar.warn::before {
+      content: "WARN";
+      position: absolute;
+      right: 8px;
+      top: 7px;
+      font-family: var(--mono);
+      color: var(--track-amber);
+      border: 1px solid var(--track-amber);
+      background: #fff;
+      padding: 1px 4px;
+      font-size: 9px;
+    }
+
+    .sample-bar.risk {
+      border-color: var(--track-red);
+      box-shadow: inset 0 -5px 0 var(--track-red);
+    }
+
+    .sample-bar.background {
+      background: #fff;
+      border-style: dashed;
+      color: #33413d;
+      box-shadow: none;
+    }
+
+    .sample-bar.selected {
+      outline: 4px solid #071411;
+      outline-offset: 2px;
+    }
+
+    .character-layout {
+      height: 100%;
+      display: grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: 20px;
+    }
+
+    .character-canvas {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.92);
+      padding: 22px;
+      position: relative;
+    }
+
+    .expanded-demo {
+      margin-top: 20px;
+      border: 1px solid #b8c8c3;
+      background:
+        linear-gradient(90deg, rgba(83, 103, 97, 0.2) 1px, transparent 1px),
+        #f8fbfa;
+      background-size: 112px 100%;
+    }
+
+    .track-header {
+      height: 54px;
+      display: grid;
+      grid-template-columns: 170px 1fr;
+      border-bottom: 1px solid #cfdcd8;
+    }
+
+    .track-name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-left: 16px;
+      font-size: 16px;
+      font-weight: 900;
+      border-right: 1px solid #cfdcd8;
+      background: rgba(220, 239, 237, 0.6);
+    }
+
+    .track-band {
+      border-left: 5px solid var(--track-teal);
+      background: rgba(220, 239, 237, 0.45);
+      display: flex;
+      align-items: center;
+      padding-left: 16px;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .person-row {
+      height: 78px;
+      display: grid;
+      grid-template-columns: 170px 1fr;
+      border-bottom: 1px solid #e0e8e5;
+    }
+
+    .person-row:last-child {
+      border-bottom: 0;
+    }
+
+    .person-label {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding-left: 28px;
+      border-right: 1px solid #cfdcd8;
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    .person-label strong {
+      font-size: 14px;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      background: var(--track-red);
+    }
+
+    .dot.violet {
+      background: var(--track-violet);
+    }
+
+    .dot.blue {
+      background: var(--track-blue);
+    }
+
+    .person-timeline {
+      position: relative;
+    }
+
+    .person-segment {
+      position: absolute;
+      height: 28px;
+      top: 24px;
+      border: 2px solid currentColor;
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--track-red);
+      padding: 5px 8px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .person-segment.violet {
+      color: var(--track-violet);
+    }
+
+    .person-segment.blue {
+      color: var(--track-blue);
+    }
+
+    .person-segment.explicit {
+      background: var(--track-red-soft);
+      border-style: solid;
+    }
+
+    .person-segment.background {
+      background: #fff;
+      border-style: dashed;
+    }
+
+    .person-segment.thin {
+      height: 20px;
+      top: 29px;
+      font-size: 10px;
+      padding: 3px 8px;
+    }
+
+    .person-side {
+      border: 1px solid var(--line);
+      background: rgba(248, 251, 250, 0.94);
+      padding: 22px;
+    }
+
+    .person-card {
+      border: 1px solid #cfdcd8;
+      background: #fff;
+      margin-top: 16px;
+      padding: 16px;
+    }
+
+    .person-card h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+
+    .person-card p {
+      margin: 0;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .field-table {
+      margin-top: 18px;
+      border: 1px solid #cfdcd8;
+      background: #fff;
+    }
+
+    .field {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      min-height: 44px;
+      border-bottom: 1px solid #e0e8e5;
+      font-size: 12px;
+    }
+
+    .field:last-child {
+      border-bottom: 0;
+    }
+
+    .field span,
+    .field strong {
+      padding: 12px;
+    }
+
+    .field span {
+      background: #edf4f2;
+      color: var(--muted);
+      border-right: 1px solid #e0e8e5;
+    }
+
+    .bottom-strip {
+      position: absolute;
+      left: 28px;
+      right: 28px;
+      bottom: 24px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.95);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      min-height: 74px;
+    }
+
+    .bottom-strip div {
+      padding: 14px 16px;
+      border-right: 1px solid #cfdcd8;
+      font-size: 12px;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+
+    .bottom-strip div:last-child {
+      border-right: 0;
+    }
+
+    .bottom-strip strong {
+      display: block;
+      color: var(--ink);
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <section class="screen" id="overview">
+    <header class="topbar">
+      <div class="titleline">
+        <h1>对象可视化要素总览</h1>
+        <span class="subtitle">把“对象字段”和“画布表现”分开定义，避免颜色、线型和时间含义混在一起。</span>
+      </div>
+      <nav class="nav" aria-label="原型视图">
+        <a href="#overview">对象总览</a>
+        <a href="#storyline">故事线</a>
+        <a href="#event">事件</a>
+        <a href="#character">人物线</a>
+      </nav>
+    </header>
+    <main class="board">
+      <div class="board-content overview-layout">
+        <section>
+          <div class="eyebrow">OBJECT VISUAL MATRIX</div>
+          <h2 class="section-title">哪些对象可以承载哪些视觉要素</h2>
+          <p class="note">这张图不是最终页面，而是选择规则用的对象矩阵。横向时间、所属轨道、颜色、线型、角标、端点和 Inspector 必须各自表达固定含义。</p>
+
+          <div class="object-table">
+            <div class="table-row table-head">
+              <div class="cell">对象</div>
+              <div class="cell">系统职责</div>
+              <div class="cell">可进入画布的视觉要素</div>
+              <div class="cell">不建议承担的含义</div>
+            </div>
+            <div class="table-row">
+              <div class="cell">
+                <div class="object-name">章节</div>
+                <div class="object-type">chapter</div>
+              </div>
+              <div class="cell">正文切片。定义一段写作处理区，不是故事本身。</div>
+              <div class="cell">
+                <div class="chips">
+                  <span class="chip strong">章节覆盖区</span>
+                  <span class="chip">起止时间</span>
+                  <span class="chip">选中背景</span>
+                  <span class="chip">进入章节函数</span>
+                </div>
+              </div>
+              <div class="cell">不直接表达事件状态；不使用颜色区分每章“好坏”。</div>
+            </div>
+            <div class="table-row">
+              <div class="cell">
+                <div class="object-name">故事线</div>
+                <div class="object-type">track</div>
+              </div>
+              <div class="cell">全局叙事轨道。承担横向事件归属和展开人物子线。</div>
+              <div class="cell">
+                <div class="chips">
+                  <span class="chip strong">行位置</span>
+                  <span class="chip strong">身份色</span>
+                  <span class="chip">展开状态</span>
+                  <span class="chip">轨道背景</span>
+                  <span class="chip">人物子线容器</span>
+                </div>
+              </div>
+              <div class="cell">不应被单个事件的风险色频繁覆盖，否则同一线会像随机色。</div>
+            </div>
+            <div class="table-row">
+              <div class="cell">
+                <div class="object-name">事件</div>
+                <div class="object-type">event</div>
+              </div>
+              <div class="cell">叙事推进单位。可被章节加工、被前后事件连接。</div>
+              <div class="cell">
+                <div class="chips">
+                  <span class="chip strong">时间长度</span>
+                  <span class="chip">标题</span>
+                  <span class="chip">状态角标</span>
+                  <span class="chip">虚实线型</span>
+                  <span class="chip">关系端点</span>
+                  <span class="chip">Inspector</span>
+                </div>
+              </div>
+              <div class="cell">不建议用整块颜色同时表达所属线、风险、人物、可见性。</div>
+            </div>
+            <div class="table-row">
+              <div class="cell">
+                <div class="object-name">人物</div>
+                <div class="object-type">character</div>
+              </div>
+              <div class="cell">人物身份字典。被事件和人物片段引用。</div>
+              <div class="cell">
+                <div class="chips">
+                  <span class="chip strong">身份色点</span>
+                  <span class="chip">简称</span>
+                  <span class="chip">筛选</span>
+                  <span class="chip">参与者标签</span>
+                </div>
+              </div>
+              <div class="cell">不直接决定事件块主色；人物色只能作辅助识别。</div>
+            </div>
+            <div class="table-row">
+              <div class="cell">
+                <div class="object-name">人物片段</div>
+                <div class="object-type">character segment</div>
+              </div>
+              <div class="cell">某人在某条故事线中的参与段，依附于展开后的故事线。</div>
+              <div class="cell">
+                <div class="chips">
+                  <span class="chip strong">细行高度</span>
+                  <span class="chip">人物色边线</span>
+                  <span class="chip">实框行为</span>
+                  <span class="chip">虚框后台</span>
+                  <span class="chip">关联事件</span>
+                </div>
+              </div>
+              <div class="cell">不应扩大故事事件边界；它描述人物状态，不代表正文事件仍在发生。</div>
+            </div>
+          </div>
+        </section>
+
+        <aside class="rule-panel">
+          <div class="eyebrow">ENCODING ORDER</div>
+          <h3>视觉编码优先级</h3>
+          <p class="note">越靠上越稳定，越不应该被临时状态覆盖。</p>
+          <div class="priority-stack">
+            <div class="priority-item">
+              <div class="priority-no">1</div>
+              <div><strong>位置</strong><span>横向是真实时间，纵向是所属故事线。</span></div>
+            </div>
+            <div class="priority-item">
+              <div class="priority-no">2</div>
+              <div><strong>长度</strong><span>事件或人物片段持续范围。</span></div>
+            </div>
+            <div class="priority-item">
+              <div class="priority-no">3</div>
+              <div><strong>归属色</strong><span>故事线身份色优先，人物色只用于子线。</span></div>
+            </div>
+            <div class="priority-item">
+              <div class="priority-no">4</div>
+              <div><strong>线型</strong><span>实线表示正文可见，虚线表示后台存在。</span></div>
+            </div>
+            <div class="priority-item">
+              <div class="priority-no">5</div>
+              <div><strong>状态标记</strong><span>风险、警示、延续、完结使用角标或边条。</span></div>
+            </div>
+            <div class="priority-item">
+              <div class="priority-no">6</div>
+              <div><strong>Inspector</strong><span>详细属性放右侧，不全部塞进块内。</span></div>
+            </div>
+          </div>
+          <div class="legend-line">
+            <span class="swatch"></span>
+            <span>故事线身份色：稳定表达归属。</span>
+          </div>
+          <div class="legend-line">
+            <span class="swatch dash"></span>
+            <span>虚线：后台状态或未在正文直接呈现。</span>
+          </div>
+          <div class="legend-line">
+            <span class="swatch badge"></span>
+            <span>风险色：只做局部强调，不替换对象身份。</span>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </section>
+
+  <section class="screen" id="storyline">
+    <header class="topbar">
+      <div class="titleline">
+        <h1>故事线对象的配色方案</h1>
+        <span class="subtitle">同一条故事线必须先让用户认出“这是谁的线”，再表达事件状态。</span>
+      </div>
+      <nav class="nav" aria-label="原型视图">
+        <a href="#overview">对象总览</a>
+        <a href="#storyline">故事线</a>
+        <a href="#event">事件</a>
+        <a href="#character">人物线</a>
+      </nav>
+    </header>
+    <main class="board">
+      <div class="board-content strategy-layout">
+        <section>
+          <div class="eyebrow">STORYLINE COLOR OPTIONS</div>
+          <h2 class="section-title">故事线可视化的三种可选规则</h2>
+          <p class="note">这里故意用同一条“采访线”演示。重点是看颜色到底表达“故事线归属”还是“事件状态”。</p>
+        </section>
+
+        <section class="strategy-grid">
+          <article class="strategy-card bad-status">
+            <div class="strategy-head">
+              <h3>A. 状态色优先</h3>
+              <p>当前原型接近这种。事件按 main / warn / risk 直接换整块颜色。</p>
+            </div>
+            <div class="mini-timeline">
+              <div class="lane-label">采访线 <span class="lane-sub">身份被状态色稀释</span></div>
+              <div class="event-bar" style="left: 34px; top: 116px; width: 190px;">采访启动<small>E001 / C1</small></div>
+              <div class="event-bar warn" style="left: 240px; top: 196px; width: 220px;">符纸异常<small>E006 / C3</small></div>
+              <div class="event-bar risk" style="left: 120px; top: 286px; width: 310px;">追访边缘化<small>E012 / C4-C5</small></div>
+            </div>
+            <div class="strategy-foot">优点是状态醒目。问题是同一条线内出现多种主色，用户会误以为它们属于不同线。</div>
+          </article>
+
+          <article class="strategy-card recommended good-track">
+            <div class="strategy-head">
+              <h3>B. 故事线色优先</h3>
+              <p>建议方案。整块保持故事线身份色，状态用边条、角标、边框表达。</p>
+            </div>
+            <div class="mini-timeline">
+              <div class="lane-label">采访线 <span class="lane-sub">青绿色稳定表示归属</span></div>
+              <div class="event-bar" style="left: 34px; top: 116px; width: 190px;">采访启动<small>E001 / C1</small></div>
+              <div class="event-bar warn" style="left: 240px; top: 196px; width: 220px;">符纸异常<small>E006 / C3</small><span class="status-pill warn">WARN</span></div>
+              <div class="event-bar risk" style="left: 120px; top: 286px; width: 310px;">追访边缘化<small>E012 / C4-C5</small><span class="status-pill risk">RISK</span></div>
+            </div>
+            <div class="strategy-foot">归属最稳。风险、警示仍可见，但不会破坏故事线阅读。这最适合当前全局时间画布。</div>
+          </article>
+
+          <article class="strategy-card mono-status">
+            <div class="strategy-head">
+              <h3>C. 中性色加标签</h3>
+              <p>高密度方案。块体尽量中性，状态和归属都放到标签、边线或左侧轨道。</p>
+            </div>
+            <div class="mini-timeline">
+              <div class="lane-label">采访线 <span class="lane-sub">低噪声，但识别慢</span></div>
+              <div class="event-bar" style="left: 34px; top: 116px; width: 190px;">采访启动<small>E001 / C1</small></div>
+              <div class="event-bar warn" style="left: 240px; top: 196px; width: 220px;">符纸异常<small>E006 / C3</small><span class="status-pill warn">WARN</span></div>
+              <div class="event-bar risk" style="left: 120px; top: 286px; width: 310px;">追访边缘化<small>E012 / C4-C5</small><span class="status-pill risk">RISK</span></div>
+            </div>
+            <div class="strategy-foot">适合报告或打印，不适合复杂交互。因为扫视时不容易区分不同故事线。</div>
+          </article>
+        </section>
+
+        <section class="decision-row">
+          <div class="decision">
+            <strong>故事线主色</strong>
+            <p>每条故事线固定一个 baseColor。它决定本线事件块填充、轨道边条和选中态基色。</p>
+          </div>
+          <div class="decision">
+            <strong>状态附加层</strong>
+            <p>风险、警示、关键节点不换整块色，用左侧窄条、角标、底边或边框强调。</p>
+          </div>
+          <div class="decision">
+            <strong>展开层</strong>
+            <p>人物子线只能在故事线展开后出现。它使用人物色，但必须比主故事线更细、更轻。</p>
+          </div>
+          <div class="decision">
+            <strong>选择建议</strong>
+            <p>优先选 B。它最符合“故事线是一级对象，状态是二级信息”的系统层级。</p>
+          </div>
+        </section>
+      </div>
+    </main>
+  </section>
+
+  <section class="screen" id="event">
+    <header class="topbar">
+      <div class="titleline">
+        <h1>事件对象的块内编码</h1>
+        <span class="subtitle">事件块只放必要信息，详细属性进入右侧 Inspector 或事件详情页。</span>
+      </div>
+      <nav class="nav" aria-label="原型视图">
+        <a href="#overview">对象总览</a>
+        <a href="#storyline">故事线</a>
+        <a href="#event">事件</a>
+        <a href="#character">人物线</a>
+      </nav>
+    </header>
+    <main class="board">
+      <div class="board-content event-layout">
+        <section class="anatomy">
+          <div class="eyebrow">EVENT BLOCK ANATOMY</div>
+          <h2 class="section-title">一个事件块最多应该承载什么</h2>
+          <p class="note">事件块是全局画布上的最小叙事节点。它需要能被选中、被连接、被 Inspector 解释，但不能把全部字段塞进块内。</p>
+          <div class="anatomy-canvas">
+            <div class="big-event">
+              <span class="left-stripe"></span>
+              <span class="port left"></span>
+              <span class="port right"></span>
+              <h3>会议结果落地</h3>
+              <div class="meta">E021-E028 / C13-C14 / 采访线</div>
+            </div>
+
+            <div class="callout title">
+              <strong>标题</strong>
+              只放短标题。摘要、起因、过程、结果放 Inspector。
+            </div>
+            <div class="callout time">
+              <strong>时间与章节</strong>
+              横向长度来自 startAt/endAt；小字显示事件编号和章节覆盖。
+            </div>
+            <div class="callout state">
+              <strong>状态边条</strong>
+              警示或风险使用局部边条，不替换故事线主色。
+            </div>
+            <div class="callout relation">
+              <strong>关系端点</strong>
+              左端接前置事件，右端接后置事件。连线可选中、可删除。
+            </div>
+            <div class="callout inspector">
+              <strong>Inspector</strong>
+              事件 ID、人物、地点、组织、输入、输出、风险和进入详情按钮放在右侧。
+            </div>
+          </div>
+        </section>
+
+        <aside class="variant-panel">
+          <div class="eyebrow">EVENT VISUAL STATES</div>
+          <h2 class="section-title">事件状态的候选表现</h2>
+          <p class="note">这些是可选组合，不必全部启用。重点是让状态不破坏故事线身份色。</p>
+          <div class="variant-grid">
+            <div class="variant">
+              <strong>普通正文事件</strong>
+              <div class="sample-bar">采访启动</div>
+            </div>
+            <div class="variant">
+              <strong>延续事件</strong>
+              <div class="sample-bar continuing">采访材料继续整理</div>
+            </div>
+            <div class="variant">
+              <strong>警示事件</strong>
+              <div class="sample-bar warn">证据链暂未闭合</div>
+            </div>
+            <div class="variant">
+              <strong>风险事件</strong>
+              <div class="sample-bar risk">张航远被边缘化</div>
+            </div>
+            <div class="variant">
+              <strong>后台事件</strong>
+              <div class="sample-bar background">情报后台发酵</div>
+            </div>
+            <div class="variant">
+              <strong>选中事件</strong>
+              <div class="sample-bar selected">会议结果落地</div>
+            </div>
+          </div>
+          <div class="bottom-strip" style="left: 22px; right: 22px; bottom: 22px;">
+            <div><strong>块内显示</strong>标题、事件编号、章节覆盖、少量状态标记。</div>
+            <div><strong>Inspector 显示</strong>摘要、参与者、地点、组织、输入输出、风险。</div>
+            <div><strong>详情页显示</strong>起因、过程、结果、编辑、前后事件链。</div>
+            <div><strong>不建议</strong>让颜色同时表示线、状态、人物和可见性。</div>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </section>
+
+  <section class="screen" id="character">
+    <header class="topbar">
+      <div class="titleline">
+        <h1>人物与人物片段的展开层</h1>
+        <span class="subtitle">人物色只服务于人物识别；人物片段不能反向扩大故事事件边界。</span>
+      </div>
+      <nav class="nav" aria-label="原型视图">
+        <a href="#overview">对象总览</a>
+        <a href="#storyline">故事线</a>
+        <a href="#event">事件</a>
+        <a href="#character">人物线</a>
+      </nav>
+    </header>
+    <main class="board">
+      <div class="board-content character-layout">
+        <section class="character-canvas">
+          <div class="eyebrow">CHARACTER SEGMENT LAYER</div>
+          <h2 class="section-title">故事线展开后的人物参与片段</h2>
+          <p class="note">人物片段只在故事线展开后出现。它表达“某人在这条故事线下的参与或后台状态”，不是新的一级故事线。</p>
+
+          <div class="expanded-demo">
+            <div class="track-header">
+              <div class="track-name">采访线</div>
+              <div class="track-band">主故事线事件仍然占主高度；人物行是低高度子层</div>
+            </div>
+            <div class="person-row">
+              <div class="person-label"><span class="dot"></span><strong>张航远</strong></div>
+              <div class="person-timeline">
+                <div class="person-segment explicit" style="left: 90px; width: 300px;">实框：追访和补充核实</div>
+                <div class="person-segment background" style="left: 470px; width: 270px;">虚框：情绪继续发酵</div>
+              </div>
+            </div>
+            <div class="person-row">
+              <div class="person-label"><span class="dot violet"></span><strong>禹树</strong></div>
+              <div class="person-timeline">
+                <div class="person-segment violet background" style="left: 250px; width: 390px;">后台：等待叶依人带回问题</div>
+              </div>
+            </div>
+            <div class="person-row">
+              <div class="person-label"><span class="dot blue"></span><strong>熊丽</strong></div>
+              <div class="person-timeline">
+                <div class="person-segment blue thin" style="left: 30px; width: 210px;">短段：布置采访</div>
+                <div class="person-segment blue thin background" style="left: 590px; width: 180px;">后台：传播压力</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="expanded-demo" style="margin-top: 24px;">
+            <div class="track-header">
+              <div class="track-name" style="border-left: 0;">职业病证据线</div>
+              <div class="track-band" style="border-left-color: var(--track-amber); background: rgba(243, 228, 200, 0.5);">同一人物可以出现在不同故事线，但片段归属由 trackId 决定</div>
+            </div>
+            <div class="person-row">
+              <div class="person-label"><span class="dot violet"></span><strong>禹树</strong></div>
+              <div class="person-timeline">
+                <div class="person-segment violet explicit" style="left: 360px; width: 300px;">实框：提出数据化处理</div>
+              </div>
+            </div>
+            <div class="person-row">
+              <div class="person-label"><span class="dot"></span><strong>张航远</strong></div>
+              <div class="person-timeline">
+                <div class="person-segment explicit" style="left: 70px; width: 250px;">实框：名单回收</div>
+                <div class="person-segment background" style="left: 500px; width: 300px;">虚框：继续追问</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <aside class="person-side">
+          <div class="eyebrow">CHARACTER OBJECT</div>
+          <h2 class="section-title">人物对象与人物片段的区别</h2>
+          <p class="note">人物是字典对象，人物片段是时间对象。两者不能混成一条“大人物线”。</p>
+
+          <div class="person-card">
+            <h3>人物对象</h3>
+            <p>记录姓名、简称、身份色、所属组织、角色说明。它没有必然的 startAt/endAt。</p>
+            <div class="field-table">
+              <div class="field"><span>显示位置</span><strong>左侧人物标签、Inspector、筛选器</strong></div>
+              <div class="field"><span>主视觉</span><strong>小色点、简称、参与者标签</strong></div>
+              <div class="field"><span>不承担</span><strong>不决定故事事件主色</strong></div>
+            </div>
+          </div>
+
+          <div class="person-card">
+            <h3>人物片段对象</h3>
+            <p>记录人物在某条故事线中的一段参与。它必须有 trackId、characterId、startAt 和 endAt。</p>
+            <div class="field-table">
+              <div class="field"><span>显示位置</span><strong>故事线展开后的子行</strong></div>
+              <div class="field"><span>主视觉</span><strong>低高度条、人物色边线、虚实线型</strong></div>
+              <div class="field"><span>不承担</span><strong>不扩大正文事件范围</strong></div>
+            </div>
+          </div>
+
+          <div class="person-card">
+            <h3>选择点</h3>
+            <p>需要确认人物片段是否只显示“有意义的动作段”，还是也允许显示“后台状态段”。如果允许后台段，虚线必须成为强规则。</p>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </section>
+
+  <script>
+    const screens = [...document.querySelectorAll(".screen")];
+    const links = [...document.querySelectorAll(".nav a")];
+
+    function activate() {
+      const id = (location.hash || "#overview").slice(1);
+      const active = document.getElementById(id) || document.getElementById("overview");
+      screens.forEach((screen) => screen.classList.toggle("active", screen === active));
+      links.forEach((link) => link.classList.toggle("active-link", link.getAttribute("href") === `#${active.id}`));
+    }
+
+    window.addEventListener("hashchange", activate);
+    activate();
+  </script>
+</body>
+</html>

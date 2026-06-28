@@ -1,0 +1,1271 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>叙事验证工具 中心事件图谱与蓝图检查原型 v13</title>
+  <style>
+    :root {
+      --bg: #e8eeeb;
+      --paper: #fbfcfb;
+      --ink: #101716;
+      --muted: #65736f;
+      --line: #899f9a;
+      --line-soft: #dce6e2;
+      --grid: rgba(137, 159, 154, .22);
+      --teal: #087468;
+      --teal-deep: #063f3a;
+      --teal-soft: #d9efec;
+      --blue: #2e5f83;
+      --blue-soft: #dceaf3;
+      --violet: #66538a;
+      --violet-soft: #e8e2f0;
+      --red: #bd2f49;
+      --red-soft: #f5dce2;
+      --amber: #a66d12;
+      --amber-soft: #f5e7c9;
+      --green: #437363;
+      --green-soft: #e3efe8;
+      --ok: #087468;
+      --ok-soft: #dff1ed;
+      --warn: #a66d12;
+      --warn-soft: #fff0d1;
+      --bad: #bd2f49;
+      --bad-soft: #f5dce2;
+      --blueprint-bg: #10191e;
+      --blueprint-panel: #16252c;
+      --blueprint-node: #1d3038;
+      --blueprint-line: #314a54;
+      --mono: Consolas, "Cascadia Mono", "Courier New", monospace;
+      --sans: "Microsoft YaHei UI", "Noto Sans CJK SC", "PingFang SC", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      width: 1920px;
+      height: 1080px;
+      margin: 0;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .frame {
+      width: 100%;
+      height: 100%;
+      padding: 16px;
+    }
+
+    .app {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-rows: 44px 1fr;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      box-shadow: 0 22px 62px rgba(26, 42, 39, .12);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 22px;
+      border-bottom: 1px solid var(--line);
+      background: #f9fbfa;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .brand span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .nav {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .btn,
+    .nav a {
+      height: 30px;
+      padding: 0 13px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--line);
+      background: #fff;
+      font-size: 12px;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .btn.primary,
+    .nav a.active {
+      border-color: var(--teal);
+      background: var(--teal);
+      color: #fff;
+    }
+
+    .btn.dark {
+      border-color: #102522;
+      background: #102522;
+      color: #fff;
+    }
+
+    .view {
+      display: none;
+      min-height: 0;
+      height: 100%;
+    }
+
+    .view.active { display: grid; }
+
+    h1, h2, h3, p { margin: 0; }
+
+    .eyebrow {
+      margin-bottom: 6px;
+      color: var(--teal-deep);
+      font: 10px/1.1 var(--mono);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .tag {
+      min-height: 26px;
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 8px;
+      border: 1px solid var(--line);
+      background: #f8faf9;
+      color: #33413e;
+      font: 11px/1.1 var(--mono);
+      white-space: nowrap;
+    }
+
+    .tag.strong {
+      border-color: var(--teal);
+      background: var(--teal-soft);
+      color: #073d38;
+      font-weight: 900;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 0 12px;
+    }
+
+    .toolbar h1 {
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .toolbar p {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .toolbar-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .mode-toggle {
+      display: inline-grid;
+      grid-template-columns: repeat(3, 1fr);
+      height: 32px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .mode-toggle a {
+      min-width: 88px;
+      padding: 0 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-right: 1px solid var(--line);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .mode-toggle a:last-child { border-right: 0; }
+
+    .mode-toggle a.active {
+      background: #102522;
+      color: #fff;
+    }
+
+    .timeline-view {
+      grid-template-columns: 1fr 342px;
+      min-height: 0;
+    }
+
+    .timeline-main {
+      display: grid;
+      grid-template-rows: 56px 1fr;
+      gap: 12px;
+      padding: 18px 18px 18px 22px;
+      min-width: 0;
+      border-right: 1px solid var(--line);
+    }
+
+    .timeline-board {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(to right, transparent 0, transparent 166px, var(--line) 166px, var(--line) 167px, transparent 167px),
+        repeating-linear-gradient(to right, transparent 0, transparent 155px, var(--grid) 156px),
+        repeating-linear-gradient(to bottom, transparent 0, transparent 52px, rgba(18, 31, 29, .07) 53px),
+        #fff;
+    }
+
+    .calendar-strip {
+      position: absolute;
+      left: 167px;
+      right: 0;
+      top: 0;
+      height: 42px;
+      background: #f1f5f3;
+      border-bottom: 1px solid #cad7d3;
+      color: #65736f;
+      font-size: 10px;
+    }
+
+    .calendar-strip span { position: absolute; white-space: nowrap; }
+
+    .chapter-strip {
+      position: absolute;
+      left: 167px;
+      right: 0;
+      top: 42px;
+      height: 70px;
+      border-bottom: 2px solid #172a27;
+      background: #fbfdfc;
+    }
+
+    .chapter-chip {
+      position: absolute;
+      top: 6px;
+      height: 58px;
+      padding: 7px 8px;
+      border: 1px solid #718984;
+      border-top: 4px solid #172a27;
+      background: #fff;
+    }
+
+    .chapter-chip strong {
+      display: block;
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .chapter-chip em {
+      display: block;
+      margin-top: 5px;
+      color: #53615e;
+      font-size: 11px;
+      font-style: normal;
+    }
+
+    .lane-labels {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 167px;
+      border-right: 1px solid var(--line);
+      background: rgba(248, 251, 250, .97);
+      z-index: 4;
+    }
+
+    .lane-label {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 52px;
+      padding: 15px 12px 0;
+      border-bottom: 1px solid var(--line-soft);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .label-muted {
+      float: right;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .timeline-item {
+      position: absolute;
+      height: 46px;
+      padding: 8px 10px;
+      border: 1px solid #64aaa1;
+      background: var(--teal-soft);
+      box-shadow: inset 0 -5px 0 var(--teal);
+      font-size: 13px;
+      font-weight: 900;
+      z-index: 6;
+    }
+
+    .timeline-item small {
+      display: block;
+      margin-top: 4px;
+      color: #273532;
+      font: 10px/1 var(--mono);
+      font-weight: 800;
+    }
+
+    .timeline-item.selected {
+      outline: 3px solid #172a27;
+      outline-offset: 2px;
+      z-index: 9;
+    }
+
+    .timeline-item.thin {
+      height: 24px;
+      padding: 4px 8px;
+      box-shadow: none;
+      font-size: 11px;
+      line-height: 1;
+    }
+
+    .timeline-item.red {
+      border-color: #d2788a;
+      background: var(--red-soft);
+      box-shadow: inset 0 -5px 0 var(--red);
+    }
+
+    .timeline-item.violet {
+      border-color: #a79abe;
+      background: var(--violet-soft);
+      box-shadow: inset 0 -5px 0 var(--violet);
+    }
+
+    .timeline-item.amber {
+      border-color: #d5a85f;
+      background: var(--amber-soft);
+      box-shadow: inset 0 -5px 0 var(--amber);
+    }
+
+    .relation-layer {
+      position: absolute;
+      left: 167px;
+      right: 0;
+      top: 112px;
+      bottom: 0;
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .relation-layer path {
+      fill: none;
+      stroke-width: 2.2;
+      marker-end: url(#tlArrow);
+    }
+
+    .relation-layer .in {
+      stroke: rgba(46, 95, 131, .64);
+    }
+
+    .relation-layer .out {
+      stroke: rgba(166, 109, 18, .7);
+    }
+
+    .relation-layer .branch {
+      stroke: rgba(189, 47, 73, .62);
+    }
+
+    .route-label {
+      position: absolute;
+      z-index: 8;
+      padding: 4px 7px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, .94);
+      color: #31403c;
+      font-size: 11px;
+      font-weight: 850;
+    }
+
+    .inspector {
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 12px;
+      padding: 18px;
+      background: #f8faf9;
+    }
+
+    .inspect-box {
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 14px;
+    }
+
+    .inspect-box h2 {
+      margin-bottom: 8px;
+      font-size: 18px;
+    }
+
+    .inspect-box p {
+      color: #3f4d49;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .inspect-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+      font-size: 12px;
+    }
+
+    .inspect-list div {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 7px;
+      border-bottom: 1px solid var(--line-soft);
+      color: var(--muted);
+    }
+
+    .inspect-list strong { color: var(--ink); }
+
+    .action-stack {
+      display: grid;
+      gap: 8px;
+    }
+
+    .graph-view {
+      grid-template-rows: 56px 1fr 118px;
+      gap: 12px;
+      padding: 18px 22px;
+    }
+
+    .graph-board {
+      position: relative;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(to right, rgba(137, 159, 154, .18) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(137, 159, 154, .12) 1px, transparent 1px),
+        #fff;
+      background-size: 128px 100%, 100% 78px;
+      overflow: hidden;
+    }
+
+    .graph-band {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      border-left: 1px solid rgba(137, 159, 154, .38);
+      border-right: 1px solid rgba(137, 159, 154, .28);
+      background: rgba(248, 251, 250, .72);
+    }
+
+    .graph-label {
+      position: absolute;
+      top: 18px;
+      height: 30px;
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      background: #fff;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .graph-node {
+      position: absolute;
+      min-height: 78px;
+      padding: 10px 12px;
+      border: 1px solid #82aaa4;
+      border-left: 5px solid var(--teal);
+      background: var(--teal-soft);
+      box-shadow: 0 12px 20px rgba(27, 42, 39, .05);
+      z-index: 4;
+    }
+
+    .graph-node strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 15px;
+    }
+
+    .graph-node small {
+      display: block;
+      margin-bottom: 6px;
+      font: 10px/1 var(--mono);
+      font-weight: 900;
+    }
+
+    .graph-node p {
+      color: #3f4d49;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .graph-node.center {
+      border-width: 2px;
+      box-shadow: inset 0 -5px 0 var(--teal), 0 18px 32px rgba(27, 42, 39, .12);
+    }
+
+    .graph-node.blue {
+      border-color: #7fa5bf;
+      border-left-color: var(--blue);
+      background: var(--blue-soft);
+    }
+
+    .graph-node.violet {
+      border-color: #a79abe;
+      border-left-color: var(--violet);
+      background: var(--violet-soft);
+    }
+
+    .graph-node.red {
+      border-color: #d2788a;
+      border-left-color: var(--red);
+      background: var(--red-soft);
+    }
+
+    .graph-node.amber {
+      border-color: #d5a85f;
+      border-left-color: var(--amber);
+      background: var(--amber-soft);
+    }
+
+    .graph-node.green {
+      border-color: #8aab9e;
+      border-left-color: var(--green);
+      background: var(--green-soft);
+    }
+
+    .port {
+      position: absolute;
+      top: 50%;
+      width: 10px;
+      height: 10px;
+      margin-top: -5px;
+      border: 2px solid #fff;
+      background: var(--teal);
+      box-shadow: 0 0 0 1px rgba(17, 29, 27, .4);
+    }
+
+    .port.left { left: -7px; }
+    .port.right { right: -7px; }
+    .port.blue { background: var(--blue); }
+    .port.amber { background: var(--amber); }
+    .port.red { background: var(--red); }
+
+    .graph-svg {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .graph-svg path {
+      fill: none;
+      stroke: rgba(35, 67, 61, .58);
+      stroke-width: 2;
+      marker-end: url(#graphArrow);
+    }
+
+    .edge-label {
+      position: absolute;
+      z-index: 3;
+      padding: 4px 6px;
+      border: 1px solid #c6d6d2;
+      background: rgba(255, 255, 255, .92);
+      color: #40504c;
+      font-size: 11px;
+      font-weight: 850;
+    }
+
+    .legend-dock {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    .legend-box {
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 12px 14px;
+    }
+
+    .legend-box h2 {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 9px;
+      font-size: 15px;
+    }
+
+    .swatch {
+      width: 36px;
+      height: 5px;
+      display: inline-block;
+      background: var(--teal);
+    }
+
+    .swatch.blue { background: var(--blue); }
+    .swatch.amber { background: var(--amber); }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .pill {
+      padding: 5px 8px;
+      border: 1px solid var(--line-soft);
+      background: #f7faf9;
+      font-size: 12px;
+      font-weight: 750;
+      line-height: 1.1;
+    }
+
+    .blueprint-view {
+      grid-template-rows: 56px 1fr 118px;
+      gap: 12px;
+      padding: 18px 22px;
+    }
+
+    .blueprint-shell {
+      display: grid;
+      grid-template-columns: 1fr 330px;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .blueprint-canvas {
+      position: relative;
+      border: 1px solid #24424a;
+      background:
+        radial-gradient(circle at 24px 24px, rgba(114, 164, 174, .12) 1px, transparent 1px),
+        linear-gradient(to right, rgba(126, 170, 178, .08) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(126, 170, 178, .08) 1px, transparent 1px),
+        var(--blueprint-bg);
+      background-size: 24px 24px, 96px 96px, 96px 96px;
+      overflow: hidden;
+      color: #d9ecec;
+    }
+
+    .bp-node {
+      position: absolute;
+      width: 220px;
+      min-height: 116px;
+      border: 1px solid #44616a;
+      background: var(--blueprint-node);
+      box-shadow: 0 14px 28px rgba(0, 0, 0, .28);
+    }
+
+    .bp-node.wide { width: 270px; }
+    .bp-node.tall { min-height: 152px; }
+
+    .bp-node .node-head {
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+      border-bottom: 1px solid #44616a;
+      background: #213841;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .bp-node.trigger .node-head { background: #204a64; }
+    .bp-node.condition .node-head { background: #624d1d; }
+    .bp-node.action .node-head { background: #17463f; }
+    .bp-node.conflict .node-head { background: #5a3140; }
+    .bp-node.state .node-head { background: #3f3561; }
+    .bp-node.output .node-head { background: #3f572e; }
+
+    .bp-node .node-body {
+      padding: 9px 10px 10px;
+      display: grid;
+      gap: 7px;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .bp-field {
+      display: grid;
+      grid-template-columns: 68px 1fr;
+      gap: 8px;
+      align-items: start;
+    }
+
+    .bp-field span {
+      color: #94adb4;
+      font-weight: 850;
+    }
+
+    .bp-field strong {
+      color: #ecf6f5;
+      font-weight: 750;
+    }
+
+    .bp-status {
+      padding: 3px 6px;
+      border: 1px solid #7faeaa;
+      background: rgba(8, 116, 104, .18);
+      color: #aee5db;
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .bp-status.warn {
+      border-color: #d5a85f;
+      background: rgba(166, 109, 18, .2);
+      color: #ffd68e;
+    }
+
+    .bp-pin {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 2px solid #0b171b;
+      background: #d8eef0;
+      box-shadow: 0 0 0 1px rgba(216, 238, 240, .55);
+    }
+
+    .bp-pin.left { left: -7px; }
+    .bp-pin.right { right: -7px; }
+    .bp-pin.exec { background: #e8f2f2; }
+    .bp-pin.data { background: #5db6e6; }
+    .bp-pin.risk { background: #e05c7a; }
+    .bp-pin.ok { background: #62c8ad; }
+
+    .bp-wire {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .bp-wire path {
+      fill: none;
+      stroke-width: 3;
+      marker-end: url(#bpArrow);
+    }
+
+    .bp-wire .exec { stroke: #e8f2f2; }
+    .bp-wire .data { stroke: #5db6e6; }
+    .bp-wire .risk { stroke: #e05c7a; }
+    .bp-wire .ok { stroke: #62c8ad; }
+
+    .bp-note {
+      position: absolute;
+      padding: 6px 8px;
+      border: 1px solid #536e77;
+      background: rgba(22, 37, 44, .88);
+      color: #d4e5e8;
+      font-size: 11px;
+      font-weight: 850;
+      z-index: 5;
+    }
+
+    .bp-inspector {
+      border: 1px solid var(--line);
+      background: #fff;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-height: 0;
+    }
+
+    .bp-inspector .inspect-box {
+      border: 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .bp-list {
+      padding: 12px 14px;
+      display: grid;
+      gap: 9px;
+      align-content: start;
+      overflow: hidden;
+    }
+
+    .bp-issue {
+      padding: 9px 10px;
+      border: 1px solid #d8b56f;
+      border-left: 5px solid var(--warn);
+      background: var(--warn-soft);
+      font-size: 12px;
+      line-height: 1.42;
+    }
+
+    .bp-issue.ok {
+      border-color: #7cb8ad;
+      border-left-color: var(--ok);
+      background: var(--ok-soft);
+    }
+
+    .bp-issue.bad {
+      border-color: #df93a0;
+      border-left-color: var(--bad);
+      background: var(--bad-soft);
+    }
+
+    .bp-issue strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          叙事验证工具
+          <span>中心事件图谱 / 正交时间线 / 蓝图式事件检查</span>
+        </div>
+        <nav class="nav" aria-label="原型视图">
+          <a href="#timeline" data-nav="timeline">正交时间线</a>
+          <a href="#graph" data-nav="graph">中心图谱</a>
+          <a href="#blueprint" data-nav="blueprint">蓝图检查</a>
+        </nav>
+      </header>
+
+      <section class="view timeline-view active" id="view-timeline">
+        <main class="timeline-main">
+          <div class="toolbar">
+            <div>
+              <h1>全局时间线：正交关系层</h1>
+              <p>章节和轨道仍是主视图；关系层只显示选中事件的输入/输出，并统一使用从左到右的折线。</p>
+            </div>
+            <div class="toolbar-actions">
+              <div class="mode-toggle" aria-label="首页展示模式">
+                <a class="active" href="#timeline">时间线</a>
+                <a href="#graph">图谱</a>
+                <a href="#blueprint">检查</a>
+              </div>
+              <span class="tag strong">选中：E021-E028</span>
+            </div>
+          </div>
+
+          <div class="timeline-board">
+            <div class="calendar-strip">
+              <span style="left: 20px; top: 22px;">7/8</span>
+              <span style="left: 176px; top: 22px;">7/9</span>
+              <span style="left: 332px; top: 22px;">7/10</span>
+              <span style="left: 488px; top: 22px;">7/11</span>
+              <span style="left: 644px; top: 22px;">7/12</span>
+              <span style="left: 800px; top: 22px;">7/13</span>
+              <span style="left: 956px; top: 22px;">7/14</span>
+              <span style="left: 1112px; top: 22px;">7/15</span>
+              <span style="left: 1268px; top: 22px;">7/16</span>
+            </div>
+            <div class="chapter-strip">
+              <div class="chapter-chip" style="left:0;width:128px"><strong>C10</strong><em>采访启动</em></div>
+              <div class="chapter-chip" style="left:128px;width:192px"><strong>C11</strong><em>样本成形</em></div>
+              <div class="chapter-chip" style="left:320px;width:192px"><strong>C12</strong><em>显形加压</em></div>
+              <div class="chapter-chip" style="left:512px;width:192px"><strong>C13</strong><em>会议结果</em></div>
+              <div class="chapter-chip" style="left:704px;width:256px"><strong>C14</strong><em>会后吸收</em></div>
+              <div class="chapter-chip" style="left:960px;width:192px"><strong>C15</strong><em>私线偏移</em></div>
+              <div class="chapter-chip" style="left:1152px;width:192px"><strong>C16</strong><em>群众争夺</em></div>
+            </div>
+            <div class="lane-labels">
+              <div class="lane-label" style="top:112px">故事主轴</div>
+              <div class="lane-label" style="top:164px">采访线 <span class="label-muted">3人</span></div>
+              <div class="lane-label" style="top:216px">大仙祠线 <span class="label-muted">3人</span></div>
+              <div class="lane-label" style="top:268px">电视台线 <span class="label-muted">2人</span></div>
+              <div class="lane-label" style="top:320px">张航远线 <span class="label-muted">2人</span></div>
+              <div class="lane-label" style="top:372px">职业病证据线 <span class="label-muted">2人</span></div>
+            </div>
+
+            <svg class="relation-layer" viewBox="0 0 1375 850" preserveAspectRatio="none">
+              <defs>
+                <marker id="tlArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(36,68,62,.68)"></path>
+                </marker>
+              </defs>
+              <path class="in" d="M 392 37 H 420 V 37 H 438"></path>
+              <path class="in" d="M 366 90 H 404 V 38 H 438"></path>
+              <path class="in" d="M 398 195 H 420 V 38 H 438"></path>
+              <path class="branch" d="M 410 306 H 430 V 38 H 438"></path>
+              <path class="out" d="M 858 37 H 895 V 37 H 988"></path>
+              <path class="out" d="M 858 37 H 905 V 320 H 950"></path>
+              <path class="branch" d="M 858 37 H 922 V 510 H 948"></path>
+              <path class="out" d="M 858 37 H 930 V 402 H 1030"></path>
+            </svg>
+
+            <div class="route-label" style="left:542px;top:210px;">输入汇入</div>
+            <div class="route-label" style="left:1018px;top:214px;">输出分流</div>
+
+            <div class="timeline-item" style="left:216px;top:126px;width:340px">采访启动<small>E010-E014</small></div>
+            <div class="timeline-item selected" style="left:604px;top:126px;width:420px">会议结果落地<small>E021-E028</small></div>
+            <div class="timeline-item" style="left:1156px;top:126px;width:300px">会后转争夺<small>E029-E041</small></div>
+            <div class="timeline-item" style="left:278px;top:178px;width:255px">走访与材料整理<small>C11-C12</small></div>
+            <div class="timeline-item thin" style="left:278px;top:230px;width:255px">叶 事实链走访</div>
+            <div class="timeline-item red thin" style="left:430px;top:282px;width:148px">张 被边缘化</div>
+            <div class="timeline-item violet" style="left:300px;top:286px;width:265px">救助显形<small>C11-C12</small></div>
+            <div class="timeline-item violet thin" style="left:650px;top:340px;width:380px">禹 情报后台发酵</div>
+            <div class="timeline-item" style="left:1118px;top:414px;width:222px">口径重写<small>C13-C14</small></div>
+            <div class="timeline-item amber" style="left:1200px;top:468px;width:256px">证据继续预热<small>C15-C16</small></div>
+            <div class="timeline-item red" style="left:1116px;top:524px;width:340px">边缘化到私线偏移<small>C13-C15</small></div>
+          </div>
+        </main>
+
+        <aside class="inspector">
+          <div class="inspect-box">
+            <p class="eyebrow">Selected Event</p>
+            <h2>会议结果落地</h2>
+            <p>关系线改为正交折线：源事件右侧出线，目标事件左侧入线，所有方向从左到右。</p>
+            <div class="inspect-list">
+              <div><span>线型</span><strong>正交折线</strong></div>
+              <div><span>方向</span><strong>左 -> 右</strong></div>
+              <div><span>范围</span><strong>仅当前选中事件</strong></div>
+            </div>
+          </div>
+          <div class="inspect-box">
+            <h2>显示原则</h2>
+            <p>时间线负责对齐章节与真实时间；关系层只补充因果，不抢占故事线条的主视觉。</p>
+          </div>
+          <div class="inspect-box">
+            <h2>下一步入口</h2>
+            <p>需要追溯来源与输出时进入中心事件图谱；需要检查事件内部结构时进入蓝图检查。</p>
+          </div>
+          <div class="action-stack">
+            <a class="btn primary" href="#graph">进入中心图谱</a>
+            <a class="btn" href="#blueprint">进入蓝图检查</a>
+          </div>
+        </aside>
+      </section>
+
+      <section class="view graph-view" id="view-graph">
+        <div class="toolbar">
+          <div>
+            <h1>中心事件知识图谱</h1>
+            <p>参考知识图谱的 ego graph：以一个事件为中心，左侧是来源事件，右侧是输出事件。</p>
+          </div>
+          <div class="toolbar-actions">
+            <div class="mode-toggle" aria-label="首页展示模式">
+              <a href="#timeline">时间线</a>
+              <a class="active" href="#graph">图谱</a>
+              <a href="#blueprint">检查</a>
+            </div>
+            <span class="tag strong">一阶关系</span>
+            <span class="tag">中心：E021-E028</span>
+          </div>
+        </div>
+
+        <main class="graph-board">
+          <div class="graph-band" style="left:0;width:34%;"></div>
+          <div class="graph-band" style="left:34%;width:32%;"></div>
+          <div class="graph-band" style="left:66%;width:34%;"></div>
+          <div class="graph-label" style="left:44px;">来源事件</div>
+          <div class="graph-label" style="left:792px;">中心事件</div>
+          <div class="graph-label" style="right:44px;">输出事件</div>
+
+          <svg class="graph-svg" viewBox="0 0 1840 720" preserveAspectRatio="none">
+            <defs>
+              <marker id="graphArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(35,67,61,.65)"></path>
+              </marker>
+            </defs>
+            <path d="M 395 134 H 575 V 306 H 742"></path>
+            <path d="M 395 274 H 575 V 324 H 742"></path>
+            <path d="M 395 414 H 575 V 342 H 742"></path>
+            <path d="M 395 554 H 575 V 360 H 742"></path>
+            <path d="M 1142 314 H 1280 V 132 H 1486"></path>
+            <path d="M 1142 328 H 1280 V 272 H 1486"></path>
+            <path d="M 1142 342 H 1280 V 414 H 1486"></path>
+            <path d="M 1142 356 H 1280 V 554 H 1486"></path>
+          </svg>
+
+          <div class="edge-label" style="left:540px;top:120px;">提供事实入口</div>
+          <div class="edge-label" style="left:555px;top:260px;">制造会议压力</div>
+          <div class="edge-label" style="left:1196px;top:122px;">输出争夺对象</div>
+          <div class="edge-label" style="left:1208px;top:402px;">形成私线条件</div>
+
+          <a class="graph-node blue" href="#blueprint" style="left:64px;top:92px;width:330px;">
+            <span class="port right blue"></span>
+            <strong>采访启动</strong><small>E010-E014 / C10-C11</small><p>形成事实入口和采访材料。</p>
+          </a>
+          <a class="graph-node violet" href="#blueprint" style="left:64px;top:232px;width:330px;">
+            <span class="port right"></span>
+            <strong>救助显形</strong><small>E016-E020 / C11-C12</small><p>让解释权压力进入会议前。</p>
+          </a>
+          <a class="graph-node red" href="#blueprint" style="left:64px;top:372px;width:330px;">
+            <span class="port right red"></span>
+            <strong>张航远被边缘化</strong><small>E019 / C13</small><p>形成人物位置变化和私线风险。</p>
+          </a>
+          <a class="graph-node amber" href="#blueprint" style="left:64px;top:512px;width:330px;">
+            <span class="port right amber"></span>
+            <strong>证据预热</strong><small>E018 / C12-C13</small><p>职业病证据未公开，但改变会议判断。</p>
+          </a>
+
+          <a class="graph-node center" href="#blueprint" style="left:742px;top:270px;width:400px;">
+            <span class="port left"></span>
+            <span class="port right"></span>
+            <strong>会议结果落地</strong><small>E021-E028 / C13-C14</small><p>多路输入在会议中压缩为公共落点，并分流为后续争夺。</p>
+          </a>
+
+          <a class="graph-node green" href="#blueprint" style="right:64px;top:92px;width:330px;">
+            <span class="port left"></span>
+            <strong>会后转争夺</strong><small>E029-E041 / C15-C16</small><p>解释权和群众资源围绕结果继续争夺。</p>
+          </a>
+          <a class="graph-node blue" href="#blueprint" style="right:64px;top:232px;width:330px;">
+            <span class="port left blue"></span>
+            <strong>口径重写</strong><small>E024-E032 / C14-C15</small><p>电视台把会议结果转成可传播表达。</p>
+          </a>
+          <a class="graph-node red" href="#blueprint" style="right:64px;top:372px;width:330px;">
+            <span class="port left red"></span>
+            <strong>私线偏移条件</strong><small>E030 / C15</small><p>张航远的位置变化进入个人行动风险。</p>
+          </a>
+          <a class="graph-node amber" href="#blueprint" style="right:64px;top:512px;width:330px;">
+            <span class="port left amber"></span>
+            <strong>证据继续预热</strong><small>E033 / C15-C16</small><p>职业病证据获得后续正式入场位置。</p>
+          </a>
+        </main>
+
+        <footer class="legend-dock">
+          <section class="legend-box">
+            <h2><span class="swatch"></span>图谱语义</h2>
+            <div class="pill-row">
+              <span class="pill">中心事件</span>
+              <span class="pill">来源事件</span>
+              <span class="pill">输出事件</span>
+              <span class="pill">关系标签</span>
+            </div>
+          </section>
+          <section class="legend-box">
+            <h2><span class="swatch blue"></span>交互策略</h2>
+            <div class="pill-row">
+              <span class="pill">点击节点换中心</span>
+              <span class="pill">一阶/二阶切换</span>
+              <span class="pill">按章节过滤</span>
+            </div>
+          </section>
+          <section class="legend-box">
+            <h2><span class="swatch amber"></span>布局策略</h2>
+            <div class="pill-row">
+              <span class="pill">左到右分层</span>
+              <span class="pill">端口连接</span>
+              <span class="pill">关系线可标注</span>
+            </div>
+          </section>
+        </footer>
+      </section>
+
+      <section class="view blueprint-view" id="view-blueprint">
+        <div class="toolbar">
+          <div>
+            <h1>蓝图式事件检查器</h1>
+            <p>借鉴 Rete / Node-RED / Blueprints 的节点端口语言，但只表达事件检查，不做完整编程编辑器。</p>
+          </div>
+          <div class="toolbar-actions">
+            <div class="mode-toggle" aria-label="首页展示模式">
+              <a href="#timeline">时间线</a>
+              <a href="#graph">图谱</a>
+              <a class="active" href="#blueprint">检查</a>
+            </div>
+            <span class="tag strong">E021-E028</span>
+            <span class="tag">3 通过 / 1 需补</span>
+          </div>
+        </div>
+
+        <main class="blueprint-shell">
+          <section class="blueprint-canvas">
+            <svg class="bp-wire" viewBox="0 0 1480 772" preserveAspectRatio="none">
+              <defs>
+                <marker id="bpArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="#d8eef0"></path>
+                </marker>
+              </defs>
+              <path class="exec" d="M 252 170 H 318 V 205 H 384"></path>
+              <path class="exec" d="M 654 205 H 712 V 205 H 770"></path>
+              <path class="exec" d="M 1040 205 H 1090 V 205 H 1140"></path>
+              <path class="data" d="M 252 250 H 330 V 352 H 424"></path>
+              <path class="data" d="M 654 322 H 730 V 445 H 812"></path>
+              <path class="risk" d="M 654 232 H 730 V 584 H 812"></path>
+              <path class="ok" d="M 1082 445 H 1130 V 362 H 1190"></path>
+              <path class="exec" d="M 1410 362 H 1456"></path>
+            </svg>
+
+            <div class="bp-node trigger wide" style="left:42px;top:112px;">
+              <span class="bp-pin right exec" style="top:58px;"></span>
+              <span class="bp-pin right data" style="top:138px;"></span>
+              <div class="node-head"><span>输入事件汇入</span><span class="bp-status">通过</span></div>
+              <div class="node-body">
+                <div class="bp-field"><span>来源</span><strong>E010 / E016 / E019 / E018</strong></div>
+                <div class="bp-field"><span>章节</span><strong>C11-C13</strong></div>
+                <div class="bp-field"><span>检查</span><strong>输入事件均可回溯</strong></div>
+              </div>
+            </div>
+
+            <div class="bp-node condition wide" style="left:384px;top:166px;">
+              <span class="bp-pin left exec" style="top:38px;"></span>
+              <span class="bp-pin right exec" style="top:38px;"></span>
+              <span class="bp-pin left data" style="top:155px;"></span>
+              <span class="bp-pin right risk" style="top:66px;"></span>
+              <div class="node-head"><span>触发条件</span><span class="bp-status warn">需补</span></div>
+              <div class="node-body">
+                <div class="bp-field"><span>条件</span><strong>材料压力足以迫使会议给出口径</strong></div>
+                <div class="bp-field"><span>证据</span><strong>职业病线影响偏弱</strong></div>
+                <div class="bp-field"><span>输出</span><strong>进入会议处理</strong></div>
+              </div>
+            </div>
+
+            <div class="bp-node action wide tall" style="left:770px;top:144px;">
+              <span class="bp-pin left exec" style="top:60px;"></span>
+              <span class="bp-pin right exec" style="top:60px;"></span>
+              <div class="node-head"><span>人物动作</span><span class="bp-status warn">需补</span></div>
+              <div class="node-body">
+                <div class="bp-field"><span>叶依人</span><strong>承接事实链，推动材料入会</strong></div>
+                <div class="bp-field"><span>张航远</span><strong>位置被压缩，动作桥偏弱</strong></div>
+                <div class="bp-field"><span>禹树</span><strong>后台情报入口保留</strong></div>
+              </div>
+            </div>
+
+            <div class="bp-node conflict wide tall" style="left:812px;top:392px;">
+              <span class="bp-pin left data" style="top:52px;"></span>
+              <span class="bp-pin right ok" style="top:52px;"></span>
+              <div class="node-head"><span>冲突机制</span><span class="bp-status">通过</span></div>
+              <div class="node-body">
+                <div class="bp-field"><span>双方</span><strong>事实链 vs 解释权网络</strong></div>
+                <div class="bp-field"><span>对象</span><strong>会议结果的公共口径</strong></div>
+                <div class="bp-field"><span>原因</span><strong>会议只形成落点，不完成归属</strong></div>
+              </div>
+            </div>
+
+            <div class="bp-node state wide" style="left:1190px;top:294px;">
+              <span class="bp-pin left ok" style="top:68px;"></span>
+              <span class="bp-pin right exec" style="top:68px;"></span>
+              <div class="node-head"><span>动态变化</span><span class="bp-status">通过</span></div>
+              <div class="node-body">
+                <div class="bp-field"><span>采访线</span><strong>材料压力 -> 公共落点</strong></div>
+                <div class="bp-field"><span>大仙祠</span><strong>解释权预压 -> 会后争夺</strong></div>
+                <div class="bp-field"><span>张航远</span><strong>边缘化 -> 私线条件</strong></div>
+              </div>
+            </div>
+
+            <div class="bp-node output" style="left:1214px;top:558px;">
+              <span class="bp-pin left risk" style="top:28px;"></span>
+              <div class="node-head"><span>风险输出</span><span class="bp-status warn">提示</span></div>
+              <div class="node-body">
+                <div class="bp-field"><span>风险</span><strong>张航远私线动作桥需补强</strong></div>
+                <div class="bp-field"><span>边界</span><strong>后台状态不拉长事件条</strong></div>
+              </div>
+            </div>
+
+            <div class="bp-note" style="left:328px;top:102px;">执行线：事件处理顺序</div>
+            <div class="bp-note" style="left:318px;top:330px;">数据线：证据与状态传递</div>
+            <div class="bp-note" style="left:720px;top:568px;">风险线：编辑问题输出</div>
+          </section>
+
+          <aside class="bp-inspector">
+            <div class="inspect-box">
+              <p class="eyebrow">Selected Node</p>
+              <h2>人物动作</h2>
+              <p>当前节点负责检查“谁做了什么，以及动作是否足以支撑输出事件”。</p>
+              <div class="inspect-list">
+                <div><span>可见性</span><strong>正文实写 / 半实写 / 后台</strong></div>
+                <div><span>状态</span><strong>需补强</strong></div>
+                <div><span>影响</span><strong>私线偏移条件</strong></div>
+              </div>
+            </div>
+            <div class="bp-list">
+              <div class="bp-issue bad">
+                <strong>需补强</strong>
+                张航远从“被边缘化”到“走向私线”的动作桥还不够明确。
+              </div>
+              <div class="bp-issue ok">
+                <strong>通过</strong>
+                叶依人的事实链承接清晰，可以支撑会议结果落地。
+              </div>
+              <div class="bp-issue">
+                <strong>编辑提醒</strong>
+                禹树后台入口只作为条件，不应变成故事主轴事件。
+              </div>
+            </div>
+            <div class="action-stack" style="padding:12px 14px;">
+              <a class="btn primary" href="#graph">回中心图谱</a>
+              <a class="btn" href="#timeline">回时间线</a>
+            </div>
+          </aside>
+        </main>
+
+        <footer class="legend-dock">
+          <section class="legend-box">
+            <h2><span class="swatch"></span>节点类型</h2>
+            <div class="pill-row">
+              <span class="pill">输入事件</span>
+              <span class="pill">触发条件</span>
+              <span class="pill">人物动作</span>
+              <span class="pill">冲突机制</span>
+              <span class="pill">动态变化</span>
+            </div>
+          </section>
+          <section class="legend-box">
+            <h2><span class="swatch blue"></span>连接类型</h2>
+            <div class="pill-row">
+              <span class="pill">执行顺序</span>
+              <span class="pill">证据/状态</span>
+              <span class="pill">风险输出</span>
+            </div>
+          </section>
+          <section class="legend-box">
+            <h2><span class="swatch amber"></span>设计边界</h2>
+            <div class="pill-row">
+              <span class="pill">不是完整编程器</span>
+              <span class="pill">只做事件检查</span>
+              <span class="pill">端口表达可检查字段</span>
+            </div>
+          </section>
+        </footer>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const views = {
+      timeline: document.getElementById("view-timeline"),
+      graph: document.getElementById("view-graph"),
+      blueprint: document.getElementById("view-blueprint")
+    };
+
+    function setRoute() {
+      const route = (location.hash || "#timeline").replace("#", "");
+      const key = Object.prototype.hasOwnProperty.call(views, route) ? route : "timeline";
+      Object.entries(views).forEach(([name, node]) => {
+        node.classList.toggle("active", name === key);
+      });
+      document.querySelectorAll("[data-nav]").forEach((item) => {
+        item.classList.toggle("active", item.dataset.nav === key);
+      });
+    }
+
+    window.addEventListener("hashchange", setRoute);
+    setRoute();
+  </script>
+</body>
+</html>

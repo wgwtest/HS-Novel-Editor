@@ -1,0 +1,1062 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>低噪声章节加工台与事件 Inspector V22</title>
+  <style>
+    :root {
+      --paper: #f6faf8;
+      --panel: #ffffff;
+      --ink: #0a1614;
+      --muted: #53645f;
+      --line: #9aada8;
+      --line-soft: #d9e2df;
+      --input: #536761;
+      --input-soft: #edf2f0;
+      --process: #087d72;
+      --process-soft: #d9efeb;
+      --output: #a46a0a;
+      --output-soft: #f4e6c6;
+      --blue: #2e658c;
+      --blue-soft: #dbeaf4;
+      --red: #bf2948;
+      --red-soft: #f6dce4;
+      --violet: #73549d;
+      --violet-soft: #e9e1f1;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 1920px;
+      height: 1080px;
+      margin: 0;
+      overflow: hidden;
+      color: var(--ink);
+      background:
+        linear-gradient(90deg, rgba(10, 22, 20, 0.03) 1px, transparent 1px) 0 0 / 24px 24px,
+        linear-gradient(180deg, rgba(10, 22, 20, 0.025) 1px, transparent 1px) 0 0 / 24px 24px,
+        #e9f0ed;
+      font-family: "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+    }
+
+    .artboard {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      padding: 18px;
+    }
+
+    .topbar,
+    .toolbar,
+    .inspectorbar {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    .topbar {
+      height: 52px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 18px;
+      padding: 0 26px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .brand span,
+    .context,
+    .tool-title span {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .context b {
+      color: var(--process);
+    }
+
+    .toolbar {
+      position: absolute;
+      left: 44px;
+      right: 44px;
+      top: 84px;
+      height: 52px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 20px;
+      padding: 0 16px;
+    }
+
+    .tool-title {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+    }
+
+    .tool-title strong {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .actions {
+      display: flex;
+      height: 34px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+    }
+
+    .actions button {
+      min-width: 92px;
+      border: 0;
+      border-right: 1px solid var(--line);
+      background: transparent;
+      color: var(--ink);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .actions button:last-child {
+      border-right: 0;
+    }
+
+    .actions .active {
+      color: #fff;
+      background: var(--ink);
+    }
+
+    .workspace {
+      position: absolute;
+      left: 44px;
+      right: 44px;
+      top: 150px;
+      bottom: 82px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      overflow: hidden;
+    }
+
+    .column {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      border-right: 1px solid var(--line-soft);
+    }
+
+    .input {
+      left: 0;
+      width: 420px;
+      background: #f7faf9;
+      border-top: 3px solid var(--input);
+    }
+
+    .process {
+      left: 420px;
+      width: 1010px;
+      border-top: 3px solid var(--process);
+      background:
+        linear-gradient(180deg, rgba(217, 226, 223, 0.72) 1px, transparent 1px) 0 150px / 100% 78px,
+        linear-gradient(90deg, rgba(8, 125, 114, 0.045), rgba(8, 125, 114, 0.012));
+    }
+
+    .output {
+      left: 1430px;
+      width: 402px;
+      border-right: 0;
+      border-top: 3px solid var(--output);
+      background: #fffdf8;
+    }
+
+    .col-head {
+      height: 86px;
+      padding: 16px 18px 10px;
+      border-bottom: 1px solid var(--line-soft);
+      background: rgba(255, 255, 255, 0.82);
+    }
+
+    .col-head small {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-family: Consolas, "Microsoft YaHei UI", monospace;
+      font-size: 10px;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+    }
+
+    .col-head h2 {
+      margin: 0;
+      font-size: 21px;
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .col-head p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.25;
+    }
+
+    .boundary {
+      position: absolute;
+      top: 86px;
+      bottom: 0;
+      width: 1px;
+      background: rgba(10, 22, 20, 0.28);
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .boundary.start {
+      left: 420px;
+    }
+
+    .boundary.end {
+      left: 1430px;
+    }
+
+    .boundary::before,
+    .boundary::after {
+      content: none;
+    }
+
+    .line-label {
+      display: none;
+    }
+
+    .section-title {
+      position: absolute;
+      left: 20px;
+      right: 20px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      border-bottom: 1px solid var(--line-soft);
+      z-index: 6;
+    }
+
+    .completed-title {
+      top: 112px;
+    }
+
+    .live-title {
+      top: 384px;
+    }
+
+    .source-card,
+    .event-card,
+    .out-card,
+    .live-span {
+      position: absolute;
+      border: 2px solid currentColor;
+      background: #fff;
+      color: var(--input);
+      box-shadow: 0 1px 0 rgba(10, 22, 20, 0.04);
+      z-index: 9;
+      cursor: pointer;
+    }
+
+    .source-card {
+      left: 20px;
+      width: 378px;
+      height: 66px;
+      padding: 11px 12px;
+      background: var(--input-soft);
+    }
+
+    .source-card.unused {
+      opacity: 0.58;
+      border-style: dashed;
+    }
+
+    .source-card strong,
+    .event-card strong,
+    .out-card strong,
+    .live-span strong {
+      display: block;
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.15;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .source-card span,
+    .event-card span,
+    .out-card span,
+    .live-span span {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 8px;
+      color: #33433f;
+      font-size: 11px;
+      line-height: 1.2;
+    }
+
+    .event-card {
+      padding: 12px 14px 10px;
+      color: var(--process);
+      background: var(--process-soft);
+    }
+
+    .event-card.is-new {
+      animation: pulseCreate 420ms ease-out;
+    }
+
+    @keyframes pulseCreate {
+      from { box-shadow: 0 0 0 8px rgba(8, 125, 114, 0.18); }
+      to { box-shadow: 0 1px 0 rgba(10, 22, 20, 0.04); }
+    }
+
+    .out-card {
+      left: 1450px;
+      width: 362px;
+      height: 62px;
+      padding: 12px 13px 10px;
+      color: var(--output);
+      background: var(--output-soft);
+    }
+
+    .out-card.red {
+      color: var(--red);
+      background: var(--red-soft);
+    }
+
+    .out-card.blue {
+      color: var(--blue);
+      background: var(--blue-soft);
+    }
+
+    .live-span {
+      left: 20px;
+      height: 58px;
+      padding: 10px 12px;
+      z-index: 12;
+    }
+
+    .live-span.violet {
+      color: var(--violet);
+      background: var(--violet-soft);
+    }
+
+    .live-span.red {
+      color: var(--red);
+      background: var(--red-soft);
+    }
+
+    .live-span.blue {
+      color: var(--blue);
+      background: var(--blue-soft);
+    }
+
+    .anchor {
+      position: absolute;
+      z-index: 16;
+      width: 14px;
+      height: 14px;
+      border: 2px solid currentColor;
+      background: #fff;
+      transform: translateY(-50%) rotate(45deg);
+      cursor: crosshair;
+    }
+
+    .anchor.in {
+      left: -9px;
+      top: 50%;
+    }
+
+    .anchor.out {
+      right: -9px;
+      top: 50%;
+    }
+
+    .anchor:hover,
+    .dragging-anchor {
+      background: var(--ink);
+      box-shadow: 0 0 0 5px rgba(8, 125, 114, 0.16);
+    }
+
+    .resize-handle {
+      position: absolute;
+      top: -4px;
+      right: -8px;
+      width: 14px;
+      height: calc(100% + 8px);
+      border: 2px solid #fff;
+      background: var(--ink);
+      box-shadow: 0 0 0 1px var(--ink);
+      cursor: ew-resize;
+      z-index: 17;
+    }
+
+    .resize-handle::after {
+      content: "";
+      position: absolute;
+      left: 3px;
+      top: 18px;
+      width: 2px;
+      height: 24px;
+      background: rgba(255,255,255,0.82);
+      box-shadow: 5px 0 0 rgba(255,255,255,0.82);
+    }
+
+    .selectable.is-selected {
+      outline: 3px solid var(--ink);
+      outline-offset: 3px;
+    }
+
+    .row {
+      position: absolute;
+      left: 420px;
+      right: 402px;
+      height: 78px;
+      border-bottom: 1px solid var(--line-soft);
+      z-index: 1;
+    }
+
+    .r1 { top: 150px; }
+    .r2 { top: 228px; }
+    .r3 { top: 306px; }
+    .r4 { top: 384px; }
+    .r5 { top: 462px; }
+    .r6 { top: 540px; }
+    .r7 { top: 618px; }
+
+    .stage-note {
+      display: none;
+    }
+
+    .stage-note.relation { left: 520px; }
+    .stage-note.create { left: 840px; }
+    .stage-note.output { left: 1208px; }
+
+    .hint-box {
+      display: none;
+    }
+
+    .rule-strip {
+      display: none;
+    }
+
+    .rule-strip div {
+      padding: 14px 16px;
+      border-right: 1px solid var(--line-soft);
+      font-size: 12px;
+      line-height: 1.55;
+      color: var(--muted);
+    }
+
+    .rule-strip div:last-child {
+      border-right: 0;
+    }
+
+    .rule-strip strong {
+      display: block;
+      color: var(--ink);
+      font-size: 13px;
+      margin-bottom: 5px;
+    }
+
+    .output-note {
+      display: none;
+    }
+
+    .relations {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1832px;
+      height: 870px;
+      z-index: 7;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    .relations path {
+      fill: none;
+      stroke: var(--ink);
+      stroke-width: 2;
+      stroke-linecap: square;
+      stroke-linejoin: miter;
+    }
+
+    .relations path.teal {
+      stroke: var(--process);
+    }
+
+    .relations path.muted {
+      stroke: rgba(10, 22, 20, 0.46);
+      stroke-dasharray: 7 6;
+    }
+
+    .relations path.draft {
+      stroke: var(--process);
+      stroke-width: 2;
+      stroke-dasharray: 5 5;
+    }
+
+    .ghost-event {
+      position: absolute;
+      z-index: 14;
+      width: 250px;
+      height: 54px;
+      border: 2px dashed var(--process);
+      background: rgba(217, 239, 235, 0.72);
+      color: var(--process);
+      padding: 10px 12px;
+      pointer-events: none;
+    }
+
+    .ghost-event strong {
+      display: block;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .interaction-note {
+      position: absolute;
+      left: 448px;
+      top: 104px;
+      z-index: 30;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.94);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      pointer-events: none;
+    }
+
+    .inspectorbar {
+      position: absolute;
+      left: 44px;
+      right: 44px;
+      bottom: 18px;
+      height: 52px;
+      display: grid;
+      grid-template-columns: 152px 220px minmax(520px, 1fr) 430px auto;
+      align-items: center;
+      gap: 18px;
+      padding: 0 16px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .inspectorbar strong {
+      color: var(--ink);
+      font-weight: 800;
+    }
+
+    .inspector-kicker {
+      color: var(--process);
+      font-family: Consolas, "Microsoft YaHei UI", monospace;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+    }
+
+    .inspector-meta {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .inspector-meta strong {
+      white-space: nowrap;
+    }
+
+    .inspector-meta span,
+    .inspector-summary {
+      min-width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .inspectorbar button {
+      height: 30px;
+      padding: 0 16px;
+      border: 1px solid var(--ink);
+      background: var(--ink);
+      color: #fff;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 800;
+    }
+  </style>
+</head>
+<body>
+  <main class="artboard">
+    <section class="topbar">
+      <div class="brand">
+        <h1>章节事件加工台</h1>
+        <span>低噪声画布与事件 Inspector 验证。</span>
+      </div>
+      <div></div>
+      <div class="context">当前章节 <b>C13 会议结果</b> / 章节函数视图</div>
+    </section>
+
+    <section class="toolbar" aria-label="工具栏">
+      <div class="tool-title">
+        <strong>三段式工作流</strong>
+        <span>延续事件是一条跨列事件条；已结束事件通过右侧端点拉线生成或连接新事件。</span>
+      </div>
+      <div class="actions" aria-label="操作模式">
+        <button class="active" data-mode="process">章节加工</button>
+        <button data-mode="link">端点拉线</button>
+        <button data-mode="create">生成事件</button>
+        <button data-mode="output">确认输出</button>
+      </div>
+    </section>
+
+    <section class="workspace" id="workspace">
+      <div class="column input">
+        <header class="col-head">
+          <small>INPUT</small>
+          <h2>章前输入</h2>
+          <p>已结束事件只作为来源；延续事件从这里开始形成同一条跨列事件条。</p>
+        </header>
+      </div>
+      <div class="column process">
+        <header class="col-head">
+          <small>PROCESS</small>
+          <h2>中段处理</h2>
+          <p>从端点拉入空白行可生成新事件；生成后事件条可继续拉长。</p>
+        </header>
+      </div>
+      <div class="column output">
+        <header class="col-head">
+          <small>OUTPUT</small>
+          <h2>章后输出</h2>
+          <p>输出是下一轮全局事件流输入，不是章节时间轴终点。</p>
+        </header>
+      </div>
+
+      <svg class="relations" id="relationsSvg">
+        <defs>
+          <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L8,4 L0,8 Z" fill="#0a1614"></path>
+          </marker>
+          <marker id="arrowTeal" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L8,4 L0,8 Z" fill="#087d72"></path>
+          </marker>
+        </defs>
+        <g id="connectionLayer"></g>
+        <path id="draftLine" class="draft" hidden></path>
+      </svg>
+
+      <div class="interaction-note" id="interactionNote">点击卡片查看摘要；从历史事件右侧端点拖到中段空白行可生成新事件。</div>
+
+      <div class="boundary start"></div>
+      <div class="boundary end"></div>
+
+      <div class="section-title completed-title"><span>已结束历史事件</span><span>右侧端点可拉关系</span></div>
+      <div class="section-title live-title"><span>章节开始时仍在延续</span><span>同一条可拉伸事件条</span></div>
+
+      <div class="row r1"></div>
+      <div class="row r2"></div>
+      <div class="row r3"></div>
+      <div class="row r4"></div>
+      <div class="row r5"></div>
+      <div class="row r6"></div>
+      <div class="row r7"></div>
+
+      <article class="source-card selectable" id="source-material" data-title="采访材料成形" data-kind="已结束历史事件" data-people="叶侠人 / 禹树" data-state="可作为来源" data-summary="已结束历史事件。它不进入中段，只从右侧端点拉线，连接或生成章内事件。" style="top:154px;">
+        <strong>采访材料成形</strong>
+        <span><em>已完成</em><em>端点可拉线</em></span>
+        <i class="anchor out" data-anchor="source-material-out" data-owner="source-material" title="拖出关系线"></i>
+      </article>
+
+      <article class="source-card selectable" id="source-authority" data-title="解释权预压" data-kind="已结束历史事件" data-people="叶侠人 / 张航远" data-state="可作为来源" data-summary="已结束历史事件。它与采访材料合流，指向同一个新建事件。" style="top:232px;">
+        <strong>解释权预压</strong>
+        <span><em>已完成</em><em>多对一来源</em></span>
+        <i class="anchor out" data-anchor="source-authority-out" data-owner="source-authority" title="拖出关系线"></i>
+      </article>
+
+      <article class="source-card unused selectable" id="source-sample" data-title="样本成形" data-kind="已结束历史事件" data-people="叶侠人" data-state="未接入本章" data-summary="已结束历史事件。尚未建立本章关系，因此不进入中段。" style="top:310px;">
+        <strong>样本成形</strong>
+        <span><em>已完成</em><em>未使用</em></span>
+        <i class="anchor out" data-anchor="source-sample-out" data-owner="source-sample" title="拖出关系线"></i>
+      </article>
+
+      <article class="event-card selectable" id="event-meeting" data-title="会议结果落地" data-kind="章内新建事件" data-people="叶侠人 / 张航远 / 禹树" data-state="已接入输出链" data-summary="由两个历史事件端点汇入的新建事件。左侧输入锚点接收关系，右侧端点可继续输出。" style="left:705px;top:154px;width:304px;height:58px;">
+        <i class="anchor in" data-anchor="event-meeting-in"></i>
+        <strong>新建事件：会议结果落地</strong>
+        <span><em>来源：采访材料 + 解释权</em><em>多对一</em></span>
+        <i class="anchor out" data-anchor="event-meeting-out" data-owner="event-meeting"></i>
+        <i class="resize-handle" title="拉长事件"></i>
+      </article>
+
+      <article class="event-card selectable" id="event-rewrite" data-title="口径重写入口" data-kind="章内新建事件" data-people="叶侠人 / 禹树" data-state="章内生成" data-summary="由采访材料一对多派生的新建事件，关系线连接到左侧输入锚点。" style="left:705px;top:310px;width:292px;height:58px;">
+        <i class="anchor in" data-anchor="event-rewrite-in"></i>
+        <strong>新建事件：口径重写入口</strong>
+        <span><em>由采访材料派生</em><em>一对多</em></span>
+        <i class="anchor out" data-anchor="event-rewrite-out" data-owner="event-rewrite"></i>
+        <i class="resize-handle" title="拉长事件"></i>
+      </article>
+
+      <article class="live-span violet selectable" id="live-relief" data-title="救助显形" data-kind="延续事件条" data-people="禹树 / 吕玉" data-state="推进到中段" data-summary="延续事件。它从章前输入开始，是一条连续事件条，当前推进到中段。" style="top:478px;width:888px;">
+        <strong>救助显形</strong>
+        <span><em>延续中</em><em>推进到中段</em></span>
+        <i class="anchor out" data-anchor="live-relief-out" data-owner="live-relief"></i>
+        <i class="resize-handle" title="拖动调整持续范围"></i>
+      </article>
+
+      <article class="live-span red selectable" id="live-zhang" data-title="张航远被边缘化" data-kind="延续事件条" data-people="张航远 / 禹树" data-state="横跨整章" data-summary="延续事件。它从章前输入开始，当前横跨整章到章节结束边界。" style="top:556px;width:1408px;">
+        <strong>张航远被边缘化</strong>
+        <span><em>延续中</em><em>横跨整章</em></span>
+        <i class="anchor out" data-anchor="live-zhang-out" data-owner="live-zhang"></i>
+        <i class="resize-handle" title="拖动调整持续范围"></i>
+      </article>
+
+      <article class="live-span blue selectable" id="live-pressure" data-title="职业病证据压力" data-kind="延续事件条" data-people="林倩 / 叶侠人" data-state="保留压力" data-summary="延续事件。它从章前输入开始，当前在中段保留压力。" style="top:634px;width:1098px;">
+        <strong>职业病证据压力</strong>
+        <span><em>延续中</em><em>保留压力</em></span>
+        <i class="anchor out" data-anchor="live-pressure-out" data-owner="live-pressure"></i>
+        <i class="resize-handle" title="拖动调整持续范围"></i>
+      </article>
+
+      <article class="out-card selectable" id="out-meeting" data-title="会后转争夺" data-kind="章后输出事件" data-people="叶侠人 / 禹树" data-state="输出到后续章节" data-summary="章后输出事件。左侧输入锚点接收从章内事件输出的关系。" style="top:154px;">
+        <i class="anchor in" data-anchor="out-meeting-in"></i>
+        <strong>会后转争夺</strong>
+        <span><em>由会议结果落地输出</em><em>C14-C15</em></span>
+      </article>
+
+      <article class="out-card red selectable" id="out-zhang" data-title="私线偏移压力" data-kind="章后输出事件" data-people="张航远 / 禹树" data-state="输出到后续章节" data-summary="章后输出事件。由张航远延续事件输出。" style="top:232px;">
+        <i class="anchor in" data-anchor="out-zhang-in"></i>
+        <strong>私线偏移压力</strong>
+        <span><em>由张航远线延续</em><em>C15</em></span>
+      </article>
+
+      <article class="out-card blue selectable" id="out-pressure" data-title="证据压力保留" data-kind="章后输出事件" data-people="林倩 / 叶侠人" data-state="输出到后续章节" data-summary="章后输出事件。由职业病证据压力输出。" style="top:310px;">
+        <i class="anchor in" data-anchor="out-pressure-in"></i>
+        <strong>证据压力保留</strong>
+        <span><em>职业病证据压力</em><em>C14-C16</em></span>
+      </article>
+
+    </section>
+
+    <section class="inspectorbar" aria-label="事件检查器">
+      <span class="inspector-kicker">EVENT INSPECTOR</span>
+      <span><strong>选中：</strong><span id="selectedTitle">会议结果落地</span></span>
+      <span class="inspector-summary"><strong>摘要：</strong><span id="selectedSummary">由两个历史事件端点汇入的新建事件。</span></span>
+      <span class="inspector-meta"><strong>对象：</strong><span id="selectedKind">章内新建事件</span><strong>人物：</strong><span id="selectedPeople">叶侠人 / 张航远 / 禹树</span></span>
+      <button id="detailBtn">进入事件详情</button>
+    </section>
+  </main>
+
+  <script>
+    const workspace = document.getElementById('workspace');
+    const svg = document.getElementById('relationsSvg');
+    const connectionLayer = document.getElementById('connectionLayer');
+    const draftLine = document.getElementById('draftLine');
+    const selectedTitle = document.getElementById('selectedTitle');
+    const selectedSummary = document.getElementById('selectedSummary');
+    const selectedKind = document.getElementById('selectedKind');
+    const selectedPeople = document.getElementById('selectedPeople');
+    const interactionNote = document.getElementById('interactionNote');
+    const detailBtn = document.getElementById('detailBtn');
+    const modeButtons = Array.from(document.querySelectorAll('[data-mode]'));
+
+    const layout = {
+      inputEnd: 420,
+      processStart: 420,
+      processEnd: 1430,
+      outputStart: 1430,
+      snapMid: 908,
+      snapEnd: 1408,
+      eventMinWidth: 244
+    };
+
+    const connections = [
+      { from: 'source-material-out', to: 'event-meeting-in', kind: 'main' },
+      { from: 'source-authority-out', to: 'event-meeting-in', kind: 'main' },
+      { from: 'source-material-out', to: 'event-rewrite-in', kind: 'teal' },
+      { from: 'event-meeting-out', to: 'out-meeting-in', kind: 'muted' },
+      { from: 'live-zhang-out', to: 'out-zhang-in', kind: 'muted' },
+      { from: 'live-pressure-out', to: 'out-pressure-in', kind: 'muted' }
+    ];
+
+    function getPoint(anchorId) {
+      const anchor = document.querySelector(`[data-anchor="${anchorId}"]`);
+      if (!anchor) return null;
+      const anchorRect = anchor.getBoundingClientRect();
+      const rootRect = workspace.getBoundingClientRect();
+      return {
+        x: anchorRect.left + anchorRect.width / 2 - rootRect.left,
+        y: anchorRect.top + anchorRect.height / 2 - rootRect.top
+      };
+    }
+
+    function pathBetween(from, to) {
+      const dx = Math.max(44, Math.min(180, (to.x - from.x) / 2));
+      const midX = from.x + dx;
+      return `M${from.x} ${from.y} L${midX} ${from.y} L${midX} ${to.y} L${to.x} ${to.y}`;
+    }
+
+    function drawConnections() {
+      connectionLayer.innerHTML = '';
+      connections.forEach((connection) => {
+        const from = getPoint(connection.from);
+        const to = getPoint(connection.to);
+        if (!from || !to) return;
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', pathBetween(from, to));
+        path.setAttribute('marker-end', connection.kind === 'teal' ? 'url(#arrowTeal)' : 'url(#arrow)');
+        if (connection.kind === 'teal') path.classList.add('teal');
+        if (connection.kind === 'muted') path.classList.add('muted');
+        connectionLayer.appendChild(path);
+      });
+    }
+
+    function setMode(mode) {
+      modeButtons.forEach((button) => button.classList.toggle('active', button.dataset.mode === mode));
+      const copy = {
+        process: '章节加工模式：点击对象查看摘要，拖动黑色手柄调整事件条跨度。',
+        link: '端点拉线模式：从右侧菱形端点拖出辅助线，释放到中段生成或连接事件。',
+        create: '生成事件模式：拖线释放到中段空白行会新建章内事件并自动连线。',
+        output: '确认输出模式：输出区只接收来自对象端点的关系，不接收悬空箭头。'
+      };
+      interactionNote.textContent = copy[mode] || copy.process;
+    }
+
+    function selectItem(item) {
+      document.querySelectorAll('.selectable').forEach((node) => node.classList.remove('is-selected'));
+      item.classList.add('is-selected');
+      selectedTitle.textContent = item.dataset.title || item.querySelector('strong')?.textContent || '未命名对象';
+      selectedSummary.textContent = item.dataset.summary || '当前对象未配置额外摘要。';
+      selectedKind.textContent = item.dataset.kind || '事件对象';
+      selectedPeople.textContent = item.dataset.people || '待绑定';
+      detailBtn.dataset.target = item.id;
+    }
+
+    function pointFromEvent(event) {
+      const rect = workspace.getBoundingClientRect();
+      return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+    }
+
+    function nearestLaneY(y) {
+      const lanes = [154, 232, 310, 388, 478, 556, 634];
+      return lanes.reduce((best, lane) => Math.abs(lane - y) < Math.abs(best - y) ? lane : best, lanes[0]);
+    }
+
+    function createEventFromDrag(sourceAnchor, x, y) {
+      const id = `event-created-${Date.now()}`;
+      const top = nearestLaneY(y);
+      const left = Math.max(layout.processStart + 70, Math.min(layout.processEnd - 320, x - 18));
+      const article = document.createElement('article');
+      article.className = 'event-card selectable is-new';
+      article.id = id;
+      article.dataset.title = '拖线生成事件';
+      article.dataset.kind = '章内新建事件';
+      article.dataset.people = '待绑定';
+      article.dataset.state = '拖线生成';
+      article.dataset.summary = '由来源端点拖线生成的新事件。它拥有左侧输入锚点和右侧可拉伸端点。';
+      article.style.left = `${left}px`;
+      article.style.top = `${top}px`;
+      article.style.width = '286px';
+      article.style.height = '58px';
+      article.innerHTML = `
+        <i class="anchor in" data-anchor="${id}-in"></i>
+        <strong>新建事件：拖线生成</strong>
+        <span><em>由端点拉线生成</em><em>可拉长</em></span>
+        <i class="anchor out" data-anchor="${id}-out" data-owner="${id}"></i>
+        <i class="resize-handle" title="拉长事件"></i>
+      `;
+      workspace.appendChild(article);
+      bindSelectable(article);
+      bindAnchors(article);
+      bindResize(article);
+      connections.push({ from: sourceAnchor.dataset.anchor, to: `${id}-in`, kind: 'teal' });
+      selectItem(article);
+      drawConnections();
+      interactionNote.textContent = '已从来源端点生成新事件，并自动建立端点到端点关系线。';
+    }
+
+    function bindSelectable(root = document) {
+      const items = root.matches?.('.selectable') ? [root] : Array.from(root.querySelectorAll('.selectable'));
+      items.forEach((item) => {
+        item.addEventListener('click', (event) => {
+          if (event.target.classList.contains('anchor') || event.target.classList.contains('resize-handle')) return;
+          selectItem(item);
+        });
+      });
+    }
+
+    function bindAnchors(root = document) {
+      const anchors = root.matches?.('.anchor') ? [root] : Array.from(root.querySelectorAll('.anchor.out'));
+      anchors.forEach((anchor) => {
+        anchor.addEventListener('pointerdown', (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          const from = getPoint(anchor.dataset.anchor);
+          if (!from) return;
+          anchor.classList.add('dragging-anchor');
+          draftLine.hidden = false;
+          draftLine.setAttribute('d', `M${from.x} ${from.y} L${from.x + 1} ${from.y}`);
+          anchor.setPointerCapture(event.pointerId);
+
+          const move = (moveEvent) => {
+            const point = pointFromEvent(moveEvent);
+            draftLine.setAttribute('d', pathBetween(from, point));
+          };
+
+          const up = (upEvent) => {
+            const point = pointFromEvent(upEvent);
+            draftLine.hidden = true;
+            anchor.classList.remove('dragging-anchor');
+            anchor.releasePointerCapture(upEvent.pointerId);
+            anchor.removeEventListener('pointermove', move);
+            anchor.removeEventListener('pointerup', up);
+
+            const targetAnchor = document.elementFromPoint(upEvent.clientX, upEvent.clientY)?.closest?.('.anchor.in');
+            if (targetAnchor) {
+              connections.push({ from: anchor.dataset.anchor, to: targetAnchor.dataset.anchor, kind: 'teal' });
+              drawConnections();
+              interactionNote.textContent = '已连接到现有事件输入锚点。';
+              return;
+            }
+
+            if (point.x > layout.processStart + 20 && point.x < layout.processEnd - 40 && point.y > 126 && point.y < 708) {
+              createEventFromDrag(anchor, point.x, point.y);
+            } else {
+              interactionNote.textContent = '关系线未落到可创建区域，已取消。';
+            }
+          };
+
+          anchor.addEventListener('pointermove', move);
+          anchor.addEventListener('pointerup', up);
+        });
+      });
+    }
+
+    function bindResize(root = document) {
+      const handles = root.matches?.('.resize-handle') ? [root] : Array.from(root.querySelectorAll('.resize-handle'));
+      handles.forEach((handle) => {
+        handle.addEventListener('pointerdown', (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          const card = handle.closest('.event-card, .live-span');
+          const cardRect = card.getBoundingClientRect();
+          const rootRect = workspace.getBoundingClientRect();
+          const startLeft = cardRect.left - rootRect.left;
+          const minWidth = card.classList.contains('live-span') ? 520 : layout.eventMinWidth;
+          const maxWidth = card.classList.contains('live-span')
+            ? 1640 - startLeft
+            : layout.outputStart - startLeft - 22;
+
+          selectItem(card);
+          handle.setPointerCapture(event.pointerId);
+
+          const move = (moveEvent) => {
+            const point = pointFromEvent(moveEvent);
+            const width = Math.max(minWidth, Math.min(maxWidth, point.x - startLeft));
+            card.style.width = `${width}px`;
+            drawConnections();
+          };
+
+          const up = (upEvent) => {
+            const point = pointFromEvent(upEvent);
+            let snapWidth = Math.max(minWidth, Math.min(maxWidth, point.x - startLeft));
+            if (card.classList.contains('live-span')) {
+              const snapTargets = [layout.snapMid - startLeft, layout.snapEnd - startLeft, 1640 - startLeft];
+              snapWidth = snapTargets.reduce((best, target) => Math.abs(target - snapWidth) < Math.abs(best - snapWidth) ? target : best, snapTargets[0]);
+              const label = snapWidth === snapTargets[0] ? '推进到中段' : (snapWidth === snapTargets[1] ? '横跨整章' : '进入输出区');
+              const meta = card.querySelector('span em:last-child');
+              if (meta) meta.textContent = label;
+              selectedSummary.textContent = `${card.dataset.title} 已吸附到：${label}。`;
+            }
+            card.style.width = `${snapWidth}px`;
+            drawConnections();
+            handle.releasePointerCapture(upEvent.pointerId);
+            handle.removeEventListener('pointermove', move);
+            handle.removeEventListener('pointerup', up);
+          };
+
+          handle.addEventListener('pointermove', move);
+          handle.addEventListener('pointerup', up);
+        });
+      });
+    }
+
+    function setupHashState() {
+      const hash = window.location.hash.replace('#', '');
+      setMode(hash === 'drag' ? 'link' : (hash === 'output' ? 'output' : 'process'));
+      if (hash === 'drag') {
+        const from = getPoint('source-sample-out');
+        const ghostX = 710;
+        const ghostY = 386;
+        const ghost = document.createElement('div');
+        ghost.className = 'ghost-event';
+        ghost.style.left = `${ghostX}px`;
+        ghost.style.top = `${ghostY}px`;
+        ghost.innerHTML = '<strong>释放后生成新事件</strong>';
+        workspace.appendChild(ghost);
+        draftLine.hidden = false;
+        draftLine.setAttribute('d', pathBetween(from, { x: ghostX, y: ghostY + 27 }));
+        interactionNote.textContent = '端点拉线演示：从历史事件右侧端点拖到中段空白行，释放后生成新事件。';
+      }
+      if (hash === 'created') {
+        createEventFromDrag(document.querySelector('[data-anchor="source-sample-out"]'), 760, 386);
+      }
+      if (hash === 'output') {
+        selectItem(document.getElementById('out-meeting'));
+      } else if (!hash || hash === 'drag') {
+        selectItem(document.getElementById('event-meeting'));
+      }
+    }
+
+    modeButtons.forEach((button) => {
+      button.addEventListener('click', () => setMode(button.dataset.mode));
+    });
+
+    detailBtn.addEventListener('click', () => {
+      const targetId = detailBtn.dataset.target || 'event-meeting';
+      const target = document.getElementById(targetId);
+      const title = target?.dataset.title || selectedTitle.textContent;
+      interactionNote.textContent = `Inspector 入口已确认：进入「${title}」的事件详情页。`;
+    });
+
+    bindSelectable();
+    bindAnchors();
+    bindResize();
+    drawConnections();
+    setupHashState();
+    window.addEventListener('resize', drawConnections);
+  </script>
+</body>
+</html>

@@ -1,0 +1,797 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>三段式章节加工台 V19</title>
+  <style>
+    :root {
+      --paper: #f6faf8;
+      --panel: #ffffff;
+      --ink: #0a1614;
+      --muted: #53645f;
+      --line: #9aada8;
+      --line-soft: #d9e2df;
+      --input: #536761;
+      --input-soft: #edf2f0;
+      --process: #087d72;
+      --process-soft: #d9efeb;
+      --output: #a46a0a;
+      --output-soft: #f4e6c6;
+      --blue: #2e658c;
+      --blue-soft: #dbeaf4;
+      --red: #bf2948;
+      --red-soft: #f6dce4;
+      --violet: #73549d;
+      --violet-soft: #e9e1f1;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 1920px;
+      height: 1080px;
+      margin: 0;
+      overflow: hidden;
+      color: var(--ink);
+      background:
+        linear-gradient(90deg, rgba(10, 22, 20, 0.03) 1px, transparent 1px) 0 0 / 24px 24px,
+        linear-gradient(180deg, rgba(10, 22, 20, 0.025) 1px, transparent 1px) 0 0 / 24px 24px,
+        #e9f0ed;
+      font-family: "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+    }
+
+    .artboard {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      padding: 18px;
+    }
+
+    .topbar {
+      height: 52px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 18px;
+      padding: 0 26px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.86);
+    }
+
+    .brand {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .brand span,
+    .context {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .context b {
+      color: var(--process);
+    }
+
+    .toolbar {
+      position: absolute;
+      left: 44px;
+      right: 44px;
+      top: 84px;
+      height: 52px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 20px;
+      padding: 0 16px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    .tool-title {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+    }
+
+    .tool-title strong {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .tool-title span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .actions {
+      display: flex;
+      height: 34px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+    }
+
+    .actions button {
+      min-width: 88px;
+      border: 0;
+      border-right: 1px solid var(--line);
+      background: transparent;
+      color: var(--ink);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .actions button:last-child {
+      border-right: 0;
+    }
+
+    .actions .active {
+      color: #fff;
+      background: var(--ink);
+    }
+
+    .workspace {
+      position: absolute;
+      left: 44px;
+      right: 44px;
+      top: 150px;
+      bottom: 60px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      overflow: hidden;
+    }
+
+    .column {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      border-right: 1px solid var(--line);
+    }
+
+    .input {
+      left: 0;
+      width: 420px;
+      background: #f7faf9;
+    }
+
+    .process {
+      left: 420px;
+      width: 1010px;
+      background:
+        linear-gradient(180deg, rgba(217, 226, 223, 0.72) 1px, transparent 1px) 0 142px / 100% 78px,
+        linear-gradient(90deg, rgba(8, 125, 114, 0.05), rgba(8, 125, 114, 0.015));
+    }
+
+    .output {
+      left: 1430px;
+      width: 402px;
+      border-right: 0;
+      background: #fffdf8;
+    }
+
+    .col-head {
+      height: 86px;
+      padding: 16px 18px 10px;
+      border-bottom: 2px solid var(--ink);
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    .col-head small {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-family: Consolas, "Microsoft YaHei UI", monospace;
+      font-size: 10px;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+    }
+
+    .col-head h2 {
+      margin: 0;
+      font-size: 21px;
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .col-head p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.25;
+    }
+
+    .input .col-head {
+      border-top: 5px solid var(--input);
+    }
+
+    .process .col-head {
+      border-top: 5px solid var(--process);
+    }
+
+    .output .col-head {
+      border-top: 5px solid var(--output);
+    }
+
+    .double-line {
+      position: absolute;
+      top: 86px;
+      bottom: 142px;
+      width: 10px;
+      z-index: 12;
+      pointer-events: none;
+    }
+
+    .double-line.start {
+      left: 414px;
+    }
+
+    .double-line.end {
+      left: 1424px;
+    }
+
+    .double-line::before,
+    .double-line::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: rgba(10, 22, 20, 0.78);
+    }
+
+    .double-line::before {
+      left: 1px;
+    }
+
+    .double-line::after {
+      right: 1px;
+    }
+
+    .line-label {
+      position: absolute;
+      top: 16px;
+      left: -18px;
+      width: 46px;
+      padding: 5px 0;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 800;
+      text-align: center;
+      writing-mode: vertical-rl;
+    }
+
+    .pool {
+      position: absolute;
+      left: 20px;
+      right: 20px;
+    }
+
+    .pool.done {
+      top: 112px;
+      height: 304px;
+    }
+
+    .pool.live {
+      top: 448px;
+      height: 316px;
+    }
+
+    .pool-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 30px;
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      border-bottom: 1px solid var(--line-soft);
+    }
+
+    .source-card,
+    .live-card,
+    .event-card,
+    .out-card {
+      position: relative;
+      border: 2px solid currentColor;
+      background: #fff;
+      color: var(--input);
+      box-shadow: 0 1px 0 rgba(10, 22, 20, 0.04);
+    }
+
+    .source-card {
+      height: 68px;
+      margin-bottom: 11px;
+      padding: 11px 12px;
+      background: var(--input-soft);
+    }
+
+    .source-card.unused {
+      opacity: 0.58;
+      border-style: dashed;
+    }
+
+    .source-card strong,
+    .live-card strong,
+    .event-card strong,
+    .out-card strong {
+      display: block;
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.15;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .source-card span,
+    .live-card span,
+    .event-card span,
+    .out-card span {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 8px;
+      color: #33433f;
+      font-size: 11px;
+      line-height: 1.2;
+    }
+
+    .pin {
+      position: absolute;
+      top: 29px;
+      right: -8px;
+      width: 13px;
+      height: 13px;
+      border: 2px solid currentColor;
+      background: #fff;
+      transform: rotate(45deg);
+    }
+
+    .live-card {
+      height: 58px;
+      margin-bottom: 12px;
+      padding: 10px 12px;
+    }
+
+    .live-card.violet {
+      color: var(--violet);
+      background: var(--violet-soft);
+    }
+
+    .live-card.red {
+      color: var(--red);
+      background: var(--red-soft);
+    }
+
+    .live-card.blue {
+      color: var(--blue);
+      background: var(--blue-soft);
+    }
+
+    .drag-label {
+      position: absolute;
+      right: 12px;
+      bottom: 14px;
+      width: 142px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.78);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .lane {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 78px;
+      border-bottom: 1px solid var(--line-soft);
+    }
+
+    .lane.l1 { top: 142px; }
+    .lane.l2 { top: 220px; }
+    .lane.l3 { top: 298px; }
+    .lane.l4 { top: 376px; }
+    .lane.l5 { top: 454px; }
+    .lane.l6 { top: 532px; }
+    .lane.l7 { top: 610px; }
+
+    .stage-note {
+      position: absolute;
+      top: 108px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.86);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      z-index: 3;
+    }
+
+    .stage-note.decide { left: 448px; }
+    .stage-note.wrap { left: 778px; }
+    .stage-note.finish { left: 1110px; }
+
+    .event-card {
+      position: absolute;
+      z-index: 6;
+      padding: 12px 14px 10px;
+      color: var(--process);
+      background: var(--process-soft);
+    }
+
+    .event-card.selected {
+      outline: 3px solid var(--ink);
+      outline-offset: 3px;
+    }
+
+    .event-card.ghost {
+      border-style: dashed;
+      background: rgba(217, 239, 235, 0.38);
+    }
+
+    .event-card.violet {
+      color: var(--violet);
+      background: var(--violet-soft);
+    }
+
+    .event-card.red {
+      color: var(--red);
+      background: var(--red-soft);
+    }
+
+    .event-card.blue {
+      color: var(--blue);
+      background: var(--blue-soft);
+    }
+
+    .handle {
+      position: absolute;
+      top: -4px;
+      right: -8px;
+      width: 14px;
+      height: calc(100% + 8px);
+      border: 2px solid #fff;
+      background: var(--ink);
+      box-shadow: 0 0 0 1px var(--ink);
+    }
+
+    .handle::after {
+      content: "";
+      position: absolute;
+      left: 3px;
+      top: 18px;
+      width: 2px;
+      height: 24px;
+      background: rgba(255,255,255,0.82);
+      box-shadow: 5px 0 0 rgba(255,255,255,0.82);
+    }
+
+    .out-card {
+      margin: 0 20px 14px;
+      padding: 12px 13px 10px;
+      color: var(--output);
+      background: var(--output-soft);
+    }
+
+    .out-list {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 142px;
+    }
+
+    .out-card.red {
+      color: var(--red);
+      background: var(--red-soft);
+    }
+
+    .out-card.blue {
+      color: var(--blue);
+      background: var(--blue-soft);
+    }
+
+    .output-hint {
+      margin: 22px 20px 0;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .relations {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1832px;
+      height: 788px;
+      z-index: 5;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    .relations path {
+      fill: none;
+      stroke: var(--ink);
+      stroke-width: 2;
+      stroke-linecap: square;
+      stroke-linejoin: miter;
+    }
+
+    .relations .teal {
+      stroke: var(--process);
+    }
+
+    .relations .muted {
+      stroke: rgba(10, 22, 20, 0.38);
+      stroke-dasharray: 7 6;
+    }
+
+    .mini-rule {
+      position: absolute;
+      left: 28px;
+      right: 28px;
+      bottom: 22px;
+      height: 76px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.9);
+      z-index: 7;
+    }
+
+    .mini-rule div {
+      padding: 14px 16px;
+      border-right: 1px solid var(--line-soft);
+      font-size: 12px;
+      line-height: 1.55;
+      color: var(--muted);
+    }
+
+    .mini-rule div:last-child {
+      border-right: 0;
+    }
+
+    .mini-rule strong {
+      display: block;
+      color: var(--ink);
+      font-size: 13px;
+      margin-bottom: 5px;
+    }
+
+    .inspector {
+      position: absolute;
+      left: 44px;
+      right: 44px;
+      bottom: 18px;
+      height: 30px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 16px;
+      padding: 0 14px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.9);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .inspector strong {
+      color: var(--ink);
+      font-weight: 800;
+    }
+
+    .inspector button {
+      height: 22px;
+      padding: 0 12px;
+      border: 1px solid var(--ink);
+      background: var(--ink);
+      color: #fff;
+      font: inherit;
+      font-size: 11px;
+      font-weight: 800;
+    }
+  </style>
+</head>
+<body>
+  <main class="artboard" aria-label="三段式章节加工台原型">
+    <section class="topbar">
+      <div class="brand">
+        <h1>章节事件加工台</h1>
+        <span>章节级视图只处理输入、加工和输出，不再承载真实时间轴。</span>
+      </div>
+      <div></div>
+      <div class="context">当前章节 <b>C13 会议结果</b> / 章节函数视图</div>
+    </section>
+
+    <section class="toolbar" aria-label="工具栏">
+      <div class="tool-title">
+        <strong>三段式工作流</strong>
+        <span>来源池只列候选，章节加工区只显示被纳入处理的事件，输出区只列章后事件流。</span>
+      </div>
+      <div class="actions" aria-label="操作模式">
+        <button class="active">章节加工</button>
+        <button>新建事件</button>
+        <button>建立关系</button>
+        <button>确认输出</button>
+      </div>
+    </section>
+
+    <section class="workspace" aria-label="章节三段式画布">
+      <svg class="relations" viewBox="0 0 1832 788" aria-hidden="true">
+        <defs>
+          <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L8,4 L0,8 Z" fill="#0a1614"></path>
+          </marker>
+          <marker id="arrow-teal" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L8,4 L0,8 Z" fill="#087d72"></path>
+          </marker>
+        </defs>
+        <path marker-end="url(#arrow)" d="M390 190 L448 190 L448 212 L650 212"></path>
+        <path marker-end="url(#arrow)" d="M390 269 L488 269 L488 212 L650 212"></path>
+        <path class="teal" marker-end="url(#arrow-teal)" d="M390 190 L470 190 L470 346 L642 346"></path>
+        <path class="muted" marker-end="url(#arrow)" d="M950 212 L1180 212 L1180 190 L1430 190"></path>
+        <path class="muted" marker-end="url(#arrow)" d="M1416 502 L1430 502"></path>
+        <path class="muted" marker-end="url(#arrow)" d="M1060 583 L1278 583 L1278 585 L1430 585"></path>
+      </svg>
+
+      <div class="column input">
+        <header class="col-head">
+          <small>INPUT</small>
+          <h2>章前输入</h2>
+          <p>已结束事件保留为来源池；未拖入关系前，不进入章节加工区。</p>
+        </header>
+
+        <section class="pool done">
+          <div class="pool-title"><span>已结束历史事件</span><span>候选来源</span></div>
+          <article class="source-card">
+            <strong>采访材料成形</strong>
+            <span><em>已完成</em><em>已连线</em></span>
+            <i class="pin"></i>
+          </article>
+          <article class="source-card">
+            <strong>解释权预压</strong>
+            <span><em>已完成</em><em>已选入</em></span>
+            <i class="pin"></i>
+          </article>
+          <article class="source-card unused">
+            <strong>样本成形</strong>
+            <span><em>已完成</em><em>未使用</em></span>
+          </article>
+        </section>
+
+        <section class="pool live">
+          <div class="pool-title"><span>章节开始时仍在延续</span><span>可拖拽</span></div>
+          <article class="live-card violet">
+            <strong>救助显形</strong>
+            <span><em>延续中</em><em>推进到中段</em></span>
+          </article>
+          <article class="live-card red">
+            <strong>张航远被边缘化</strong>
+            <span><em>延续中</em><em>横跨整章</em></span>
+          </article>
+          <article class="live-card blue">
+            <strong>职业病证据压力</strong>
+            <span><em>延续中</em><em>保持压力</em></span>
+          </article>
+        </section>
+
+        <div class="drag-label">这里是来源池，不重复画入中区；只有连线或拖拽后才参与本章处理。</div>
+      </div>
+
+      <div class="column process">
+        <header class="col-head">
+          <small>PROCESS</small>
+          <h2>中段处理</h2>
+          <p>章节函数的“猪肚”：决定新事件、延续事件推进范围和输入输出关系。</p>
+        </header>
+
+        <div class="lane l1"></div>
+        <div class="lane l2"></div>
+        <div class="lane l3"></div>
+        <div class="lane l4"></div>
+        <div class="lane l5"></div>
+        <div class="lane l6"></div>
+        <div class="lane l7"></div>
+
+        <div class="stage-note decide">关系决策</div>
+        <div class="stage-note wrap">章内包装</div>
+        <div class="stage-note finish">终结 / 保留</div>
+
+        <article class="event-card selected" style="left:282px;top:148px;width:304px;height:58px;">
+          <strong>新建事件：会议结果落地</strong>
+          <span><em>来源：采访材料 + 解释权</em><em>多对一</em></span>
+        </article>
+
+        <article class="event-card" style="left:274px;top:304px;width:292px;height:58px;">
+          <strong>新建事件：口径重写入口</strong>
+          <span><em>由采访材料派生</em><em>一对多</em></span>
+        </article>
+
+        <article class="event-card violet" style="left:28px;top:460px;width:444px;height:58px;">
+          <strong>救助显形</strong>
+          <span><em>拖到中段</em><em>本章处理到这里</em></span>
+          <i class="handle"></i>
+        </article>
+
+        <article class="event-card red" style="left:28px;top:538px;width:972px;height:58px;">
+          <strong>张航远被边缘化</strong>
+          <span><em>拖过中段后停在章节结束线</em><em>横跨整章</em></span>
+          <i class="handle"></i>
+        </article>
+
+        <article class="event-card blue" style="left:28px;top:616px;width:644px;height:58px;">
+          <strong>职业病证据压力</strong>
+          <span><em>不进入正文细节编辑</em><em>保留压力</em></span>
+        </article>
+
+        <div class="mini-rule">
+          <div><strong>已结束事件</strong>只通过关系线进入本章，不在中区重复成条。</div>
+          <div><strong>延续事件</strong>按整行拖动，停靠位置表达生命周期。</div>
+          <div><strong>事件详情</strong>另开页面编辑起因、过程和结果。</div>
+        </div>
+      </div>
+
+      <div class="column output">
+        <header class="col-head">
+          <small>OUTPUT</small>
+          <h2>章后输出</h2>
+          <p>这里只放本章加工后的输出事件，传给后续章节或全局事件流。</p>
+        </header>
+
+        <section class="out-list">
+          <article class="out-card">
+            <strong>会后转争夺</strong>
+            <span><em>由会议结果落地输出</em><em>C14-C15</em></span>
+          </article>
+          <article class="out-card red">
+            <strong>私线偏移压力</strong>
+            <span><em>由张航远线延续</em><em>C15</em></span>
+          </article>
+          <article class="out-card blue">
+            <strong>证据压力保留</strong>
+            <span><em>职业病证据压力</em><em>C14-C16</em></span>
+          </article>
+          <div class="output-hint">输出不是时间轴终点，而是下一轮全局事件流的输入。</div>
+        </section>
+      </div>
+
+      <div class="double-line start"><span class="line-label">章节开始</span></div>
+      <div class="double-line end"><span class="line-label">章节结束</span></div>
+    </section>
+
+    <section class="inspector" aria-label="选中摘要">
+      <span><strong>选中：</strong>新建事件「会议结果落地」</span>
+      <span><strong>摘要：</strong>来源为两个已结束历史事件；在本章内重新包装成新事件；输出到「会后转争夺」。</span>
+      <button>进入事件详情</button>
+    </section>
+  </main>
+</body>
+</html>

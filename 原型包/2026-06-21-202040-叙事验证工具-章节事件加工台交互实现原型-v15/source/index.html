@@ -1,0 +1,1691 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>叙事验证工具 章节事件加工台交互实现原型 v15</title>
+  <style>
+    :root {
+      --bg: #e8eeeb;
+      --paper: #fbfcfb;
+      --ink: #101716;
+      --muted: #65736f;
+      --line: #879d98;
+      --line-soft: #dce6e2;
+      --grid: rgba(135, 157, 152, .18);
+      --teal: #087468;
+      --teal-deep: #063f3a;
+      --teal-soft: #d9efec;
+      --blue: #2e5f83;
+      --blue-soft: #dceaf3;
+      --violet: #66538a;
+      --violet-soft: #e8e2f0;
+      --red: #bd2f49;
+      --red-soft: #f5dce2;
+      --amber: #a66d12;
+      --amber-soft: #f5e7c9;
+      --green: #437363;
+      --green-soft: #e3efe8;
+      --ok: #087468;
+      --ok-soft: #dff1ed;
+      --warn: #a66d12;
+      --warn-soft: #fff0d1;
+      --bad: #bd2f49;
+      --bad-soft: #f5dce2;
+      --mono: Consolas, "Cascadia Mono", "Courier New", monospace;
+      --sans: "Microsoft YaHei UI", "Noto Sans CJK SC", "PingFang SC", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      width: 1920px;
+      height: 1080px;
+      margin: 0;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .frame {
+      width: 100%;
+      height: 100%;
+      padding: 16px;
+    }
+
+    .app {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-rows: 44px 1fr;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      box-shadow: 0 22px 62px rgba(26, 42, 39, .12);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 22px;
+      border-bottom: 1px solid var(--line);
+      background: #f9fbfa;
+    }
+
+    .brand {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .brand span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .nav {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .btn,
+    .nav a {
+      height: 30px;
+      padding: 0 13px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--line);
+      background: #fff;
+      font-size: 12px;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .btn.primary,
+    .nav a.active {
+      border-color: var(--teal);
+      background: var(--teal);
+      color: #fff;
+    }
+
+    .view {
+      display: none;
+      min-height: 0;
+      height: 100%;
+    }
+
+    .view.active { display: grid; }
+
+    h1, h2, h3, p { margin: 0; }
+
+    .eyebrow {
+      margin-bottom: 6px;
+      color: var(--teal-deep);
+      font: 10px/1.1 var(--mono);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .tag {
+      min-height: 26px;
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 8px;
+      border: 1px solid var(--line);
+      background: #f8faf9;
+      color: #33413e;
+      font: 11px/1.1 var(--mono);
+      white-space: nowrap;
+    }
+
+    .tag.strong {
+      border-color: var(--teal);
+      background: var(--teal-soft);
+      color: #073d38;
+      font-weight: 900;
+    }
+
+    .page {
+      grid-template-rows: 78px 1fr 118px;
+      gap: 12px;
+      padding: 18px 22px;
+      min-height: 0;
+    }
+
+    .object-bar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: center;
+      padding: 12px 14px 12px 16px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .object-bar h1 {
+      font-size: 23px;
+      line-height: 1.1;
+    }
+
+    .object-bar p {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .meta-line {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      max-width: 780px;
+    }
+
+    .chapter-layout {
+      display: grid;
+      grid-template-columns: 330px minmax(0, 1fr) 330px;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .panel {
+      min-height: 0;
+      border: 1px solid var(--line);
+      background: #fff;
+      display: grid;
+      grid-template-rows: 44px 1fr;
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--line-soft);
+      background: #f8faf9;
+    }
+
+    .panel-head h2 {
+      font-size: 15px;
+      line-height: 1;
+    }
+
+    .panel-head span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .panel-body {
+      min-height: 0;
+      padding: 12px;
+      overflow: hidden;
+    }
+
+    .input-panel .panel-head { border-top: 4px solid var(--blue); }
+    .process-panel .panel-head { border-top: 4px solid var(--teal); }
+    .output-panel .panel-head { border-top: 4px solid var(--amber); }
+
+    .event-stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .event-card {
+      min-height: 80px;
+      padding: 10px 10px 10px 12px;
+      border: 1px solid #87aaa4;
+      border-left: 5px solid var(--teal);
+      background: var(--teal-soft);
+    }
+
+    .event-card.blue {
+      border-color: #7fa5bf;
+      border-left-color: var(--blue);
+      background: var(--blue-soft);
+    }
+
+    .event-card.violet {
+      border-color: #a79abe;
+      border-left-color: var(--violet);
+      background: var(--violet-soft);
+    }
+
+    .event-card.red {
+      border-color: #d2788a;
+      border-left-color: var(--red);
+      background: var(--red-soft);
+    }
+
+    .event-card.amber {
+      border-color: #d5a85f;
+      border-left-color: var(--amber);
+      background: var(--amber-soft);
+    }
+
+    .event-card.green {
+      border-color: #8aab9e;
+      border-left-color: var(--green);
+      background: var(--green-soft);
+    }
+
+    .event-card.selected {
+      outline: 3px solid #172a27;
+      outline-offset: 2px;
+    }
+
+    .event-card,
+    .operation-node,
+    .logic-node,
+    .badge,
+    .matrix-table tr:not(:first-child) {
+      cursor: pointer;
+      transition: opacity .14s ease, box-shadow .14s ease, outline-color .14s ease, transform .14s ease;
+    }
+
+    .event-card:focus-visible,
+    .operation-node:focus-visible,
+    .logic-node:focus-visible,
+    .badge:focus-visible,
+    .matrix-table tr:focus-visible {
+      outline: 3px solid #172a27;
+      outline-offset: 2px;
+    }
+
+    .event-card.related,
+    .operation-node.related,
+    .logic-node.related,
+    .badge.related,
+    .matrix-table tr.related {
+      box-shadow: inset 0 0 0 2px rgba(8, 116, 104, .52), 5px 5px 0 rgba(8, 116, 104, .08);
+    }
+
+    .event-card.dimmed,
+    .operation-node.dimmed,
+    .logic-node.dimmed,
+    .badge.dimmed,
+    .matrix-table tr.dimmed {
+      opacity: .42;
+    }
+
+    .operation-node.selected,
+    .logic-node.selected {
+      outline: 3px solid #172a27;
+      outline-offset: 2px;
+      box-shadow: 8px 8px 0 rgba(16, 23, 22, .1);
+      transform: translate(-1px, -1px);
+    }
+
+    .event-card strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+      line-height: 1.15;
+    }
+
+    .event-card small {
+      display: block;
+      margin-bottom: 6px;
+      color: #263431;
+      font: 10px/1 var(--mono);
+      font-weight: 900;
+    }
+
+    .event-card p {
+      color: #3f4d49;
+      font-size: 12px;
+      line-height: 1.42;
+    }
+
+    .event-card .input-kind {
+      display: inline-flex;
+      margin-top: 8px;
+      padding: 3px 6px;
+      border: 1px solid rgba(20, 38, 35, .18);
+      background: rgba(255, 255, 255, .56);
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .process-board {
+      height: 100%;
+      position: relative;
+      border: 1px solid var(--line-soft);
+      background:
+        linear-gradient(to right, var(--grid) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(137, 159, 154, .12) 1px, transparent 1px),
+        #fff;
+      background-size: 92px 100%, 100% 66px;
+      overflow: hidden;
+    }
+
+    .stage-title {
+      position: absolute;
+      top: 12px;
+      height: 28px;
+      padding: 6px 9px;
+      border: 1px solid var(--line);
+      background: #fff;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .operation-node {
+      position: absolute;
+      width: 252px;
+      min-height: 112px;
+      border: 1px solid #7aa8a2;
+      background: #fafdfe;
+      box-shadow: 0 12px 22px rgba(22, 38, 35, .06);
+    }
+
+    .operation-node.wide { width: 310px; }
+    .operation-node.small { min-height: 92px; }
+
+    .op-head {
+      height: 34px;
+      padding: 0 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--line-soft);
+      background: var(--teal-soft);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .operation-node.merge .op-head { background: var(--blue-soft); }
+    .operation-node.conflict .op-head { background: var(--red-soft); }
+    .operation-node.translate .op-head { background: var(--violet-soft); }
+    .operation-node.hold .op-head { background: var(--amber-soft); }
+    .operation-node.output .op-head { background: var(--green-soft); }
+
+    .op-body {
+      padding: 10px;
+      display: grid;
+      gap: 7px;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .op-line {
+      display: grid;
+      grid-template-columns: 60px 1fr;
+      gap: 8px;
+    }
+
+    .op-line span {
+      color: var(--muted);
+      font-weight: 850;
+    }
+
+    .op-line strong {
+      color: #182522;
+      font-weight: 750;
+    }
+
+    .op-status {
+      padding: 3px 6px;
+      border: 1px solid #7cb8ad;
+      background: var(--ok-soft);
+      color: var(--ok);
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .op-status.warn {
+      border-color: #d5a85f;
+      background: var(--warn-soft);
+      color: var(--warn);
+    }
+
+    .op-status.bad {
+      border-color: #df93a0;
+      background: var(--bad-soft);
+      color: var(--bad);
+    }
+
+    .flow-svg {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .flow-svg path {
+      fill: none;
+      stroke: rgba(40, 70, 64, .62);
+      stroke-width: 2.2;
+      marker-end: url(#arrow);
+    }
+
+    .flow-svg .soft { stroke: rgba(102, 83, 138, .58); }
+    .flow-svg .risk { stroke: rgba(189, 47, 73, .62); }
+    .flow-svg .hold { stroke: rgba(166, 109, 18, .66); }
+
+    .pool-note {
+      padding: 10px 11px;
+      border: 1px solid var(--line);
+      background: #f8faf9;
+      color: #3f4d49;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .rule-stack {
+      display: grid;
+      gap: 8px;
+    }
+
+    .rule {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 9px;
+      border: 1px solid var(--line-soft);
+      background: #fff;
+      font-size: 12px;
+    }
+
+    .rule span {
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .context-dock {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    .context-box {
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 12px 14px;
+    }
+
+    .context-box h2 {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 9px;
+      font-size: 15px;
+    }
+
+    .swatch {
+      width: 36px;
+      height: 5px;
+      display: inline-block;
+      background: var(--teal);
+    }
+
+    .swatch.blue { background: var(--blue); }
+    .swatch.amber { background: var(--amber); }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .pill {
+      padding: 5px 8px;
+      border: 1px solid var(--line-soft);
+      background: #f7faf9;
+      font-size: 12px;
+      font-weight: 750;
+      line-height: 1.1;
+    }
+
+    .logic-page {
+      grid-template-rows: 78px 1fr 118px;
+      gap: 12px;
+      padding: 18px 22px;
+    }
+
+    .logic-shell {
+      display: grid;
+      grid-template-columns: 1fr 342px;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .logic-canvas {
+      position: relative;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(to right, var(--grid) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(137, 159, 154, .12) 1px, transparent 1px),
+        #fff;
+      background-size: 110px 100%, 100% 72px;
+      overflow: hidden;
+    }
+
+    .rail {
+      position: absolute;
+      left: 34px;
+      right: 34px;
+      height: 64px;
+      border: 1px solid var(--line);
+      background: rgba(248, 251, 250, .88);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 12px;
+    }
+
+    .rail strong {
+      min-width: 92px;
+      font-size: 13px;
+    }
+
+    .rail .badge {
+      padding: 5px 8px;
+      border: 1px solid var(--line-soft);
+      background: #fff;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .logic-node {
+      position: absolute;
+      width: 280px;
+      min-height: 112px;
+      border: 1px solid #7aa8a2;
+      background: #fff;
+      box-shadow: 0 12px 22px rgba(22, 38, 35, .08);
+      z-index: 3;
+    }
+
+    .logic-node.wide { width: 360px; }
+
+    .logic-node .op-head {
+      background: var(--teal-soft);
+    }
+
+    .logic-node.merge .op-head { background: var(--blue-soft); }
+    .logic-node.conflict .op-head { background: var(--red-soft); }
+    .logic-node.translate .op-head { background: var(--violet-soft); }
+    .logic-node.hold .op-head { background: var(--amber-soft); }
+    .logic-node.output .op-head { background: var(--green-soft); }
+
+    .side-inspector {
+      border: 1px solid var(--line);
+      background: #fff;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-height: 0;
+    }
+
+    .side-inspector .inspect-block {
+      padding: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .inspector-meta {
+      display: grid;
+      gap: 7px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line-soft);
+    }
+
+    .inspector-row {
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      gap: 10px;
+      align-items: baseline;
+      font-size: 12px;
+    }
+
+    .inspector-row span {
+      color: var(--muted);
+    }
+
+    .inspector-row strong {
+      font-size: 13px;
+    }
+
+    .selection-title {
+      margin-bottom: 6px;
+      font-size: 16px;
+      font-weight: 950;
+      line-height: 1.2;
+    }
+
+    .selection-summary {
+      color: #3d4b48;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .selection-action {
+      margin-top: 8px;
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .inspect-block h2 {
+      margin-bottom: 8px;
+      font-size: 18px;
+    }
+
+    .inspect-block p {
+      color: #3f4d49;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .issue-list {
+      padding: 12px 14px;
+      display: grid;
+      gap: 9px;
+      align-content: start;
+    }
+
+    .issue {
+      padding: 9px 10px;
+      border: 1px solid #d8b56f;
+      border-left: 5px solid var(--warn);
+      background: var(--warn-soft);
+      font-size: 12px;
+      line-height: 1.42;
+    }
+
+    .issue.ok {
+      border-color: #7cb8ad;
+      border-left-color: var(--ok);
+      background: var(--ok-soft);
+    }
+
+    .issue.bad {
+      border-color: #df93a0;
+      border-left-color: var(--bad);
+      background: var(--bad-soft);
+    }
+
+    .issue strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+
+    .check-layout {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .matrix {
+      border: 1px solid var(--line);
+      background: #fff;
+      display: grid;
+      grid-template-rows: 44px 1fr;
+      min-height: 0;
+    }
+
+    .matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 12px;
+    }
+
+    .matrix-table th,
+    .matrix-table td {
+      border: 1px solid var(--line-soft);
+      padding: 9px 10px;
+      vertical-align: top;
+      line-height: 1.4;
+    }
+
+    .matrix-table th {
+      background: #f4f7f6;
+      text-align: left;
+      font-weight: 900;
+    }
+
+    .status {
+      display: inline-flex;
+      padding: 4px 7px;
+      border: 1px solid #7cb8ad;
+      background: var(--ok-soft);
+      color: var(--ok);
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .status.warn {
+      border-color: #d8b56f;
+      background: var(--warn-soft);
+      color: var(--warn);
+    }
+
+    .status.bad {
+      border-color: #df93a0;
+      background: var(--bad-soft);
+      color: var(--bad);
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          叙事验证工具
+          <span>章节事件加工台 / 交互实现 / 选中对象 Inspector</span>
+        </div>
+        <nav class="nav" aria-label="原型视图">
+          <a href="#overview" data-nav="overview">加工台总览</a>
+          <a href="#logic" data-nav="logic">内部组合</a>
+          <a href="#check" data-nav="check">输出检查</a>
+        </nav>
+      </header>
+
+      <section class="view page active" id="view-overview">
+        <header class="object-bar">
+          <div>
+            <p class="eyebrow">Chapter Event Workbench</p>
+            <h1>C13 会议结果：章节事件加工台</h1>
+            <p>章节接收并列外部事件输入，内部完成组合与处理，再输出新的事件集；输入池和输出池不强行画因果链。</p>
+          </div>
+          <div class="meta-line">
+            <span class="tag strong">章节函数</span>
+            <span class="tag">并列输入 5</span>
+            <span class="tag">内部操作 6</span>
+            <span class="tag">外部输出 4</span>
+            <a class="btn" href="#logic">看内部组合</a>
+          </div>
+        </header>
+
+        <main class="chapter-layout">
+          <section class="panel input-panel">
+            <div class="panel-head">
+              <h2>左侧输入事件池</h2>
+              <span>并列进入 / 不连线</span>
+            </div>
+            <div class="panel-body">
+              <div class="event-stack">
+                <div class="pool-note">这些事件进入 C13 时是并列材料。它们之间的因果关系不在这里表达。</div>
+                <div class="event-card blue">
+                  <strong>采访材料成形</strong>
+                  <small>E010-E014 / 采访线</small>
+                  <p>采访线已经形成可被会议吸收的材料。</p>
+                  <span class="input-kind">输入材料</span>
+                </div>
+                <div class="event-card violet">
+                  <strong>救助显形</strong>
+                  <small>E016-E020 / 大仙祠线</small>
+                  <p>救助逻辑与解释权压力进入可见层。</p>
+                  <span class="input-kind">输入压力</span>
+                </div>
+                <div class="event-card red">
+                  <strong>张航远被边缘化</strong>
+                  <small>E019 / 张航远线</small>
+                  <p>人物位置变化尚未输出成私线事件。</p>
+                  <span class="input-kind">输入人物状态</span>
+                </div>
+                <div class="event-card amber">
+                  <strong>职业病证据压力</strong>
+                  <small>E018 / 职业病证据线</small>
+                  <p>证据未公开，但已经影响判断结构。</p>
+                  <span class="input-kind">输入潜伏条件</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel process-panel">
+            <div class="panel-head">
+              <h2>中部章节内部加工台</h2>
+              <span>逻辑发生在这里</span>
+            </div>
+            <div class="panel-body">
+              <div class="process-board">
+                <div class="stage-title" style="left:20px;">输入进入章节</div>
+                <div class="stage-title" style="left:390px;">内部组合处理</div>
+                <div class="stage-title" style="right:20px;">形成输出</div>
+                <svg class="flow-svg" viewBox="0 0 940 660" preserveAspectRatio="none">
+                  <defs>
+                    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                      <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(40,70,64,.72)"></path>
+                    </marker>
+                  </defs>
+                  <path d="M 190 128 H 280 V 238 H 350"></path>
+                  <path d="M 190 228 H 280 V 238 H 350"></path>
+                  <path class="risk" d="M 190 328 H 280 V 348 H 350"></path>
+                  <path class="hold" d="M 190 428 H 280 V 458 H 350"></path>
+                  <path d="M 598 238 H 648 V 190 H 704"></path>
+                  <path class="soft" d="M 598 348 H 648 V 300 H 704"></path>
+                  <path class="hold" d="M 598 458 H 648 V 410 H 704"></path>
+                </svg>
+
+                <div class="operation-node merge" style="left:40px;top:84px;">
+                  <div class="op-head"><span>承接输入</span><span class="op-status">通过</span></div>
+                  <div class="op-body">
+                    <div class="op-line"><span>对象</span><strong>采访材料 / 救助压力</strong></div>
+                    <div class="op-line"><span>动作</span><strong>进入会议场景</strong></div>
+                  </div>
+                </div>
+                <div class="operation-node conflict wide" style="left:350px;top:194px;">
+                  <div class="op-head"><span>合流与冲突化</span><span class="op-status">通过</span></div>
+                  <div class="op-body">
+                    <div class="op-line"><span>合流</span><strong>事实链与解释权进入同一场景</strong></div>
+                    <div class="op-line"><span>冲突</span><strong>会议必须给出可承接口径</strong></div>
+                  </div>
+                </div>
+                <div class="operation-node translate wide" style="left:350px;top:324px;">
+                  <div class="op-head"><span>口径转译</span><span class="op-status warn">需补</span></div>
+                  <div class="op-body">
+                    <div class="op-line"><span>对象</span><strong>会议结果 -> 可传播表达</strong></div>
+                    <div class="op-line"><span>风险</span><strong>电视台线动作桥仍需明确</strong></div>
+                  </div>
+                </div>
+                <div class="operation-node hold wide" style="left:350px;top:454px;">
+                  <div class="op-head"><span>悬置与保留入口</span><span class="op-status">通过</span></div>
+                  <div class="op-body">
+                    <div class="op-line"><span>对象</span><strong>职业病证据 / 禹树后台</strong></div>
+                    <div class="op-line"><span>原则</span><strong>不在本章提前爆开</strong></div>
+                  </div>
+                </div>
+                <div class="operation-node output" style="right:40px;top:144px;">
+                  <div class="op-head"><span>输出生成</span><span class="op-status">通过</span></div>
+                  <div class="op-body">
+                    <div class="op-line"><span>生成</span><strong>会议结果落地</strong></div>
+                    <div class="op-line"><span>分流</span><strong>会后争夺 / 口径重写</strong></div>
+                  </div>
+                </div>
+                <div class="operation-node output" style="right:40px;top:374px;">
+                  <div class="op-head"><span>风险输出</span><span class="op-status warn">需补</span></div>
+                  <div class="op-body">
+                    <div class="op-line"><span>输出</span><strong>私线偏移条件</strong></div>
+                    <div class="op-line"><span>问题</span><strong>张航远动作桥偏弱</strong></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel output-panel">
+            <div class="panel-head">
+              <h2>右侧输出事件池</h2>
+              <span>章节产物 / 不互连</span>
+            </div>
+            <div class="panel-body">
+              <div class="event-stack">
+                <div class="pool-note">这些是 C13 处理后的外部事件产物。输出之间的因果关系交给事件图谱查看。</div>
+                <div class="event-card green selected">
+                  <strong>会议结果落地</strong>
+                  <small>E021-E028 / 主输出</small>
+                  <p>本章最主要输出，成为后续争夺的公共前提。</p>
+                  <span class="input-kind">新建/包装</span>
+                </div>
+                <div class="event-card blue">
+                  <strong>口径重写</strong>
+                  <small>E024-E032 / 电视台线</small>
+                  <p>会议结果被转换成可传播、可控、可争夺的表达。</p>
+                  <span class="input-kind">转译输出</span>
+                </div>
+                <div class="event-card red">
+                  <strong>私线偏移条件</strong>
+                  <small>E030 / 张航远线</small>
+                  <p>人物位置变化进入个人行动风险。</p>
+                  <span class="input-kind">风险输出</span>
+                </div>
+                <div class="event-card amber">
+                  <strong>证据继续预热</strong>
+                  <small>E033 / 职业病证据线</small>
+                  <p>证据获得后续正式入场位置，但本章不终结。</p>
+                  <span class="input-kind">悬置输出</span>
+                </div>
+              </div>
+            </div>
+          </section>
+        </main>
+
+        <footer class="context-dock">
+          <section class="context-box">
+            <h2><span class="swatch"></span>人物</h2>
+            <div class="pill-row">
+              <span class="pill">叶依人：承接事实链</span>
+              <span class="pill">张航远：位置下沉</span>
+              <span class="pill">禹树：后台入口</span>
+            </div>
+          </section>
+          <section class="context-box">
+            <h2><span class="swatch blue"></span>地理</h2>
+            <div class="pill-row">
+              <span class="pill">会议场景</span>
+              <span class="pill">电视台空间</span>
+              <span class="pill">大仙祠外部压力场</span>
+            </div>
+          </section>
+          <section class="context-box">
+            <h2><span class="swatch amber"></span>选中对象</h2>
+            <div id="overview-selection">
+              <div class="selection-title">会议结果落地</div>
+              <div class="selection-summary">本章最主要输出，成为后续争夺的公共前提。</div>
+              <div class="selection-action">
+                <a class="btn primary" href="#logic">查看加工路径</a>
+                <a class="btn" href="#check">检查输出</a>
+              </div>
+            </div>
+          </section>
+        </footer>
+      </section>
+
+      <section class="view logic-page" id="view-logic">
+        <header class="object-bar">
+          <div>
+            <p class="eyebrow">Chapter Internal Logic</p>
+            <h1>C13 内部组合逻辑放大</h1>
+            <p>左侧输入池已经收起为顶部输入轨；本页只看章节内部如何把并列材料组合成有逻辑的正文处理。</p>
+          </div>
+          <div class="meta-line">
+            <span class="tag strong">内部处理</span>
+            <span class="tag">合流 / 冲突化 / 转译 / 悬置 / 生成</span>
+            <a class="btn" href="#overview">回总览</a>
+          </div>
+        </header>
+
+        <main class="logic-shell">
+          <section class="logic-canvas">
+            <div class="rail" style="top:22px;">
+              <strong>输入轨</strong>
+              <span class="badge">采访材料成形</span>
+              <span class="badge">救助显形</span>
+              <span class="badge">边缘化状态</span>
+              <span class="badge">证据压力</span>
+              <span class="badge">解释权预压</span>
+            </div>
+            <div class="rail" style="bottom:22px;">
+              <strong>输出轨</strong>
+              <span class="badge">会议结果落地</span>
+              <span class="badge">口径重写</span>
+              <span class="badge">私线偏移条件</span>
+              <span class="badge">证据继续预热</span>
+            </div>
+
+            <svg class="flow-svg" viewBox="0 0 1480 720" preserveAspectRatio="none">
+              <defs>
+                <marker id="logicArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(40,70,64,.72)"></path>
+                </marker>
+              </defs>
+              <path d="M 240 150 H 318 V 232 H 398" marker-end="url(#logicArrow)"></path>
+              <path d="M 640 232 H 715 V 232 H 790" marker-end="url(#logicArrow)"></path>
+              <path class="soft" d="M 640 350 H 715 V 350 H 790" marker-end="url(#logicArrow)"></path>
+              <path class="risk" d="M 1046 232 H 1100 V 350 H 1155" marker-end="url(#logicArrow)"></path>
+              <path class="hold" d="M 1046 350 H 1100 V 482 H 1155" marker-end="url(#logicArrow)"></path>
+              <path d="M 1046 232 H 1120 V 610 H 1180" marker-end="url(#logicArrow)"></path>
+            </svg>
+
+            <div class="logic-node merge" style="left:88px;top:126px;">
+              <div class="op-head"><span>场景承接</span><span class="op-status">通过</span></div>
+              <div class="op-body">
+                <div class="op-line"><span>输入</span><strong>采访材料 + 救助压力</strong></div>
+                <div class="op-line"><span>处理</span><strong>进入同一会议场景</strong></div>
+              </div>
+            </div>
+            <div class="logic-node conflict wide" style="left:398px;top:196px;">
+              <div class="op-head"><span>合流与冲突化</span><span class="op-status">通过</span></div>
+              <div class="op-body">
+                <div class="op-line"><span>合流</span><strong>并列输入被放进同一公共场景</strong></div>
+                <div class="op-line"><span>冲突</span><strong>事实链与解释权必须产生口径选择</strong></div>
+              </div>
+            </div>
+            <div class="logic-node translate wide" style="left:790px;top:196px;">
+              <div class="op-head"><span>结果包装</span><span class="op-status">通过</span></div>
+              <div class="op-body">
+                <div class="op-line"><span>包装</span><strong>材料压力 -> 会议结果落点</strong></div>
+                <div class="op-line"><span>输出</span><strong>会议结果落地</strong></div>
+              </div>
+            </div>
+            <div class="logic-node translate wide" style="left:790px;top:330px;">
+              <div class="op-head"><span>媒体转译</span><span class="op-status warn">需补</span></div>
+              <div class="op-body">
+                <div class="op-line"><span>转译</span><strong>会议结果 -> 可传播口径</strong></div>
+                <div class="op-line"><span>问题</span><strong>电视台线动作桥仍偏弱</strong></div>
+              </div>
+            </div>
+            <div class="logic-node hold" style="right:78px;top:330px;">
+              <div class="op-head"><span>风险保留</span><span class="op-status warn">提示</span></div>
+              <div class="op-body">
+                <div class="op-line"><span>人物</span><strong>张航远边缘化</strong></div>
+                <div class="op-line"><span>输出</span><strong>私线偏移条件</strong></div>
+              </div>
+            </div>
+            <div class="logic-node output" style="right:78px;top:462px;">
+              <div class="op-head"><span>悬置输出</span><span class="op-status">通过</span></div>
+              <div class="op-body">
+                <div class="op-line"><span>证据</span><strong>职业病线继续预热</strong></div>
+                <div class="op-line"><span>原则</span><strong>不在本章提前爆开</strong></div>
+              </div>
+            </div>
+          </section>
+
+          <aside class="side-inspector">
+            <div class="inspect-block">
+              <p class="eyebrow">Selected Operation</p>
+              <h2>合流与冲突化</h2>
+              <p>该节点是章节内部逻辑的核心：它把并列输入放入同一会议场景，并制造必须给出口径的压力。</p>
+            </div>
+            <div class="issue-list">
+              <div class="issue ok">
+                <strong>成立</strong>
+                输入事件之间没有在输入池强连，逻辑从这里开始发生。
+              </div>
+              <div class="issue ok">
+                <strong>成立</strong>
+                章节处理不是事件摘要，而是把材料、压力和人物位置组合成正文行动。
+              </div>
+              <div class="issue">
+                <strong>需留意</strong>
+                如果把“证据压力”写太强，会抢走本章会议结果的主输出。
+              </div>
+            </div>
+            <div class="action-stack" style="padding:12px 14px;">
+              <a class="btn primary" href="#check">看输出检查</a>
+              <a class="btn" href="#overview">回总览</a>
+            </div>
+          </aside>
+        </main>
+
+        <footer class="context-dock">
+          <section class="context-box">
+            <h2><span class="swatch"></span>内部操作</h2>
+            <div class="pill-row">
+              <span class="pill">承接</span>
+              <span class="pill">合流</span>
+              <span class="pill">冲突化</span>
+              <span class="pill">转译</span>
+              <span class="pill">悬置</span>
+              <span class="pill">生成</span>
+            </div>
+          </section>
+          <section class="context-box">
+            <h2><span class="swatch blue"></span>边界</h2>
+            <div class="pill-row">
+              <span class="pill">输入池不连线</span>
+              <span class="pill">内部才有逻辑</span>
+              <span class="pill">输出池不互连</span>
+            </div>
+          </section>
+          <section class="context-box">
+            <h2><span class="swatch amber"></span>风险</h2>
+            <div class="pill-row">
+              <span class="pill">张航远动作桥</span>
+              <span class="pill">证据线提前爆开</span>
+              <span class="pill">会议写成总结章</span>
+            </div>
+          </section>
+        </footer>
+      </section>
+
+      <section class="view page" id="view-check">
+        <header class="object-bar">
+          <div>
+            <p class="eyebrow">Chapter Output Check</p>
+            <h1>C13 输出事件与章节加工检查</h1>
+            <p>本页检查章节输入、内部处理和输出是否满足边界：输入并列、内部有逻辑、输出清楚、不污染全局时间线。</p>
+          </div>
+          <div class="meta-line">
+            <span class="tag strong">检查状态</span>
+            <span class="tag">4 通过 / 2 需补</span>
+            <a class="btn" href="#overview">回总览</a>
+          </div>
+        </header>
+
+        <main class="check-layout">
+          <section class="matrix">
+            <div class="panel-head">
+              <h2>章节加工检查矩阵</h2>
+              <span>输入 / 内部 / 输出 / 边界</span>
+            </div>
+            <div class="panel-body">
+              <table class="matrix-table">
+                <tr>
+                  <th style="width:140px;">检查项</th>
+                  <th>当前表达</th>
+                  <th style="width:190px;">证据或页面位置</th>
+                  <th style="width:110px;">状态</th>
+                </tr>
+                <tr>
+                  <td>输入并列</td>
+                  <td>左侧输入池只列出外部事件，不在输入卡之间画因果关系。</td>
+                  <td>总览 / 输入事件池</td>
+                  <td><span class="status">通过</span></td>
+                </tr>
+                <tr>
+                  <td>内部有逻辑</td>
+                  <td>合流、冲突化、转译、悬置和生成都发生在中部加工台。</td>
+                  <td>总览 / 内部组合</td>
+                  <td><span class="status">通过</span></td>
+                </tr>
+                <tr>
+                  <td>输出清楚</td>
+                  <td>右侧输出池列出会议结果、口径重写、私线偏移条件和证据继续预热。</td>
+                  <td>总览 / 输出事件池</td>
+                  <td><span class="status">通过</span></td>
+                </tr>
+                <tr>
+                  <td>输出不互连</td>
+                  <td>输出事件之间不画关系线，后续因果交给中心事件知识图谱。</td>
+                  <td>总览 / 输出事件池</td>
+                  <td><span class="status">通过</span></td>
+                </tr>
+                <tr>
+                  <td>电视台转译</td>
+                  <td>会议结果到口径重写的动作桥仍偏弱，需要补一个明确动作。</td>
+                  <td>内部组合 / 媒体转译</td>
+                  <td><span class="status warn">需补</span></td>
+                </tr>
+                <tr>
+                  <td>张航远私线</td>
+                  <td>边缘化到私线偏移条件的动作桥需要更具体，否则输出显得突兀。</td>
+                  <td>输出检查 / 风险保留</td>
+                  <td><span class="status warn">需补</span></td>
+                </tr>
+                <tr>
+                  <td>时间线边界</td>
+                  <td>本版不修改全局时间线，不叠加事件关系箭头。</td>
+                  <td>设计说明 v0.3</td>
+                  <td><span class="status">通过</span></td>
+                </tr>
+              </table>
+            </div>
+          </section>
+
+          <aside class="side-inspector">
+            <div class="inspect-block">
+              <p class="eyebrow">Output Inspector</p>
+              <h2>私线偏移条件</h2>
+              <p>这是 C13 可能输出的风险事件。当前逻辑成立方向明确，但动作桥还不够强。</p>
+            </div>
+            <div class="issue-list">
+              <div class="issue bad">
+                <strong>需补强</strong>
+                张航远不能只因为“被边缘化”就自然进入私线，需要一个可见动作或判断。
+              </div>
+              <div class="issue">
+                <strong>建议</strong>
+                在会议后安排一次被排除、被误读或自证冲动的具体触发。
+              </div>
+              <div class="issue ok">
+                <strong>边界正确</strong>
+                该输出保留在章节加工台内，不拉长故事主轴事件条。
+              </div>
+            </div>
+            <div class="action-stack" style="padding:12px 14px;">
+              <a class="btn primary" href="#logic">回内部组合</a>
+              <a class="btn" href="#overview">回加工台</a>
+            </div>
+          </aside>
+        </main>
+
+        <footer class="context-dock">
+          <section class="context-box">
+            <h2><span class="swatch"></span>通过项</h2>
+            <div class="pill-row">
+              <span class="pill">输入并列</span>
+              <span class="pill">内部有逻辑</span>
+              <span class="pill">输出清楚</span>
+              <span class="pill">时间线不叠箭头</span>
+            </div>
+          </section>
+          <section class="context-box">
+            <h2><span class="swatch blue"></span>需补项</h2>
+            <div class="pill-row">
+              <span class="pill">电视台转译动作</span>
+              <span class="pill">张航远私线动作桥</span>
+            </div>
+          </section>
+          <section class="context-box">
+            <h2><span class="swatch amber"></span>后续入口</h2>
+            <div class="pill-row">
+              <span class="pill">输出事件可进中心图谱</span>
+              <span class="pill">单事件可进事件编辑</span>
+              <span class="pill">章节留在加工台</span>
+            </div>
+          </section>
+        </footer>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const views = {
+      overview: document.getElementById("view-overview"),
+      logic: document.getElementById("view-logic"),
+      check: document.getElementById("view-check")
+    };
+
+    const objectModel = {
+      "采访材料成形": {
+        kind: "输入事件",
+        owner: "采访线",
+        summary: "采访线已经形成可被会议吸收的材料。它进入章节时只是外部材料，不在输入池里和其他输入强连。",
+        role: "提供事实材料，使 C13 会议不是空转讨论。",
+        risk: "如果材料太完整，会议场景会变成结论宣读，削弱本章处理逻辑。",
+        action: "查看内部承接",
+        route: "#logic",
+        related: ["承接输入", "场景承接", "合流与冲突化", "会议结果落地"]
+      },
+      "救助显形": {
+        kind: "输入事件",
+        owner: "大仙祠线",
+        summary: "救助逻辑与解释权压力进入可见层，它给会议制造必须回应的外部压力。",
+        role: "把解释权问题带入场景，推动会议从材料整理走向表态。",
+        risk: "如果直接拖到后续章节，会误读成故事线持续事件，而不是本章输入条件。",
+        action: "查看冲突化",
+        route: "#logic",
+        related: ["合流与冲突化", "场景承接", "会议结果落地"]
+      },
+      "张航远被边缘化": {
+        kind: "输入事件",
+        owner: "张航远线",
+        summary: "人物位置变化已经发生，但在本章还没有自然转化为私线行动。",
+        role: "给后续私线风险提供人物状态。",
+        risk: "动作桥偏弱时，输出“私线偏移条件”会显得突兀。",
+        action: "检查风险输出",
+        route: "#check",
+        related: ["风险输出", "私线偏移条件", "张航远私线"]
+      },
+      "职业病证据压力": {
+        kind: "输入事件",
+        owner: "职业病证据线",
+        summary: "证据未公开，但已经影响判断结构，是本章需要悬置而不是终结的压力。",
+        role: "制造后台压力，并为后续证据线保留入口。",
+        risk: "如果本章提前公开，会污染后续事件节奏。",
+        action: "查看悬置输出",
+        route: "#logic",
+        related: ["悬置与保留入口", "风险保留", "悬置输出", "证据继续预热"]
+      },
+      "边缘化状态": {
+        kind: "输入轨别名",
+        owner: "张航远线",
+        summary: "这是逻辑页输入轨上的短标签，对应输入事件“张航远被边缘化”。",
+        role: "在内部组合页压缩显示人物状态输入。",
+        risk: "如果只看短标签，可能忽略它需要动作桥才能输出成私线事件。",
+        action: "检查风险输出",
+        route: "#check",
+        related: ["张航远被边缘化", "风险输出", "私线偏移条件", "张航远私线"]
+      },
+      "证据压力": {
+        kind: "输入轨别名",
+        owner: "职业病证据线",
+        summary: "这是逻辑页输入轨上的短标签，对应输入事件“职业病证据压力”。",
+        role: "在内部组合页压缩显示后台证据输入。",
+        risk: "如果本章提前揭开，会破坏后续证据线节奏。",
+        action: "查看悬置逻辑",
+        route: "#logic",
+        related: ["职业病证据压力", "悬置与保留入口", "证据继续预热"]
+      },
+      "解释权预压": {
+        kind: "输入轨别名",
+        owner: "大仙祠线",
+        summary: "这是逻辑页输入轨上的短标签，表示救助显形背后的解释权压力。",
+        role: "提醒内部冲突不是单纯材料整理，而包含解释权争夺。",
+        risk: "如果解释权压力过强，会抢走会议结果的主输出。",
+        action: "查看冲突化",
+        route: "#logic",
+        related: ["救助显形", "合流与冲突化", "会议结果落地"]
+      },
+      "承接输入": {
+        kind: "内部操作",
+        owner: "章节函数",
+        summary: "把并列输入事件带入 C13 的会议场景，不改变输入之间的关系。",
+        role: "确认材料进入章节黑盒，但因果只在章节内部发生。",
+        risk: "不能在这里把输入池画成事件链。",
+        action: "放大内部逻辑",
+        route: "#logic",
+        related: ["采访材料成形", "救助显形", "场景承接", "合流与冲突化"]
+      },
+      "场景承接": {
+        kind: "内部操作",
+        owner: "章节函数",
+        summary: "把输入轨上的材料转换成可写进正文的场景承接。",
+        role: "让外部事件进入同一章，而不是在全局时间线上加箭头。",
+        risk: "承接太弱会让输入像被硬塞进章节。",
+        action: "看总览位置",
+        route: "#overview",
+        related: ["承接输入", "采访材料成形", "救助显形", "合流与冲突化"]
+      },
+      "合流与冲突化": {
+        kind: "内部操作",
+        owner: "章节函数",
+        summary: "这是章节内部逻辑的核心：把事实链、解释权和人物位置放进同一场景，制造必须回应的压力。",
+        role: "把并列输入转成带逻辑的章节处理。",
+        risk: "如果写成概括说明，就不是章节函数的处理过程。",
+        action: "检查输出",
+        route: "#check",
+        related: ["采访材料成形", "救助显形", "场景承接", "输出生成", "会议结果落地"]
+      },
+      "口径转译": {
+        kind: "内部操作",
+        owner: "章节函数",
+        summary: "把会议结果转成电视台线可以承接的传播表达。",
+        role: "连接会议结果和后续口径重写事件。",
+        risk: "当前需要补一个明确动作桥，否则电视台线输出会偏抽象。",
+        action: "查看需补项",
+        route: "#check",
+        related: ["媒体转译", "结果包装", "口径重写", "电视台转译"]
+      },
+      "媒体转译": {
+        kind: "内部操作",
+        owner: "章节函数",
+        summary: "把会议结论包装成可传播、可控、可争夺的媒体表达。",
+        role: "让输出不是摘要，而是新事件的发生条件。",
+        risk: "动作桥不够会导致输出看起来像作者说明。",
+        action: "回总览",
+        route: "#overview",
+        related: ["口径转译", "口径重写", "电视台转译"]
+      },
+      "悬置与保留入口": {
+        kind: "内部操作",
+        owner: "章节函数",
+        summary: "职业病证据和禹树后台入口在本章被保留，而不是提前爆开。",
+        role: "把未显形的后台压力转成后续可承接的输出。",
+        risk: "悬置必须有可感知的压力，否则会变成空白伏笔。",
+        action: "查看证据输出",
+        route: "#overview",
+        related: ["职业病证据压力", "风险保留", "悬置输出", "证据继续预热"]
+      },
+      "输出生成": {
+        kind: "内部操作",
+        owner: "章节函数",
+        summary: "把本章内部处理包装成外部事件产物。",
+        role: "生成会议结果落地、会后争夺和口径重写等后续可引用事件。",
+        risk: "输出之间不能在输出池里再互相连线。",
+        action: "检查输出池",
+        route: "#check",
+        related: ["合流与冲突化", "会议结果落地", "口径重写"]
+      },
+      "风险输出": {
+        kind: "内部操作",
+        owner: "章节函数",
+        summary: "把人物边缘化状态转成后续私线风险，但动作桥还需要补强。",
+        role: "提示后续人物线可用的风险入口。",
+        risk: "不能把人物后台状态误画成故事线主事件。",
+        action: "检查私线偏移",
+        route: "#check",
+        related: ["张航远被边缘化", "私线偏移条件", "张航远私线"]
+      },
+      "结果包装": {
+        kind: "内部操作",
+        owner: "章节函数",
+        summary: "把内部冲突处理后的结果重新包装成可进入外部事件池的对象。",
+        role: "明确章节输出不是正文摘要，而是后续系统可引用的事件。",
+        risk: "包装过度会让事件对象失去具体发生感。",
+        action: "查看输出池",
+        route: "#overview",
+        related: ["会议结果落地", "口径重写", "输出生成"]
+      },
+      "风险保留": {
+        kind: "内部操作",
+        owner: "章节函数",
+        summary: "把职业病证据和人物私线保留为后续压力。",
+        role: "避免本章一次性解决所有线索。",
+        risk: "保留项必须能被后续事件图谱继续追踪。",
+        action: "查看检查项",
+        route: "#check",
+        related: ["证据继续预热", "私线偏移条件", "悬置与保留入口"]
+      },
+      "悬置输出": {
+        kind: "内部操作",
+        owner: "章节函数",
+        summary: "把未公开证据转换成后续章节可继续使用的输出入口。",
+        role: "让后台压力保留在事件系统中。",
+        risk: "不能在本章提前给出证据结论。",
+        action: "回总览",
+        route: "#overview",
+        related: ["职业病证据压力", "证据继续预热", "悬置与保留入口"]
+      },
+      "会议结果落地": {
+        kind: "输出事件",
+        owner: "故事主轴",
+        summary: "C13 的主输出，成为后续争夺的公共前提。",
+        role: "把会议内部处理转成后续可引用的新事件。",
+        risk: "不能和输出池里的其他事件强行互连，因果要交给事件图谱。",
+        action: "查看加工路径",
+        route: "#logic",
+        related: ["输出生成", "合流与冲突化", "结果包装", "口径重写"]
+      },
+      "口径重写": {
+        kind: "输出事件",
+        owner: "电视台线",
+        summary: "会议结果被转换成可传播、可控、可争夺的表达。",
+        role: "承接会议结果，但作为独立后续事件存在。",
+        risk: "电视台动作桥需要补强。",
+        action: "查看需补检查",
+        route: "#check",
+        related: ["口径转译", "媒体转译", "电视台转译", "会议结果落地"]
+      },
+      "私线偏移条件": {
+        kind: "输出事件",
+        owner: "张航远线",
+        summary: "人物位置变化进入个人行动风险，是本章的风险输出之一。",
+        role: "给后续私线提供条件，而不是在本章直接完成私线行动。",
+        risk: "缺少触发动作时会显得生硬。",
+        action: "检查动作桥",
+        route: "#check",
+        related: ["张航远被边缘化", "风险输出", "张航远私线"]
+      },
+      "证据继续预热": {
+        kind: "输出事件",
+        owner: "职业病证据线",
+        summary: "证据获得后续正式入场位置，但本章不终结。",
+        role: "保留后台压力，让后续事件继续承接。",
+        risk: "预热必须可追踪，不能变成无对象伏笔。",
+        action: "查看悬置逻辑",
+        route: "#logic",
+        related: ["职业病证据压力", "悬置与保留入口", "悬置输出"]
+      },
+      "输入并列": {
+        kind: "检查项",
+        owner: "边界规则",
+        summary: "输入池只列外部事件，不表达输入事件之间的因果关系。",
+        role: "防止把章节页误用成事件因果图。",
+        risk: "如果输入之间画线，会破坏章节函数模型。",
+        action: "回总览",
+        route: "#overview",
+        related: ["采访材料成形", "救助显形", "张航远被边缘化", "职业病证据压力"]
+      },
+      "内部有逻辑": {
+        kind: "检查项",
+        owner: "章节函数",
+        summary: "承接、合流、冲突化、转译、悬置和生成都发生在章节内部。",
+        role: "证明章节不是摘要容器，而是加工函数。",
+        risk: "内部处理若过弱，输出事件就没有可信来源。",
+        action: "查看内部组合",
+        route: "#logic",
+        related: ["合流与冲突化", "输出生成", "口径转译"]
+      },
+      "输出清楚": {
+        kind: "检查项",
+        owner: "输出池",
+        summary: "输出池列出章节加工后的外部事件产物。",
+        role: "让后续事件图谱可以引用这些对象。",
+        risk: "输出如果只是句子摘要，就无法继续追踪。",
+        action: "回总览",
+        route: "#overview",
+        related: ["会议结果落地", "口径重写", "私线偏移条件", "证据继续预热"]
+      },
+      "输出不互连": {
+        kind: "检查项",
+        owner: "边界规则",
+        summary: "输出事件之间不在章节页强连，后续因果关系交给中心事件图谱。",
+        role: "保持章节加工台和事件图谱的对象边界。",
+        risk: "输出区一旦画箭头，会回到全局时间线混乱的问题。",
+        action: "回总览",
+        route: "#overview",
+        related: ["会议结果落地", "口径重写", "私线偏移条件", "证据继续预热"]
+      },
+      "电视台转译": {
+        kind: "检查项",
+        owner: "需补项",
+        summary: "会议结果到口径重写之间的电视台动作桥还需要明确。",
+        role: "补足输出事件的发生机制。",
+        risk: "没有动作桥时，口径重写会像作者解释。",
+        action: "查看转译节点",
+        route: "#logic",
+        related: ["口径转译", "媒体转译", "口径重写"]
+      },
+      "张航远私线": {
+        kind: "检查项",
+        owner: "需补项",
+        summary: "张航远从边缘化到私线偏移条件之间需要可见触发。",
+        role: "让人物线输出有动作依据。",
+        risk: "如果只写心理状态，后续行动会缺乏事件支撑。",
+        action: "回总览",
+        route: "#overview",
+        related: ["张航远被边缘化", "风险输出", "私线偏移条件"]
+      },
+      "时间线边界": {
+        kind: "检查项",
+        owner: "边界规则",
+        summary: "本版不修改全局时间线，也不往全局时间线上叠加事件关系箭头。",
+        role: "把宏观定位和对象编辑拆开。",
+        risk: "回到全局箭头会破坏现有时间线可读性。",
+        action: "回加工台",
+        route: "#overview",
+        related: ["输入并列", "输出不互连"]
+      }
+    };
+
+    let activeKey = "会议结果落地";
+
+    function labelFromNode(node) {
+      if (node.matches(".event-card")) return node.querySelector("strong")?.textContent.trim();
+      if (node.matches(".operation-node, .logic-node")) return node.querySelector(".op-head span")?.textContent.trim();
+      if (node.matches(".badge")) return node.textContent.trim();
+      if (node.matches(".matrix-table tr")) return node.querySelector("td")?.textContent.trim();
+      return "";
+    }
+
+    function selectableNodes() {
+      return [...document.querySelectorAll(".event-card, .operation-node, .logic-node, .badge, .matrix-table tr:not(:first-child)")];
+    }
+
+    function ensureSelectable() {
+      selectableNodes().forEach((node) => {
+        const label = labelFromNode(node);
+        if (!label) return;
+        node.dataset.objectKey = label;
+        node.setAttribute("tabindex", "0");
+        node.setAttribute("role", "button");
+        node.setAttribute("aria-label", `选择 ${label}`);
+      });
+    }
+
+    function renderOverviewSelection(item) {
+      const root = document.getElementById("overview-selection");
+      if (!root) return;
+      root.innerHTML = `
+        <div class="selection-title">${activeKey}</div>
+        <div class="selection-summary">${item.summary}</div>
+        <div class="selection-action">
+          <a class="btn primary" href="${item.route}">${item.action}</a>
+          <a class="btn" href="#check">检查边界</a>
+        </div>
+      `;
+    }
+
+    function renderInspector(item) {
+      const html = `
+        <div class="inspect-block">
+          <p class="eyebrow">Selected Object</p>
+          <h2>${activeKey}</h2>
+          <p>${item.summary}</p>
+        </div>
+        <div class="inspector-meta">
+          <div class="inspector-row"><span>类型</span><strong>${item.kind}</strong></div>
+          <div class="inspector-row"><span>归属</span><strong>${item.owner}</strong></div>
+          <div class="inspector-row"><span>作用</span><strong>${item.role}</strong></div>
+          <div class="inspector-row"><span>风险</span><strong>${item.risk}</strong></div>
+        </div>
+        <div class="issue-list">
+          <div class="issue ok">
+            <strong>交互规则</strong>
+            单击只选中对象并显示 Inspector，不直接跳转详情页。
+          </div>
+          <div class="issue">
+            <strong>路径高亮</strong>
+            当前只高亮与该对象相关的输入、内部操作、输出或检查项。
+          </div>
+        </div>
+        <div class="action-stack" style="padding:12px 14px;">
+          <a class="btn primary" href="${item.route}">${item.action}</a>
+          <a class="btn" href="#overview">回加工台</a>
+        </div>
+      `;
+      document.querySelectorAll(".side-inspector").forEach((node) => {
+        node.innerHTML = html;
+      });
+    }
+
+    function updateSelection(nextKey) {
+      activeKey = objectModel[nextKey] ? nextKey : activeKey;
+      const item = objectModel[activeKey] || objectModel["会议结果落地"];
+      const related = new Set([activeKey, ...(item.related || [])]);
+      selectableNodes().forEach((node) => {
+        const key = node.dataset.objectKey || labelFromNode(node);
+        const isSelected = key === activeKey;
+        const isRelated = related.has(key);
+        node.classList.toggle("selected", isSelected);
+        node.classList.toggle("related", !isSelected && isRelated);
+        node.classList.toggle("dimmed", !isSelected && !isRelated);
+      });
+      renderOverviewSelection(item);
+      renderInspector(item);
+    }
+
+    function wireSelection() {
+      ensureSelectable();
+      selectableNodes().forEach((node) => {
+        node.addEventListener("click", () => updateSelection(node.dataset.objectKey));
+        node.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            updateSelection(node.dataset.objectKey);
+          }
+        });
+      });
+    }
+
+    function setRoute() {
+      const route = (location.hash || "#overview").replace("#", "");
+      const key = Object.prototype.hasOwnProperty.call(views, route) ? route : "overview";
+      Object.entries(views).forEach(([name, node]) => {
+        node.classList.toggle("active", name === key);
+      });
+      document.querySelectorAll("[data-nav]").forEach((item) => {
+        item.classList.toggle("active", item.dataset.nav === key);
+      });
+      if (key === "logic" && !["场景承接", "合流与冲突化", "口径转译", "媒体转译", "悬置与保留入口", "输出生成", "风险保留", "悬置输出"].includes(activeKey)) {
+        updateSelection("合流与冲突化");
+      } else if (key === "check" && !["输入并列", "内部有逻辑", "输出清楚", "输出不互连", "电视台转译", "张航远私线", "时间线边界", "私线偏移条件"].includes(activeKey)) {
+        updateSelection("私线偏移条件");
+      } else {
+        updateSelection(activeKey);
+      }
+    }
+
+    wireSelection();
+    window.addEventListener("hashchange", setRoute);
+    setRoute();
+  </script>
+</body>
+</html>

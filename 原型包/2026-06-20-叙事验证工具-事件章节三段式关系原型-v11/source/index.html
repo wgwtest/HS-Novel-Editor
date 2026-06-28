@@ -1,0 +1,1422 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>叙事验证工具 事件章节三段式关系原型 v11</title>
+  <style>
+    :root {
+      --bg: #e7ecea;
+      --paper: #fbfcfb;
+      --panel: #ffffff;
+      --ink: #111918;
+      --muted: #66736f;
+      --line: #8fa5a0;
+      --line-soft: #dfe7e4;
+      --teal: #08766a;
+      --teal-strong: #045a52;
+      --teal-soft: #d9efec;
+      --red: #bd2f48;
+      --red-soft: #f4dbe1;
+      --violet: #66558a;
+      --violet-soft: #e7e2ef;
+      --amber: #a96d12;
+      --amber-soft: #f5e5c6;
+      --blue: #315f83;
+      --blue-soft: #dbe8f1;
+      --green: #447364;
+      --green-soft: #e3efe9;
+      --mono: Consolas, "Cascadia Mono", "Courier New", monospace;
+      --sans: "Microsoft YaHei UI", "Noto Sans CJK SC", "PingFang SC", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      width: 1920px;
+      height: 1080px;
+      margin: 0;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .frame {
+      width: 100%;
+      height: 100%;
+      padding: 16px;
+    }
+
+    .app {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-rows: 44px 1fr;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      box-shadow: 0 24px 70px rgba(24, 41, 38, 0.12);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 22px;
+      border-bottom: 1px solid var(--line);
+      background: #f9fbfa;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .brand span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .topnav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .topnav a,
+    .btn {
+      height: 30px;
+      padding: 0 13px;
+      border: 1px solid var(--line);
+      background: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .topnav a.active,
+    .btn.primary {
+      border-color: var(--teal);
+      background: var(--teal);
+      color: #fff;
+    }
+
+    .btn.dark {
+      border-color: #102522;
+      background: #102522;
+      color: #fff;
+    }
+
+    .view {
+      display: none;
+      min-height: 0;
+      height: 100%;
+    }
+
+    .view.active { display: grid; }
+
+    .object-page {
+      grid-template-rows: 82px 1fr 132px;
+      gap: 12px;
+      padding: 18px 22px;
+      min-height: 0;
+    }
+
+    .object-bar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: center;
+      padding: 12px 14px 12px 16px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .eyebrow {
+      margin: 0 0 6px;
+      color: var(--teal-strong);
+      font: 10px/1.1 var(--mono);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    h1, h2, h3, p { margin: 0; }
+
+    h1 {
+      font-size: 24px;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    .object-bar p {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .meta-line {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      max-width: 700px;
+    }
+
+    .tag {
+      min-height: 26px;
+      padding: 5px 8px;
+      border: 1px solid var(--line);
+      background: #f8faf9;
+      color: #33413e;
+      font: 11px/1.1 var(--mono);
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+    }
+
+    .tag.strong {
+      border-color: var(--teal);
+      background: var(--teal-soft);
+      color: #053b36;
+      font-weight: 900;
+    }
+
+    .triad {
+      display: grid;
+      grid-template-columns: 350px minmax(0, 1fr) 350px;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .panel {
+      min-height: 0;
+      border: 1px solid var(--line);
+      background: #fff;
+      display: grid;
+      grid-template-rows: 46px 1fr;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 13px;
+      border-bottom: 1px solid var(--line-soft);
+      background: #f8faf9;
+    }
+
+    .panel-head h2 {
+      font-size: 15px;
+      line-height: 1;
+    }
+
+    .panel-head span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .panel-body {
+      min-height: 0;
+      padding: 12px;
+      overflow: hidden;
+    }
+
+    .input-col .panel-head {
+      border-top: 4px solid var(--blue);
+    }
+
+    .process-col .panel-head {
+      border-top: 4px solid var(--teal);
+    }
+
+    .output-col .panel-head {
+      border-top: 4px solid var(--amber);
+    }
+
+    .card-stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .event-card {
+      position: relative;
+      min-height: 74px;
+      padding: 10px 10px 10px 13px;
+      border: 1px solid #88aca7;
+      border-left: 5px solid var(--teal);
+      background: var(--teal-soft);
+    }
+
+    .event-card.blue {
+      border-color: #7fa5bf;
+      border-left-color: var(--blue);
+      background: var(--blue-soft);
+    }
+
+    .event-card.red {
+      border-color: #d3788b;
+      border-left-color: var(--red);
+      background: var(--red-soft);
+    }
+
+    .event-card.violet {
+      border-color: #a699bd;
+      border-left-color: var(--violet);
+      background: var(--violet-soft);
+    }
+
+    .event-card.amber {
+      border-color: #d6aa60;
+      border-left-color: var(--amber);
+      background: var(--amber-soft);
+    }
+
+    .event-card.green {
+      border-color: #89aa9d;
+      border-left-color: var(--green);
+      background: var(--green-soft);
+    }
+
+    .event-card strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 15px;
+      line-height: 1.15;
+    }
+
+    .event-card small {
+      display: block;
+      margin-bottom: 6px;
+      color: #263431;
+      font: 10px/1.1 var(--mono);
+      font-weight: 800;
+    }
+
+    .event-card p {
+      color: #3f4d49;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .event-card.current {
+      border-width: 2px;
+      box-shadow: inset 0 -5px 0 var(--teal);
+      min-height: 88px;
+    }
+
+    .process-board {
+      height: 100%;
+      display: grid;
+      grid-template-rows: 100px repeat(5, minmax(76px, 1fr));
+      gap: 10px;
+    }
+
+    .current-event {
+      display: grid;
+      grid-template-columns: 1fr 220px;
+      gap: 12px;
+      padding: 12px;
+      border: 2px solid var(--teal);
+      background: linear-gradient(90deg, #e3f3f1 0%, #fbfefe 100%);
+      box-shadow: inset 0 -5px 0 var(--teal);
+    }
+
+    .current-event h2 {
+      margin-bottom: 5px;
+      font-size: 21px;
+      line-height: 1.1;
+    }
+
+    .current-event p {
+      color: #3c4a47;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .current-event .metric {
+      display: grid;
+      gap: 6px;
+      align-content: center;
+      padding-left: 12px;
+      border-left: 1px solid var(--line);
+      font-size: 12px;
+    }
+
+    .metric div {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+    }
+
+    .metric strong { color: var(--ink); }
+
+    .step-row {
+      display: grid;
+      grid-template-columns: 116px 1fr 170px;
+      gap: 10px;
+      align-items: stretch;
+      min-height: 0;
+    }
+
+    .step-label {
+      padding: 10px;
+      border: 1px solid var(--line);
+      background: #f4f7f6;
+      display: grid;
+      align-content: center;
+      gap: 4px;
+    }
+
+    .step-label strong {
+      font-size: 14px;
+    }
+
+    .step-label span {
+      color: var(--muted);
+      font: 10px/1.1 var(--mono);
+    }
+
+    .step-content {
+      padding: 10px 12px;
+      border: 1px solid var(--line-soft);
+      background: #fff;
+      display: grid;
+      align-content: center;
+      gap: 5px;
+    }
+
+    .step-content h3 {
+      font-size: 14px;
+      line-height: 1.2;
+    }
+
+    .step-content p {
+      color: #3f4d49;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .step-check {
+      padding: 10px;
+      border: 1px solid #cbd8d5;
+      background: #f8faf9;
+      color: #3f4d49;
+      font-size: 12px;
+      line-height: 1.45;
+      display: grid;
+      align-content: center;
+    }
+
+    .context-dock {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .context-box {
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 12px 14px;
+    }
+
+    .context-box h2 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 9px;
+      font-size: 15px;
+    }
+
+    .swatch {
+      width: 36px;
+      height: 5px;
+      background: var(--teal);
+      display: inline-block;
+    }
+
+    .swatch.blue { background: var(--blue); }
+    .swatch.amber { background: var(--amber); }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .pill {
+      padding: 5px 8px;
+      border: 1px solid var(--line-soft);
+      background: #f7faf9;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .pill.muted {
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .operation-board {
+      height: 100%;
+      display: grid;
+      grid-template-rows: repeat(6, 1fr);
+      gap: 9px;
+    }
+
+    .op-row {
+      display: grid;
+      grid-template-columns: 92px 1fr 170px;
+      gap: 10px;
+      min-height: 0;
+    }
+
+    .op-kind {
+      border: 1px solid var(--line);
+      background: #f5f8f7;
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .op-main {
+      border: 1px solid var(--line-soft);
+      background: #fff;
+      padding: 10px 12px;
+      display: grid;
+      align-content: center;
+      gap: 5px;
+    }
+
+    .op-main strong {
+      font-size: 14px;
+    }
+
+    .op-main span {
+      color: #3f4d49;
+      font-size: 12px;
+      line-height: 1.42;
+    }
+
+    .op-result {
+      border: 1px solid #cbd8d5;
+      background: #f9fbfa;
+      padding: 10px;
+      display: grid;
+      align-content: center;
+      color: #3f4d49;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .graph-page {
+      grid-template-rows: 82px 1fr 132px;
+      gap: 12px;
+      padding: 18px 22px;
+    }
+
+    .graph-board {
+      position: relative;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(to right, rgba(143, 165, 160, .16) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(143, 165, 160, .12) 1px, transparent 1px),
+        #fff;
+      background-size: 128px 100%, 100% 80px;
+      overflow: hidden;
+    }
+
+    .graph-col-label {
+      position: absolute;
+      top: 18px;
+      height: 28px;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      background: #f8faf9;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .node {
+      position: absolute;
+      min-height: 78px;
+      padding: 10px 12px;
+      border: 1px solid #88aca7;
+      border-left: 5px solid var(--teal);
+      background: var(--teal-soft);
+      box-shadow: 0 12px 20px rgba(27, 42, 39, .06);
+    }
+
+    .node strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 15px;
+    }
+
+    .node small {
+      display: block;
+      margin-bottom: 6px;
+      font: 10px/1 var(--mono);
+      font-weight: 900;
+    }
+
+    .node p {
+      color: #3f4d49;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .node.current {
+      border-width: 2px;
+      box-shadow: inset 0 -5px 0 var(--teal), 0 18px 32px rgba(27, 42, 39, .12);
+    }
+
+    .node.blue {
+      border-color: #7fa5bf;
+      border-left-color: var(--blue);
+      background: var(--blue-soft);
+    }
+
+    .node.red {
+      border-color: #d3788b;
+      border-left-color: var(--red);
+      background: var(--red-soft);
+    }
+
+    .node.violet {
+      border-color: #a699bd;
+      border-left-color: var(--violet);
+      background: var(--violet-soft);
+    }
+
+    .node.amber {
+      border-color: #d6aa60;
+      border-left-color: var(--amber);
+      background: var(--amber-soft);
+    }
+
+    .edge {
+      position: absolute;
+      height: 2px;
+      background: var(--line);
+      transform-origin: left center;
+    }
+
+    .edge::after {
+      content: "";
+      position: absolute;
+      right: -1px;
+      top: -4px;
+      width: 0;
+      height: 0;
+      border-left: 8px solid var(--line);
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+    }
+
+    .timeline-view {
+      grid-template-columns: 1fr 340px;
+      min-height: 0;
+    }
+
+    .timeline-main {
+      display: grid;
+      grid-template-rows: 52px 1fr;
+      gap: 12px;
+      padding: 18px 18px 18px 22px;
+      min-width: 0;
+      border-right: 1px solid var(--line);
+    }
+
+    .compact-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 0 12px;
+    }
+
+    .compact-toolbar h1 {
+      font-size: 18px;
+    }
+
+    .compact-toolbar span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .timeline-board {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(to right, transparent 0, transparent 167px, var(--line) 167px, var(--line) 168px, transparent 168px),
+        repeating-linear-gradient(to right, transparent 0, transparent 155px, rgba(143, 165, 160, .36) 156px),
+        repeating-linear-gradient(to bottom, transparent 0, transparent 52px, rgba(18, 31, 29, .07) 53px),
+        #fff;
+    }
+
+    .calendar-strip {
+      position: absolute;
+      left: 168px;
+      right: 0;
+      top: 0;
+      height: 42px;
+      background: #f2f5f4;
+      border-bottom: 1px solid #cad8d4;
+      color: #66736f;
+      font-size: 10px;
+    }
+
+    .calendar-strip span,
+    .chapter-strip span {
+      position: absolute;
+      white-space: nowrap;
+    }
+
+    .chapter-strip {
+      position: absolute;
+      left: 168px;
+      right: 0;
+      top: 42px;
+      height: 70px;
+      border-bottom: 2px solid #182b28;
+      background: #fbfdfc;
+    }
+
+    .chapter-chip {
+      position: absolute;
+      top: 6px;
+      height: 58px;
+      padding: 7px 8px;
+      border: 1px solid #6f8782;
+      border-top: 4px solid #172a27;
+      background: #fff;
+    }
+
+    .chapter-chip strong {
+      display: block;
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .chapter-chip em {
+      display: block;
+      margin-top: 5px;
+      color: #53615e;
+      font-size: 11px;
+      font-style: normal;
+    }
+
+    .lane-labels {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 168px;
+      bottom: 0;
+      border-right: 1px solid var(--line);
+      background: rgba(248, 251, 250, .96);
+    }
+
+    .lane-label {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 52px;
+      padding: 15px 12px 0;
+      border-bottom: 1px solid var(--line-soft);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .label-muted {
+      color: var(--muted);
+      font-weight: 700;
+      float: right;
+      font-size: 11px;
+    }
+
+    .timeline-item {
+      position: absolute;
+      height: 46px;
+      padding: 8px 10px;
+      border: 1px solid #65aaa2;
+      background: var(--teal-soft);
+      box-shadow: inset 0 -5px 0 var(--teal);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .timeline-item small {
+      display: block;
+      margin-top: 4px;
+      font: 10px/1 var(--mono);
+      color: #273532;
+    }
+
+    .timeline-item.selected {
+      outline: 3px solid #182b28;
+      outline-offset: 2px;
+    }
+
+    .timeline-item.thin {
+      height: 24px;
+      padding: 4px 8px;
+      box-shadow: none;
+      font-size: 11px;
+      line-height: 1;
+    }
+
+    .timeline-item.red {
+      border-color: #d1788b;
+      background: var(--red-soft);
+      box-shadow: inset 0 -5px 0 var(--red);
+    }
+
+    .timeline-item.violet {
+      border-color: #a79abe;
+      background: var(--violet-soft);
+      box-shadow: inset 0 -5px 0 var(--violet);
+    }
+
+    .timeline-item.amber {
+      border-color: #d6aa60;
+      background: var(--amber-soft);
+      box-shadow: inset 0 -5px 0 var(--amber);
+    }
+
+    .inspector {
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 12px;
+      padding: 18px;
+      background: #f8faf9;
+    }
+
+    .inspect-box {
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 14px;
+    }
+
+    .inspect-box h2 {
+      margin-bottom: 8px;
+      font-size: 18px;
+    }
+
+    .inspect-box p {
+      color: #3f4d49;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .inspect-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+      font-size: 12px;
+    }
+
+    .inspect-list div {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 7px;
+      border-bottom: 1px solid var(--line-soft);
+      color: var(--muted);
+    }
+
+    .inspect-list strong { color: var(--ink); }
+
+    .action-stack {
+      display: grid;
+      gap: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          叙事验证工具
+          <span>事件图 / 章节函数 / 三段式详情页</span>
+        </div>
+        <nav class="topnav" aria-label="原型视图">
+          <a href="#timeline" data-nav="timeline">全局画布</a>
+          <a href="#event" data-nav="event">事件页</a>
+          <a href="#chapter" data-nav="chapter">章节函数</a>
+          <a href="#graph" data-nav="graph">事件关系</a>
+        </nav>
+      </header>
+
+      <section class="view timeline-view active" id="view-timeline">
+        <main class="timeline-main">
+          <div class="compact-toolbar">
+            <div>
+              <h1>全局时间线画布</h1>
+              <span>章节作为横向刻度，事件跨章节推进；选中对象后由 Inspector 确认进入。</span>
+            </div>
+            <div class="meta-line">
+              <span class="tag">真实时间：2025/7/8-7/18</span>
+              <span class="tag strong">选中：E021 会议结果落地</span>
+            </div>
+          </div>
+
+          <div class="timeline-board">
+            <div class="calendar-strip">
+              <span style="left: 20px; top: 22px;">7/8</span>
+              <span style="left: 176px; top: 22px;">7/9</span>
+              <span style="left: 332px; top: 22px;">7/10</span>
+              <span style="left: 488px; top: 22px;">7/11</span>
+              <span style="left: 644px; top: 22px;">7/12</span>
+              <span style="left: 800px; top: 22px;">7/13</span>
+              <span style="left: 956px; top: 22px;">7/14</span>
+              <span style="left: 1112px; top: 22px;">7/15</span>
+              <span style="left: 1268px; top: 22px;">7/16</span>
+            </div>
+            <div class="chapter-strip">
+              <div class="chapter-chip" style="left:0;width:128px"><strong>C10</strong><em>采访启动</em></div>
+              <div class="chapter-chip" style="left:128px;width:192px"><strong>C11</strong><em>样本成形</em></div>
+              <div class="chapter-chip" style="left:320px;width:192px"><strong>C12</strong><em>显形加压</em></div>
+              <div class="chapter-chip" style="left:512px;width:192px"><strong>C13</strong><em>会议结果</em></div>
+              <div class="chapter-chip" style="left:704px;width:256px"><strong>C14</strong><em>会后吸收</em></div>
+              <div class="chapter-chip" style="left:960px;width:192px"><strong>C15</strong><em>私线偏移</em></div>
+              <div class="chapter-chip" style="left:1152px;width:192px"><strong>C16</strong><em>群众争夺</em></div>
+            </div>
+            <div class="lane-labels">
+              <div class="lane-label" style="top:112px">故事主轴</div>
+              <div class="lane-label" style="top:164px">采访线 <span class="label-muted">3人</span></div>
+              <div class="lane-label" style="top:216px">大仙祠线 <span class="label-muted">3人</span></div>
+              <div class="lane-label" style="top:268px">电视台线 <span class="label-muted">2人</span></div>
+              <div class="lane-label" style="top:320px">张航远线 <span class="label-muted">2人</span></div>
+              <div class="lane-label" style="top:372px">职业病证据线 <span class="label-muted">2人</span></div>
+            </div>
+
+            <div class="timeline-item" style="left:184px;top:126px;width:336px">采访启动<small>E010-E014</small></div>
+            <div class="timeline-item selected" style="left:544px;top:126px;width:420px">会议结果落地<small>E021-E028</small></div>
+            <div class="timeline-item" style="left:992px;top:126px;width:318px">会后转争夺<small>E029-E041</small></div>
+            <div class="timeline-item" style="left:240px;top:178px;width:430px">走访与材料整理<small>C11-C12</small></div>
+            <div class="timeline-item thin" style="left:240px;top:230px;width:430px">叶 事实链走访</div>
+            <div class="timeline-item red thin" style="left:544px;top:250px;width:486px">张 被边缘化</div>
+            <div class="timeline-item violet" style="left:264px;top:286px;width:428px">救助显形<small>C11-C12</small></div>
+            <div class="timeline-item violet thin" style="left:544px;top:340px;width:486px">禹 情报后台发酵</div>
+            <div class="timeline-item" style="left:544px;top:414px;width:222px">口径重写<small>C13-C14</small></div>
+            <div class="timeline-item amber" style="left:704px;top:468px;width:332px">化学证据预热<small>C14-C15</small></div>
+            <div class="timeline-item red" style="left:544px;top:524px;width:486px">边缘化到私线偏移<small>C13-C15</small></div>
+          </div>
+        </main>
+
+        <aside class="inspector">
+          <div class="inspect-box">
+            <p class="eyebrow">Selected Story Event</p>
+            <h2>会议结果落地</h2>
+            <p>事件对象。它接收“采访材料成形”和“救助显形”的压力，在 C13-C14 被处理成可以进入会后争夺的公共结果。</p>
+            <div class="inspect-list">
+              <div><span>输入</span><strong>4 个前置事件</strong></div>
+              <div><span>处理</span><strong>会议口径 / 解释权 / 人物位移</strong></div>
+              <div><span>输出</span><strong>3 个后置事件</strong></div>
+            </div>
+          </div>
+          <div class="inspect-box">
+            <h2>关联章节</h2>
+            <p>C13 负责让会议结果显形，C14 负责把结果吸收到后续争夺中。</p>
+            <div class="inspect-list">
+              <div><span>C13</span><strong>会议结果</strong></div>
+              <div><span>C14</span><strong>会后吸收</strong></div>
+            </div>
+          </div>
+          <div class="inspect-box">
+            <h2>对象边界</h2>
+            <p>故事事件只表达正文中承担推进作用的部分；人物后台状态进入人物条，不拉长故事事件条。</p>
+          </div>
+          <div class="action-stack">
+            <a class="btn primary" href="#event">进入事件页</a>
+            <a class="btn" href="#chapter">进入章节函数页</a>
+            <a class="btn" href="#graph">查看事件关系</a>
+          </div>
+        </aside>
+      </section>
+
+      <section class="view object-page" id="view-event">
+        <header class="object-bar">
+          <div>
+            <p class="eyebrow">Story Event Detail</p>
+            <h1>E021-E028 会议结果落地</h1>
+            <p>事件页按“输入事件 -> 当前事件处理 -> 输出事件”组织；中部只处理当前事件，不替代章节函数。</p>
+          </div>
+          <div class="meta-line">
+            <span class="tag strong">故事主轴</span>
+            <span class="tag">C13-C14</span>
+            <span class="tag">2025/7/13-7/15</span>
+            <a class="btn" href="#timeline">回到画布</a>
+          </div>
+        </header>
+
+        <div class="triad">
+          <section class="panel input-col">
+            <div class="panel-head">
+              <h2>左侧输入</h2>
+              <span>前置事件 / 前置信息</span>
+            </div>
+            <div class="panel-body">
+              <div class="card-stack">
+                <a class="event-card blue" href="#graph">
+                  <strong>采访启动</strong>
+                  <small>E010-E014</small>
+                  <p>采访线形成事实收集入口，提供会议前可以被引用的材料基础。</p>
+                </a>
+                <a class="event-card violet" href="#graph">
+                  <strong>救助显形</strong>
+                  <small>E016-E020</small>
+                  <p>大仙祠线把救助和解释权推到台前，形成会议必须回应的外部压力。</p>
+                </a>
+                <a class="event-card red" href="#graph">
+                  <strong>张航远被边缘化</strong>
+                  <small>E019</small>
+                  <p>人物位置变化制造私线证明欲，为后续偏移埋下动因。</p>
+                </a>
+                <a class="event-card amber" href="#graph">
+                  <strong>证据预热</strong>
+                  <small>E018</small>
+                  <p>职业病证据还未成为主证据，但已经改变会议中的判断口径。</p>
+                </a>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel process-col">
+            <div class="panel-head">
+              <h2>中部处理逻辑与处理内容</h2>
+              <span>当前事件的主体区</span>
+            </div>
+            <div class="panel-body">
+              <div class="process-board">
+                <div class="current-event">
+                  <div>
+                    <h2>会议结果落地</h2>
+                    <p>多个前置事件在会议场景中被压缩成一个可公开承接的结果：采访线获得阶段性事实落点，但解释权仍未完全稳定。</p>
+                  </div>
+                  <div class="metric">
+                    <div><span>事件边界</span><strong>实写事件</strong></div>
+                    <div><span>参与人物</span><strong>叶 / 张 / 禹</strong></div>
+                    <div><span>主要风险</span><strong>误写成总结章</strong></div>
+                  </div>
+                </div>
+
+                <div class="step-row">
+                  <div class="step-label"><strong>触发条件</strong><span>CAUSE</span></div>
+                  <div class="step-content">
+                    <h3>材料已经足够让会议必须给出可追踪口径。</h3>
+                    <p>采访事实、救助压力和解释权争夺同时进入同一场景，会议不能继续停留在模糊态。</p>
+                  </div>
+                  <div class="step-check">输入必须可回溯到前置事件，而不是凭空说明。</div>
+                </div>
+
+                <div class="step-row">
+                  <div class="step-label"><strong>人物动作</strong><span>ACTION</span></div>
+                  <div class="step-content">
+                    <h3>叶依人承接事实链，张航远的位置被压缩，禹树保留后台情报入口。</h3>
+                    <p>三个人不是同一种参与方式：叶推动公开链路，张产生偏移压力，禹提供未显形的后台条件。</p>
+                  </div>
+                  <div class="step-check">人物动作要区分实写、被动影响和后台状态。</div>
+                </div>
+
+                <div class="step-row">
+                  <div class="step-label"><strong>冲突机制</strong><span>CONFLICT</span></div>
+                  <div class="step-content">
+                    <h3>事实链与解释权互相压迫，会议结果只能部分解决问题。</h3>
+                    <p>结果看似落地，但大仙祠线和电视台口径仍在争夺解释空间，事件因此能自然输出到后续章节。</p>
+                  </div>
+                  <div class="step-check">不能把会议写成一次性解决全部矛盾。</div>
+                </div>
+
+                <div class="step-row">
+                  <div class="step-label"><strong>状态变化</strong><span>STATE</span></div>
+                  <div class="step-content">
+                    <h3>事件从“材料压力”变成“会后争夺的公开前提”。</h3>
+                    <p>输入事件并未消失，而是被重新包装成会后可被各方争夺、引用和扭曲的公共结果。</p>
+                  </div>
+                  <div class="step-check">结果要能变成后置事件，不只是情绪变化。</div>
+                </div>
+
+                <div class="step-row">
+                  <div class="step-label"><strong>编辑检查</strong><span>EDIT</span></div>
+                  <div class="step-content">
+                    <h3>当前事件只写正文中发生并推动主线的部分。</h3>
+                    <p>禹树后台发酵、张航远私线欲望可以影响事件，但未被正文呈现的持续执行应放入人物条。</p>
+                  </div>
+                  <div class="step-check">故事事件条不因人物后台状态被拉长。</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel output-col">
+            <div class="panel-head">
+              <h2>右侧输出</h2>
+              <span>后置事件 / 后置逻辑</span>
+            </div>
+            <div class="panel-body">
+              <div class="card-stack">
+                <a class="event-card" href="#graph">
+                  <strong>会后转争夺</strong>
+                  <small>E029-E041</small>
+                  <p>会议结果成为各方争夺解释权、群众资源和后续口径的共同前提。</p>
+                </a>
+                <a class="event-card red" href="#graph">
+                  <strong>私线偏移条件</strong>
+                  <small>E030</small>
+                  <p>张航远的边缘化与证明欲被放大，开始制造偏离采访主线的行动条件。</p>
+                </a>
+                <a class="event-card blue" href="#graph">
+                  <strong>口径重写</strong>
+                  <small>E024-E032</small>
+                  <p>电视台线把会议结果转写成可播、可控、可争夺的公共表达。</p>
+                </a>
+                <a class="event-card amber" href="#graph">
+                  <strong>证据继续预热</strong>
+                  <small>E033</small>
+                  <p>化学证据尚未完全入场，但会议后的判断结构让它有了进入位置。</p>
+                </a>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <footer class="context-dock">
+          <section class="context-box">
+            <h2><span class="swatch"></span>人物</h2>
+            <div class="pill-row">
+              <span class="pill">叶依人：事实链承接</span>
+              <span class="pill">张航远：边缘化压力</span>
+              <span class="pill">禹树：后台情报入口</span>
+              <span class="pill muted">群众：后置争夺对象</span>
+            </div>
+          </section>
+          <section class="context-box">
+            <h2><span class="swatch blue"></span>地理</h2>
+            <div class="pill-row">
+              <span class="pill">会议室</span>
+              <span class="pill">电视台工作区</span>
+              <span class="pill">大仙祠外部场域</span>
+              <span class="pill muted">群众接触点</span>
+            </div>
+          </section>
+          <section class="context-box">
+            <h2><span class="swatch amber"></span>组织</h2>
+            <div class="pill-row">
+              <span class="pill">电视台</span>
+              <span class="pill">祠庙解释权网络</span>
+              <span class="pill">慈善资源</span>
+              <span class="pill muted">职业病证据链</span>
+            </div>
+          </section>
+        </footer>
+      </section>
+
+      <section class="view object-page" id="view-chapter">
+        <header class="object-bar">
+          <div>
+            <p class="eyebrow">Chapter Function Detail</p>
+            <h1>C13 会议结果</h1>
+            <p>章节页把一章视为事件处理函数：输入事件集进入正文，被承接、演化、补充、包装、创建或终结。</p>
+          </div>
+          <div class="meta-line">
+            <span class="tag strong">章节函数</span>
+            <span class="tag">2025/7/13</span>
+            <span class="tag">输入 5 / 输出 4</span>
+            <a class="btn" href="#timeline">回到画布</a>
+          </div>
+        </header>
+
+        <div class="triad">
+          <section class="panel input-col">
+            <div class="panel-head">
+              <h2>左侧输入事件集</h2>
+              <span>进入 C13 前</span>
+            </div>
+            <div class="panel-body">
+              <div class="card-stack">
+                <a class="event-card blue" href="#event">
+                  <strong>采访材料成形</strong>
+                  <small>E010-E014</small>
+                  <p>采访线已经有可被组织和会议吸收的材料。</p>
+                </a>
+                <a class="event-card violet" href="#event">
+                  <strong>救助显形</strong>
+                  <small>E016-E020</small>
+                  <p>大仙祠线把救助逻辑推到可见层，要求会议回应。</p>
+                </a>
+                <a class="event-card red" href="#event">
+                  <strong>张航远被边缘化</strong>
+                  <small>E019</small>
+                  <p>人物位置已发生变化，但还没有输出成私线事件。</p>
+                </a>
+                <a class="event-card amber" href="#event">
+                  <strong>职业病证据压力</strong>
+                  <small>E018</small>
+                  <p>证据存在但尚未正式成为公开主线。</p>
+                </a>
+                <a class="event-card green" href="#event">
+                  <strong>解释权预压</strong>
+                  <small>E017</small>
+                  <p>祠庙网络与媒体表达之间已经形成隐性冲突。</p>
+                </a>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel process-col">
+            <div class="panel-head">
+              <h2>中部章节加工台</h2>
+              <span>输出事件集 = C13(输入事件集)</span>
+            </div>
+            <div class="panel-body">
+              <div class="operation-board">
+                <div class="op-row">
+                  <div class="op-kind">承接</div>
+                  <div class="op-main">
+                    <strong>把采访材料与救助压力带入会议。</strong>
+                    <span>章节开端不重新开线，而是让已有事件在会议场景中发生碰撞。</span>
+                  </div>
+                  <div class="op-result">保持 E010/E016 的因果连续性。</div>
+                </div>
+                <div class="op-row">
+                  <div class="op-kind">演化</div>
+                  <div class="op-main">
+                    <strong>材料压力演化为会议必须给出的结果。</strong>
+                    <span>事实不再只是采访材料，而是转成组织层面的公共落点。</span>
+                  </div>
+                  <div class="op-result">形成 E021 会议结果落地。</div>
+                </div>
+                <div class="op-row">
+                  <div class="op-kind">补充</div>
+                  <div class="op-main">
+                    <strong>补充人物在会议中的位置变化。</strong>
+                    <span>叶依人继续承接事实链，张航远被压到边缘，禹树保持后台入口。</span>
+                  </div>
+                  <div class="op-result">人物状态进入事件后续条件。</div>
+                </div>
+                <div class="op-row">
+                  <div class="op-kind">包装</div>
+                  <div class="op-main">
+                    <strong>把同一事实包装成可传播口径。</strong>
+                    <span>电视台线不是复制事实，而是把会议结果转写为可播、可控、可争夺的表达。</span>
+                  </div>
+                  <div class="op-result">输出 E024 口径重写。</div>
+                </div>
+                <div class="op-row">
+                  <div class="op-kind">创建</div>
+                  <div class="op-main">
+                    <strong>创建会后争夺的新事件入口。</strong>
+                    <span>会议结果没有关闭故事，而是让多个组织力量有了继续争夺的对象。</span>
+                  </div>
+                  <div class="op-result">输出 E029 会后转争夺。</div>
+                </div>
+                <div class="op-row">
+                  <div class="op-kind">悬置</div>
+                  <div class="op-main">
+                    <strong>暂不终结职业病证据线。</strong>
+                    <span>证据只完成预热，不在本章直接爆开，避免章节承担过多结论。</span>
+                  </div>
+                  <div class="op-result">保留 E033 后续进入位置。</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel output-col">
+            <div class="panel-head">
+              <h2>右侧输出事件集</h2>
+              <span>离开 C13 后</span>
+            </div>
+            <div class="panel-body">
+              <div class="card-stack">
+                <a class="event-card current" href="#event">
+                  <strong>会议结果落地</strong>
+                  <small>E021-E028</small>
+                  <p>本章的主要输出，成为 C14-C15 继续推进的公共前提。</p>
+                </a>
+                <a class="event-card blue" href="#event">
+                  <strong>口径重写</strong>
+                  <small>E024</small>
+                  <p>电视台线接收会议结果并开始转换表达。</p>
+                </a>
+                <a class="event-card" href="#event">
+                  <strong>会后转争夺</strong>
+                  <small>E029</small>
+                  <p>解释权、群众资源和后续行动进入新争夺阶段。</p>
+                </a>
+                <a class="event-card red" href="#event">
+                  <strong>私线偏移条件</strong>
+                  <small>E030</small>
+                  <p>张航远被边缘化的结果进入个人行动风险。</p>
+                </a>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <footer class="context-dock">
+          <section class="context-box">
+            <h2><span class="swatch"></span>人物</h2>
+            <div class="pill-row">
+              <span class="pill">叶依人：承接事实链</span>
+              <span class="pill">张航远：位置下沉</span>
+              <span class="pill">禹树：后台入口</span>
+              <span class="pill muted">电视台人员：口径转写</span>
+            </div>
+          </section>
+          <section class="context-box">
+            <h2><span class="swatch blue"></span>地理</h2>
+            <div class="pill-row">
+              <span class="pill">会议场景</span>
+              <span class="pill">采访材料所在处</span>
+              <span class="pill">电视台空间</span>
+              <span class="pill muted">大仙祠外部压力场</span>
+            </div>
+          </section>
+          <section class="context-box">
+            <h2><span class="swatch amber"></span>组织</h2>
+            <div class="pill-row">
+              <span class="pill">电视台</span>
+              <span class="pill">大仙祠解释权</span>
+              <span class="pill">慈善资源</span>
+              <span class="pill muted">证据链外围</span>
+            </div>
+          </section>
+        </footer>
+      </section>
+
+      <section class="view graph-page" id="view-graph">
+        <header class="object-bar">
+          <div>
+            <p class="eyebrow">Event Relation Map</p>
+            <h1>事件前后置跳转关系</h1>
+            <p>起因和结果都指向事件对象；章节只是其中一段处理发生的位置。</p>
+          </div>
+          <div class="meta-line">
+            <span class="tag strong">当前：E021-E028</span>
+            <span class="tag">输入 4</span>
+            <span class="tag">输出 4</span>
+            <a class="btn" href="#event">返回事件页</a>
+          </div>
+        </header>
+
+        <main class="graph-board">
+          <div class="graph-col-label" style="left: 44px;">输入事件</div>
+          <div class="graph-col-label" style="left: 742px;">当前事件</div>
+          <div class="graph-col-label" style="right: 44px;">输出事件</div>
+
+          <a class="node blue" href="#event" style="left:64px;top:92px;width:330px;">
+            <strong>采访启动</strong><small>E010-E014</small><p>提供事实入口和采访材料。</p>
+          </a>
+          <a class="node violet" href="#event" style="left:64px;top:252px;width:330px;">
+            <strong>救助显形</strong><small>E016-E020</small><p>把解释权压力推到会议前。</p>
+          </a>
+          <a class="node red" href="#event" style="left:64px;top:412px;width:330px;">
+            <strong>张航远被边缘化</strong><small>E019</small><p>形成后续私线偏移的人物条件。</p>
+          </a>
+          <a class="node amber" href="#event" style="left:64px;top:572px;width:330px;">
+            <strong>证据预热</strong><small>E018</small><p>职业病证据尚未爆开，但已影响判断。</p>
+          </a>
+
+          <a class="node current" href="#event" style="left:710px;top:282px;width:420px;">
+            <strong>会议结果落地</strong><small>E021-E028 / C13-C14</small><p>输入事件被章节处理成公共落点，并输出会后争夺入口。</p>
+          </a>
+
+          <a class="node" href="#event" style="right:64px;top:112px;width:330px;">
+            <strong>会后转争夺</strong><small>E029-E041</small><p>组织和人物围绕会议结果继续争夺。</p>
+          </a>
+          <a class="node blue" href="#event" style="right:64px;top:272px;width:330px;">
+            <strong>口径重写</strong><small>E024-E032</small><p>电视台线开始把事实转换成传播表达。</p>
+          </a>
+          <a class="node red" href="#event" style="right:64px;top:432px;width:330px;">
+            <strong>私线偏移条件</strong><small>E030</small><p>张航远从位置变化走向行动风险。</p>
+          </a>
+          <a class="node amber" href="#event" style="right:64px;top:592px;width:330px;">
+            <strong>证据继续预热</strong><small>E033</small><p>职业病证据获得后续正式入场条件。</p>
+          </a>
+
+          <div class="edge" style="left:394px;top:138px;width:350px;transform:rotate(22deg);"></div>
+          <div class="edge" style="left:394px;top:298px;width:318px;transform:rotate(5deg);"></div>
+          <div class="edge" style="left:394px;top:458px;width:340px;transform:rotate(-18deg);"></div>
+          <div class="edge" style="left:394px;top:618px;width:382px;transform:rotate(-34deg);"></div>
+
+          <div class="edge" style="left:1130px;top:322px;width:330px;transform:rotate(-23deg);"></div>
+          <div class="edge" style="left:1130px;top:340px;width:318px;transform:rotate(-4deg);"></div>
+          <div class="edge" style="left:1130px;top:358px;width:322px;transform:rotate(18deg);"></div>
+          <div class="edge" style="left:1130px;top:376px;width:370px;transform:rotate(33deg);"></div>
+        </main>
+
+        <footer class="context-dock">
+          <section class="context-box">
+            <h2><span class="swatch"></span>关系规则</h2>
+            <div class="pill-row">
+              <span class="pill">起因：前置事件引用</span>
+              <span class="pill">过程：当前事件内部</span>
+              <span class="pill">结果：后置事件引用</span>
+            </div>
+          </section>
+          <section class="context-box">
+            <h2><span class="swatch blue"></span>章节位置</h2>
+            <div class="pill-row">
+              <span class="pill">C13：显形处理</span>
+              <span class="pill">C14：会后吸收</span>
+              <span class="pill muted">章节不是主轴本身</span>
+            </div>
+          </section>
+          <section class="context-box">
+            <h2><span class="swatch amber"></span>对象组成</h2>
+            <div class="pill-row">
+              <span class="pill">人物</span>
+              <span class="pill">地理</span>
+              <span class="pill">组织</span>
+              <span class="pill muted">共同构成具体时间点</span>
+            </div>
+          </section>
+        </footer>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const views = {
+      timeline: document.getElementById("view-timeline"),
+      event: document.getElementById("view-event"),
+      chapter: document.getElementById("view-chapter"),
+      graph: document.getElementById("view-graph")
+    };
+
+    function setRoute() {
+      const route = (location.hash || "#timeline").replace("#", "");
+      const key = Object.prototype.hasOwnProperty.call(views, route) ? route : "timeline";
+      Object.entries(views).forEach(([name, view]) => {
+        view.classList.toggle("active", name === key);
+      });
+      document.querySelectorAll("[data-nav]").forEach((item) => {
+        item.classList.toggle("active", item.dataset.nav === key);
+      });
+    }
+
+    window.addEventListener("hashchange", setRoute);
+    setRoute();
+  </script>
+</body>
+</html>

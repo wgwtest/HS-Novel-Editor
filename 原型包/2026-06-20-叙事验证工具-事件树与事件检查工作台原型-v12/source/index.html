@@ -1,0 +1,1470 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>叙事验证工具 事件树与事件检查工作台原型 v12</title>
+  <style>
+    :root {
+      --bg: #e8eeeb;
+      --paper: #fbfcfb;
+      --ink: #101715;
+      --muted: #62716d;
+      --line: #889d98;
+      --line-soft: #dce5e1;
+      --grid: rgba(136, 157, 152, .22);
+      --teal: #087468;
+      --teal-deep: #063f3a;
+      --teal-soft: #d9efec;
+      --blue: #2f5e82;
+      --blue-soft: #dae8f2;
+      --violet: #65538a;
+      --violet-soft: #e8e2f0;
+      --red: #bf2f49;
+      --red-soft: #f5dce2;
+      --amber: #a56c12;
+      --amber-soft: #f5e6c8;
+      --green: #427463;
+      --green-soft: #e3efe8;
+      --warn: #b06400;
+      --warn-soft: #fff1d4;
+      --good: #087468;
+      --good-soft: #dff1ed;
+      --bad: #b42b40;
+      --bad-soft: #f5dde2;
+      --mono: Consolas, "Cascadia Mono", "Courier New", monospace;
+      --sans: "Microsoft YaHei UI", "Noto Sans CJK SC", "PingFang SC", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      width: 1920px;
+      height: 1080px;
+      margin: 0;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .frame {
+      width: 100%;
+      height: 100%;
+      padding: 16px;
+    }
+
+    .app {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-rows: 44px 1fr;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      box-shadow: 0 22px 62px rgba(26, 42, 39, .13);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 22px;
+      border-bottom: 1px solid var(--line);
+      background: #f9fbfa;
+    }
+
+    .brand {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .brand span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .topnav {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .btn,
+    .topnav a {
+      height: 30px;
+      padding: 0 13px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--line);
+      background: #fff;
+      font-size: 12px;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .btn.primary,
+    .topnav a.active {
+      border-color: var(--teal);
+      background: var(--teal);
+      color: #fff;
+    }
+
+    .btn.dark {
+      border-color: #102522;
+      background: #102522;
+      color: #fff;
+    }
+
+    .view {
+      display: none;
+      min-height: 0;
+      height: 100%;
+    }
+
+    .view.active { display: grid; }
+
+    h1, h2, h3, p { margin: 0; }
+
+    .eyebrow {
+      margin-bottom: 6px;
+      color: var(--teal-deep);
+      font: 10px/1.1 var(--mono);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .tag {
+      min-height: 26px;
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 8px;
+      border: 1px solid var(--line);
+      background: #f8faf9;
+      color: #33413e;
+      font: 11px/1.1 var(--mono);
+      white-space: nowrap;
+    }
+
+    .tag.strong {
+      border-color: var(--teal);
+      background: var(--teal-soft);
+      color: #073d38;
+      font-weight: 900;
+    }
+
+    .mode-toggle {
+      display: inline-grid;
+      grid-template-columns: 1fr 1fr;
+      height: 32px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .mode-toggle a {
+      min-width: 86px;
+      padding: 0 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-right: 1px solid var(--line);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .mode-toggle a:last-child { border-right: 0; }
+
+    .mode-toggle a.active {
+      background: #102522;
+      color: #fff;
+    }
+
+    .timeline-view {
+      grid-template-columns: 1fr 342px;
+      min-height: 0;
+    }
+
+    .timeline-main {
+      display: grid;
+      grid-template-rows: 56px 1fr;
+      gap: 12px;
+      padding: 18px 18px 18px 22px;
+      min-width: 0;
+      border-right: 1px solid var(--line);
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 0 12px;
+    }
+
+    .toolbar h1 {
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .toolbar p {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .toolbar-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .timeline-board {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(to right, transparent 0, transparent 166px, var(--line) 166px, var(--line) 167px, transparent 167px),
+        repeating-linear-gradient(to right, transparent 0, transparent 155px, var(--grid) 156px),
+        repeating-linear-gradient(to bottom, transparent 0, transparent 52px, rgba(18, 31, 29, .07) 53px),
+        #fff;
+    }
+
+    .calendar-strip {
+      position: absolute;
+      left: 167px;
+      right: 0;
+      top: 0;
+      height: 42px;
+      background: #f1f5f3;
+      border-bottom: 1px solid #cad7d3;
+      color: #65736f;
+      font-size: 10px;
+    }
+
+    .calendar-strip span,
+    .chapter-strip span {
+      position: absolute;
+      white-space: nowrap;
+    }
+
+    .chapter-strip {
+      position: absolute;
+      left: 167px;
+      right: 0;
+      top: 42px;
+      height: 70px;
+      border-bottom: 2px solid #172a27;
+      background: #fbfdfc;
+    }
+
+    .chapter-chip {
+      position: absolute;
+      top: 6px;
+      height: 58px;
+      padding: 7px 8px;
+      border: 1px solid #718984;
+      border-top: 4px solid #172a27;
+      background: #fff;
+    }
+
+    .chapter-chip strong {
+      display: block;
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .chapter-chip em {
+      display: block;
+      margin-top: 5px;
+      color: #53615e;
+      font-size: 11px;
+      font-style: normal;
+    }
+
+    .lane-labels {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 167px;
+      border-right: 1px solid var(--line);
+      background: rgba(248, 251, 250, .97);
+      z-index: 3;
+    }
+
+    .lane-label {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 52px;
+      padding: 15px 12px 0;
+      border-bottom: 1px solid var(--line-soft);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .label-muted {
+      float: right;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .timeline-item {
+      position: absolute;
+      height: 46px;
+      padding: 8px 10px;
+      border: 1px solid #64aaa1;
+      background: var(--teal-soft);
+      box-shadow: inset 0 -5px 0 var(--teal);
+      font-size: 13px;
+      font-weight: 900;
+      z-index: 4;
+    }
+
+    .timeline-item small {
+      display: block;
+      margin-top: 4px;
+      color: #273532;
+      font: 10px/1 var(--mono);
+      font-weight: 800;
+    }
+
+    .timeline-item.selected {
+      outline: 3px solid #172a27;
+      outline-offset: 2px;
+      z-index: 8;
+    }
+
+    .timeline-item.thin {
+      height: 24px;
+      padding: 4px 8px;
+      box-shadow: none;
+      font-size: 11px;
+      line-height: 1;
+    }
+
+    .timeline-item.red {
+      border-color: #d2788a;
+      background: var(--red-soft);
+      box-shadow: inset 0 -5px 0 var(--red);
+    }
+
+    .timeline-item.violet {
+      border-color: #a79abe;
+      background: var(--violet-soft);
+      box-shadow: inset 0 -5px 0 var(--violet);
+    }
+
+    .timeline-item.amber {
+      border-color: #d5a85f;
+      background: var(--amber-soft);
+      box-shadow: inset 0 -5px 0 var(--amber);
+    }
+
+    .relation-layer {
+      position: absolute;
+      left: 167px;
+      right: 0;
+      top: 112px;
+      bottom: 0;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .relation-layer path {
+      fill: none;
+      stroke: rgba(9, 75, 69, .54);
+      stroke-width: 2;
+      marker-end: url(#arrowHead);
+    }
+
+    .relation-layer path.input {
+      stroke: rgba(47, 94, 130, .54);
+    }
+
+    .relation-layer path.output {
+      stroke: rgba(166, 108, 18, .62);
+    }
+
+    .relation-label {
+      position: absolute;
+      z-index: 5;
+      padding: 4px 6px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, .9);
+      color: #31403c;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .inspector {
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 12px;
+      padding: 18px;
+      background: #f8faf9;
+    }
+
+    .inspect-box {
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 14px;
+    }
+
+    .inspect-box h2 {
+      margin-bottom: 8px;
+      font-size: 18px;
+    }
+
+    .inspect-box p {
+      color: #3f4d49;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .inspect-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+      font-size: 12px;
+    }
+
+    .inspect-list div {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 7px;
+      border-bottom: 1px solid var(--line-soft);
+      color: var(--muted);
+    }
+
+    .inspect-list strong { color: var(--ink); }
+
+    .action-stack {
+      display: grid;
+      gap: 8px;
+    }
+
+    .tree-view {
+      grid-template-rows: 56px 1fr 118px;
+      gap: 12px;
+      padding: 18px 22px;
+    }
+
+    .tree-board {
+      position: relative;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(to right, var(--grid) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(136, 157, 152, .16) 1px, transparent 1px),
+        #fff;
+      background-size: 128px 100%, 100% 78px;
+      overflow: hidden;
+    }
+
+    .tree-band {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      border-left: 1px solid rgba(136, 157, 152, .4);
+      border-right: 1px solid rgba(136, 157, 152, .3);
+      background: rgba(248, 251, 250, .72);
+    }
+
+    .tree-label {
+      position: absolute;
+      top: 18px;
+      height: 30px;
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      background: #fff;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .tree-node {
+      position: absolute;
+      min-height: 78px;
+      padding: 10px 12px;
+      border: 1px solid #82aaa4;
+      border-left: 5px solid var(--teal);
+      background: var(--teal-soft);
+      box-shadow: 0 12px 20px rgba(27, 42, 39, .05);
+      z-index: 4;
+    }
+
+    .tree-node strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 15px;
+    }
+
+    .tree-node small {
+      display: block;
+      margin-bottom: 6px;
+      font: 10px/1 var(--mono);
+      font-weight: 900;
+    }
+
+    .tree-node p {
+      color: #3f4d49;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .tree-node.current {
+      border-width: 2px;
+      box-shadow: inset 0 -5px 0 var(--teal), 0 18px 32px rgba(27, 42, 39, .12);
+    }
+
+    .tree-node.blue {
+      border-color: #7fa5bf;
+      border-left-color: var(--blue);
+      background: var(--blue-soft);
+    }
+
+    .tree-node.violet {
+      border-color: #a79abe;
+      border-left-color: var(--violet);
+      background: var(--violet-soft);
+    }
+
+    .tree-node.red {
+      border-color: #d2788a;
+      border-left-color: var(--red);
+      background: var(--red-soft);
+    }
+
+    .tree-node.amber {
+      border-color: #d5a85f;
+      border-left-color: var(--amber);
+      background: var(--amber-soft);
+    }
+
+    .tree-node.green {
+      border-color: #8aab9e;
+      border-left-color: var(--green);
+      background: var(--green-soft);
+    }
+
+    .tree-svg {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .tree-svg path {
+      fill: none;
+      stroke: rgba(35, 67, 61, .56);
+      stroke-width: 2;
+      marker-end: url(#treeArrow);
+    }
+
+    .tree-svg path.faint {
+      stroke-dasharray: 6 5;
+      stroke: rgba(101, 83, 138, .55);
+    }
+
+    .legend-dock {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    .legend-box {
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 12px 14px;
+    }
+
+    .legend-box h2 {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 9px;
+      font-size: 15px;
+    }
+
+    .swatch {
+      width: 36px;
+      height: 5px;
+      display: inline-block;
+      background: var(--teal);
+    }
+
+    .swatch.blue { background: var(--blue); }
+    .swatch.amber { background: var(--amber); }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .pill {
+      padding: 5px 8px;
+      border: 1px solid var(--line-soft);
+      background: #f7faf9;
+      font-size: 12px;
+      font-weight: 750;
+      line-height: 1.1;
+    }
+
+    .check-view {
+      grid-template-rows: 82px 1fr 118px;
+      gap: 12px;
+      padding: 18px 22px;
+    }
+
+    .object-bar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: center;
+      padding: 12px 14px 12px 16px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .object-bar h1 {
+      font-size: 24px;
+      line-height: 1.1;
+    }
+
+    .object-bar p {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .meta-line {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      max-width: 760px;
+    }
+
+    .check-layout {
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr) 316px;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .panel {
+      min-height: 0;
+      border: 1px solid var(--line);
+      background: #fff;
+      display: grid;
+      grid-template-rows: 44px 1fr;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--line-soft);
+      background: #f8faf9;
+    }
+
+    .panel-head h2 {
+      font-size: 15px;
+      line-height: 1;
+    }
+
+    .panel-head span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .panel-body {
+      min-height: 0;
+      padding: 12px;
+      overflow: hidden;
+    }
+
+    .mini-card-stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .mini-card {
+      padding: 10px 10px 10px 12px;
+      border: 1px solid #87aca6;
+      border-left: 5px solid var(--teal);
+      background: var(--teal-soft);
+    }
+
+    .mini-card.blue {
+      border-color: #7fa5bf;
+      border-left-color: var(--blue);
+      background: var(--blue-soft);
+    }
+
+    .mini-card.violet {
+      border-color: #a79abe;
+      border-left-color: var(--violet);
+      background: var(--violet-soft);
+    }
+
+    .mini-card.red {
+      border-color: #d2788a;
+      border-left-color: var(--red);
+      background: var(--red-soft);
+    }
+
+    .mini-card.amber {
+      border-color: #d5a85f;
+      border-left-color: var(--amber);
+      background: var(--amber-soft);
+    }
+
+    .mini-card strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+
+    .mini-card small {
+      display: block;
+      margin-bottom: 6px;
+      color: #263431;
+      font: 10px/1 var(--mono);
+      font-weight: 900;
+    }
+
+    .mini-card p {
+      color: #3f4d49;
+      font-size: 12px;
+      line-height: 1.42;
+    }
+
+    .check-workbench {
+      min-height: 0;
+      display: grid;
+      grid-template-rows: 94px 1fr;
+      gap: 10px;
+    }
+
+    .event-summary {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 12px;
+      padding: 12px;
+      border: 2px solid var(--teal);
+      background: linear-gradient(90deg, #e2f2ef 0%, #fbfefe 100%);
+      box-shadow: inset 0 -5px 0 var(--teal);
+    }
+
+    .event-summary h2 {
+      margin-bottom: 5px;
+      font-size: 21px;
+    }
+
+    .event-summary p {
+      color: #3d4b48;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .score-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      align-content: center;
+      border-left: 1px solid var(--line);
+      padding-left: 12px;
+    }
+
+    .score {
+      display: grid;
+      gap: 3px;
+      padding: 6px;
+      border: 1px solid var(--line-soft);
+      background: #fff;
+      font-size: 11px;
+    }
+
+    .score strong {
+      font-size: 15px;
+      line-height: 1;
+    }
+
+    .check-grid {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .check-module {
+      min-height: 0;
+      border: 1px solid var(--line);
+      background: #fff;
+      display: grid;
+      grid-template-rows: 38px 1fr;
+    }
+
+    .module-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+      border-bottom: 1px solid var(--line-soft);
+      background: #f8faf9;
+    }
+
+    .module-head h3 {
+      font-size: 14px;
+    }
+
+    .status {
+      padding: 4px 7px;
+      border: 1px solid var(--line-soft);
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .status.good {
+      border-color: #7cb8ad;
+      background: var(--good-soft);
+      color: var(--good);
+    }
+
+    .status.warn {
+      border-color: #d9b56f;
+      background: var(--warn-soft);
+      color: var(--warn);
+    }
+
+    .status.bad {
+      border-color: #df93a0;
+      background: var(--bad-soft);
+      color: var(--bad);
+    }
+
+    .module-body {
+      padding: 8px;
+      overflow: hidden;
+    }
+
+    .check-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 11px;
+    }
+
+    .check-table th,
+    .check-table td {
+      border: 1px solid var(--line-soft);
+      padding: 6px 7px;
+      vertical-align: top;
+      line-height: 1.35;
+    }
+
+    .check-table th {
+      background: #f4f7f6;
+      color: #34423f;
+      text-align: left;
+      font-weight: 900;
+    }
+
+    .check-table .narrow { width: 56px; }
+    .check-table .medium { width: 90px; }
+    .check-table .wide { width: 40%; }
+
+    .field-line {
+      display: grid;
+      grid-template-columns: 84px 1fr 74px;
+      gap: 8px;
+      align-items: center;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--line-soft);
+      font-size: 12px;
+    }
+
+    .field-line:last-child { border-bottom: 0; }
+
+    .field-label {
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .field-value {
+      padding: 5px 7px;
+      border: 1px solid var(--line-soft);
+      background: #fbfcfb;
+      line-height: 1.3;
+    }
+
+    .right-stack {
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+
+    .issue-card {
+      padding: 10px 11px;
+      border: 1px solid #d9b56f;
+      border-left: 5px solid var(--warn);
+      background: var(--warn-soft);
+    }
+
+    .issue-card.good {
+      border-color: #7cb8ad;
+      border-left-color: var(--good);
+      background: var(--good-soft);
+    }
+
+    .issue-card.bad {
+      border-color: #df93a0;
+      border-left-color: var(--bad);
+      background: var(--bad-soft);
+    }
+
+    .issue-card strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 13px;
+    }
+
+    .issue-card p {
+      color: #3f4d49;
+      font-size: 12px;
+      line-height: 1.42;
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          叙事验证工具
+          <span>事件树 / 时间线连线 / 事件检查工作台</span>
+        </div>
+        <nav class="topnav" aria-label="原型视图">
+          <a href="#timeline" data-nav="timeline">时间线连线</a>
+          <a href="#tree" data-nav="tree">事件树</a>
+          <a href="#event-check" data-nav="event-check">事件检查</a>
+        </nav>
+      </header>
+
+      <section class="view timeline-view active" id="view-timeline">
+        <main class="timeline-main">
+          <div class="toolbar">
+            <div>
+              <h1>全局时间线画布</h1>
+              <p>默认仍看章节与故事线位置；只对选中事件显示上游和下游连接，避免全量箭头把画面打乱。</p>
+            </div>
+            <div class="toolbar-actions">
+              <div class="mode-toggle" aria-label="首页展示模式">
+                <a class="active" href="#timeline">时间线</a>
+                <a href="#tree">事件树</a>
+              </div>
+              <span class="tag strong">选中：E021-E028</span>
+            </div>
+          </div>
+
+          <div class="timeline-board">
+            <div class="calendar-strip">
+              <span style="left: 20px; top: 22px;">7/8</span>
+              <span style="left: 176px; top: 22px;">7/9</span>
+              <span style="left: 332px; top: 22px;">7/10</span>
+              <span style="left: 488px; top: 22px;">7/11</span>
+              <span style="left: 644px; top: 22px;">7/12</span>
+              <span style="left: 800px; top: 22px;">7/13</span>
+              <span style="left: 956px; top: 22px;">7/14</span>
+              <span style="left: 1112px; top: 22px;">7/15</span>
+              <span style="left: 1268px; top: 22px;">7/16</span>
+            </div>
+            <div class="chapter-strip">
+              <div class="chapter-chip" style="left:0;width:128px"><strong>C10</strong><em>采访启动</em></div>
+              <div class="chapter-chip" style="left:128px;width:192px"><strong>C11</strong><em>样本成形</em></div>
+              <div class="chapter-chip" style="left:320px;width:192px"><strong>C12</strong><em>显形加压</em></div>
+              <div class="chapter-chip" style="left:512px;width:192px"><strong>C13</strong><em>会议结果</em></div>
+              <div class="chapter-chip" style="left:704px;width:256px"><strong>C14</strong><em>会后吸收</em></div>
+              <div class="chapter-chip" style="left:960px;width:192px"><strong>C15</strong><em>私线偏移</em></div>
+              <div class="chapter-chip" style="left:1152px;width:192px"><strong>C16</strong><em>群众争夺</em></div>
+            </div>
+            <div class="lane-labels">
+              <div class="lane-label" style="top:112px">故事主轴</div>
+              <div class="lane-label" style="top:164px">采访线 <span class="label-muted">3人</span></div>
+              <div class="lane-label" style="top:216px">大仙祠线 <span class="label-muted">3人</span></div>
+              <div class="lane-label" style="top:268px">电视台线 <span class="label-muted">2人</span></div>
+              <div class="lane-label" style="top:320px">张航远线 <span class="label-muted">2人</span></div>
+              <div class="lane-label" style="top:372px">职业病证据线 <span class="label-muted">2人</span></div>
+            </div>
+
+            <svg class="relation-layer" viewBox="0 0 1375 850" preserveAspectRatio="none">
+              <defs>
+                <marker id="arrowHead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(9,75,69,.62)"></path>
+                </marker>
+              </defs>
+              <path class="input" d="M 395 38 C 460 42, 496 56, 548 70"></path>
+              <path class="input" d="M 525 224 C 575 190, 595 126, 620 70"></path>
+              <path class="input" d="M 820 292 C 760 238, 705 135, 665 70"></path>
+              <path class="output" d="M 818 70 C 905 80, 930 94, 980 96"></path>
+              <path class="output" d="M 768 70 C 822 250, 880 395, 920 490"></path>
+              <path class="output" d="M 730 70 C 780 164, 852 250, 896 310"></path>
+            </svg>
+
+            <div class="relation-label" style="left:658px;top:214px;">输入汇入</div>
+            <div class="relation-label" style="left:1018px;top:276px;">输出分流</div>
+
+            <div class="timeline-item" style="left:184px;top:126px;width:336px">采访启动<small>E010-E014</small></div>
+            <div class="timeline-item selected" style="left:544px;top:126px;width:420px">会议结果落地<small>E021-E028</small></div>
+            <div class="timeline-item" style="left:992px;top:126px;width:318px">会后转争夺<small>E029-E041</small></div>
+            <div class="timeline-item" style="left:240px;top:178px;width:430px">走访与材料整理<small>C11-C12</small></div>
+            <div class="timeline-item thin" style="left:240px;top:230px;width:430px">叶 事实链走访</div>
+            <div class="timeline-item red thin" style="left:544px;top:250px;width:486px">张 被边缘化</div>
+            <div class="timeline-item violet" style="left:264px;top:286px;width:428px">救助显形<small>C11-C12</small></div>
+            <div class="timeline-item violet thin" style="left:544px;top:340px;width:486px">禹 情报后台发酵</div>
+            <div class="timeline-item" style="left:544px;top:414px;width:222px">口径重写<small>C13-C14</small></div>
+            <div class="timeline-item amber" style="left:704px;top:468px;width:332px">化学证据预热<small>C14-C15</small></div>
+            <div class="timeline-item red" style="left:544px;top:524px;width:486px">边缘化到私线偏移<small>C13-C15</small></div>
+          </div>
+        </main>
+
+        <aside class="inspector">
+          <div class="inspect-box">
+            <p class="eyebrow">Selected Story Event</p>
+            <h2>会议结果落地</h2>
+            <p>时间线模式只显示当前选中事件的因果连线。未选中事件不画箭头，避免全局画布退化成关系网。</p>
+            <div class="inspect-list">
+              <div><span>输入连接</span><strong>采访 / 救助 / 边缘化</strong></div>
+              <div><span>输出连接</span><strong>会后争夺 / 口径 / 私线</strong></div>
+              <div><span>显示策略</span><strong>局部连线</strong></div>
+            </div>
+          </div>
+          <div class="inspect-box">
+            <h2>切换说明</h2>
+            <p>需要看完整因果结构时切换到事件树；需要对齐章节和真实时间时留在时间线。</p>
+          </div>
+          <div class="inspect-box">
+            <h2>箭头约束</h2>
+            <p>箭头不是默认常显图层。它只在选中对象周围展开，表达“当前对象的输入与输出”。</p>
+          </div>
+          <div class="action-stack">
+            <a class="btn primary" href="#event-check">进入事件检查</a>
+            <a class="btn" href="#tree">切到事件树</a>
+          </div>
+        </aside>
+      </section>
+
+      <section class="view tree-view" id="view-tree">
+        <div class="toolbar">
+          <div>
+            <h1>首页事件树模式</h1>
+            <p>用树状关系专门表达前后置、分裂、合流；它不替代时间线，而是时间线的因果阅读模式。</p>
+          </div>
+          <div class="toolbar-actions">
+            <div class="mode-toggle" aria-label="首页展示模式">
+              <a href="#timeline">时间线</a>
+              <a class="active" href="#tree">事件树</a>
+            </div>
+            <span class="tag strong">当前焦点：会议结果落地</span>
+          </div>
+        </div>
+
+        <main class="tree-board">
+          <div class="tree-band" style="left:0;width:34%;"></div>
+          <div class="tree-band" style="left:34%;width:32%;"></div>
+          <div class="tree-band" style="left:66%;width:34%;"></div>
+          <div class="tree-label" style="left:44px;">输入事件</div>
+          <div class="tree-label" style="left:788px;">当前处理</div>
+          <div class="tree-label" style="right:44px;">输出事件</div>
+
+          <svg class="tree-svg" viewBox="0 0 1840 720" preserveAspectRatio="none">
+            <defs>
+              <marker id="treeArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(35,67,61,.64)"></path>
+              </marker>
+            </defs>
+            <path d="M 395 134 C 510 176, 620 246, 745 300"></path>
+            <path d="M 395 274 C 520 286, 608 294, 745 318"></path>
+            <path d="M 395 414 C 520 386, 620 352, 745 336"></path>
+            <path d="M 395 554 C 536 482, 620 400, 745 354"></path>
+            <path d="M 1105 310 C 1220 230, 1325 160, 1462 132"></path>
+            <path d="M 1105 324 C 1242 316, 1325 290, 1462 272"></path>
+            <path d="M 1105 338 C 1245 382, 1320 416, 1462 414"></path>
+            <path d="M 1105 352 C 1230 452, 1325 530, 1462 554"></path>
+            <path class="faint" d="M 260 314 C 450 650, 1030 650, 1610 590"></path>
+          </svg>
+
+          <a class="tree-node blue" href="#event-check" style="left:64px;top:92px;width:330px;">
+            <strong>采访启动</strong><small>E010-E014 / C10-C11</small><p>形成事实入口和采访材料。</p>
+          </a>
+          <a class="tree-node violet" href="#event-check" style="left:64px;top:232px;width:330px;">
+            <strong>救助显形</strong><small>E016-E020 / C11-C12</small><p>让解释权压力进入可见层。</p>
+          </a>
+          <a class="tree-node red" href="#event-check" style="left:64px;top:372px;width:330px;">
+            <strong>张航远被边缘化</strong><small>E019 / C13</small><p>形成人物位置变化和私线风险。</p>
+          </a>
+          <a class="tree-node amber" href="#event-check" style="left:64px;top:512px;width:330px;">
+            <strong>证据预热</strong><small>E018 / C12-C13</small><p>职业病证据未公开，但改变会议判断。</p>
+          </a>
+
+          <a class="tree-node current" href="#event-check" style="left:742px;top:270px;width:400px;">
+            <strong>会议结果落地</strong><small>E021-E028 / C13-C14</small><p>多路输入在会议中被压缩成公共落点，并分流为后续争夺。</p>
+          </a>
+
+          <a class="tree-node green" href="#event-check" style="right:64px;top:92px;width:330px;">
+            <strong>会后转争夺</strong><small>E029-E041 / C15-C16</small><p>解释权和群众资源围绕结果继续争夺。</p>
+          </a>
+          <a class="tree-node blue" href="#event-check" style="right:64px;top:232px;width:330px;">
+            <strong>口径重写</strong><small>E024-E032 / C14-C15</small><p>电视台把会议结果转成可传播表达。</p>
+          </a>
+          <a class="tree-node red" href="#event-check" style="right:64px;top:372px;width:330px;">
+            <strong>私线偏移条件</strong><small>E030 / C15</small><p>张航远的位置变化进入个人行动风险。</p>
+          </a>
+          <a class="tree-node amber" href="#event-check" style="right:64px;top:512px;width:330px;">
+            <strong>证据继续预热</strong><small>E033 / C15-C16</small><p>职业病证据获得后续正式入场位置。</p>
+          </a>
+        </main>
+
+        <footer class="legend-dock">
+          <section class="legend-box">
+            <h2><span class="swatch"></span>使用场景</h2>
+            <div class="pill-row">
+              <span class="pill">追前置原因</span>
+              <span class="pill">看输出分流</span>
+              <span class="pill">检查合流/分裂</span>
+            </div>
+          </section>
+          <section class="legend-box">
+            <h2><span class="swatch blue"></span>与时间线关系</h2>
+            <div class="pill-row">
+              <span class="pill">时间线负责定位</span>
+              <span class="pill">事件树负责因果</span>
+              <span class="pill">两者可切换</span>
+            </div>
+          </section>
+          <section class="legend-box">
+            <h2><span class="swatch amber"></span>显示原则</h2>
+            <div class="pill-row">
+              <span class="pill">不全量叠箭头</span>
+              <span class="pill">焦点事件展开</span>
+              <span class="pill">弱化后台虚段</span>
+            </div>
+          </section>
+        </footer>
+      </section>
+
+      <section class="view check-view" id="view-event-check">
+        <header class="object-bar">
+          <div>
+            <p class="eyebrow">Event Check Workbench</p>
+            <h1>E021-E028 会议结果落地</h1>
+            <p>事件页不再只是文字说明；触发条件、人物动作、冲突机制、动态变化都要有字段、证据、状态和问题提示。</p>
+          </div>
+          <div class="meta-line">
+            <span class="tag strong">故事主轴</span>
+            <span class="tag">C13-C14</span>
+            <span class="tag">检查状态：3 通过 / 1 需补强</span>
+            <a class="btn" href="#timeline">回到画布</a>
+          </div>
+        </header>
+
+        <div class="check-layout">
+          <section class="panel">
+            <div class="panel-head">
+              <h2>输入事件</h2>
+              <span>可点击追溯</span>
+            </div>
+            <div class="panel-body">
+              <div class="mini-card-stack">
+                <a class="mini-card blue" href="#tree">
+                  <strong>采访启动</strong>
+                  <small>E010-E014</small>
+                  <p>提供事实入口和会议前可引用材料。</p>
+                </a>
+                <a class="mini-card violet" href="#tree">
+                  <strong>救助显形</strong>
+                  <small>E016-E020</small>
+                  <p>把救助和解释权压力推到会议前。</p>
+                </a>
+                <a class="mini-card red" href="#tree">
+                  <strong>张航远被边缘化</strong>
+                  <small>E019</small>
+                  <p>人物位置变化制造私线行动风险。</p>
+                </a>
+                <a class="mini-card amber" href="#tree">
+                  <strong>证据预热</strong>
+                  <small>E018</small>
+                  <p>证据未公开，但已改变会议判断结构。</p>
+                </a>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <h2>中部事件检查工作台</h2>
+              <span>字段化 / 可检查 / 可编辑</span>
+            </div>
+            <div class="panel-body">
+              <div class="check-workbench">
+                <div class="event-summary">
+                  <div>
+                    <h2>当前事件摘要</h2>
+                    <p>多路输入在会议场景中被压缩成可公开承接的结果。它不是总结，而是把材料压力转成后续争夺的公共前提。</p>
+                  </div>
+                  <div class="score-grid">
+                    <div class="score"><span>因果闭合</span><strong>82%</strong></div>
+                    <div class="score"><span>人物动作</span><strong>需补</strong></div>
+                    <div class="score"><span>冲突有效</span><strong>通过</strong></div>
+                    <div class="score"><span>输出明确</span><strong>通过</strong></div>
+                  </div>
+                </div>
+
+                <div class="check-grid">
+                  <section class="check-module">
+                    <div class="module-head">
+                      <h3>触发条件</h3>
+                      <span class="status good">可检查</span>
+                    </div>
+                    <div class="module-body">
+                      <table class="check-table">
+                        <tr>
+                          <th class="medium">字段</th>
+                          <th>当前值</th>
+                          <th class="medium">证据</th>
+                          <th class="narrow">状态</th>
+                        </tr>
+                        <tr>
+                          <td>前置事件</td>
+                          <td>E010、E016、E019、E018 汇入会议。</td>
+                          <td>C11-C13</td>
+                          <td><span class="status good">通过</span></td>
+                        </tr>
+                        <tr>
+                          <td>触发阈值</td>
+                          <td>材料与救助压力足以迫使会议给出口径。</td>
+                          <td>C13</td>
+                          <td><span class="status good">通过</span></td>
+                        </tr>
+                        <tr>
+                          <td>缺口</td>
+                          <td>职业病证据影响会议判断，但展示强度偏弱。</td>
+                          <td>C12-C13</td>
+                          <td><span class="status warn">需补</span></td>
+                        </tr>
+                      </table>
+                    </div>
+                  </section>
+
+                  <section class="check-module">
+                    <div class="module-head">
+                      <h3>人物动作</h3>
+                      <span class="status warn">需补强</span>
+                    </div>
+                    <div class="module-body">
+                      <table class="check-table">
+                        <tr>
+                          <th class="medium">人物</th>
+                          <th>目标 / 动作</th>
+                          <th class="medium">可见性</th>
+                          <th class="narrow">状态</th>
+                        </tr>
+                        <tr>
+                          <td>叶依人</td>
+                          <td>承接事实链，推动材料进入会议口径。</td>
+                          <td>正文实写</td>
+                          <td><span class="status good">通过</span></td>
+                        </tr>
+                        <tr>
+                          <td>张航远</td>
+                          <td>位置被压缩，证明欲被激活。</td>
+                          <td>半实写</td>
+                          <td><span class="status warn">需补</span></td>
+                        </tr>
+                        <tr>
+                          <td>禹树</td>
+                          <td>后台情报入口保留，不直接替代事件推进。</td>
+                          <td>后台状态</td>
+                          <td><span class="status good">通过</span></td>
+                        </tr>
+                      </table>
+                    </div>
+                  </section>
+
+                  <section class="check-module">
+                    <div class="module-head">
+                      <h3>冲突机制</h3>
+                      <span class="status good">可检查</span>
+                    </div>
+                    <div class="module-body">
+                      <div class="field-line">
+                        <div class="field-label">冲突双方</div>
+                        <div class="field-value">事实链 vs 解释权网络</div>
+                        <span class="status good">通过</span>
+                      </div>
+                      <div class="field-line">
+                        <div class="field-label">争夺对象</div>
+                        <div class="field-value">会议结果的公共口径</div>
+                        <span class="status good">通过</span>
+                      </div>
+                      <div class="field-line">
+                        <div class="field-label">压力来源</div>
+                        <div class="field-value">采访材料、救助压力、媒体转写</div>
+                        <span class="status good">通过</span>
+                      </div>
+                      <div class="field-line">
+                        <div class="field-label">不能消失</div>
+                        <div class="field-value">会议只形成落点，没有完成解释权归属</div>
+                        <span class="status good">通过</span>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section class="check-module">
+                    <div class="module-head">
+                      <h3>动态变化</h3>
+                      <span class="status good">可检查</span>
+                    </div>
+                    <div class="module-body">
+                      <table class="check-table">
+                        <tr>
+                          <th class="medium">对象</th>
+                          <th>输入状态</th>
+                          <th>输出状态</th>
+                          <th class="narrow">状态</th>
+                        </tr>
+                        <tr>
+                          <td>采访线</td>
+                          <td>材料压力</td>
+                          <td>公共落点</td>
+                          <td><span class="status good">通过</span></td>
+                        </tr>
+                        <tr>
+                          <td>大仙祠线</td>
+                          <td>解释权预压</td>
+                          <td>会后争夺</td>
+                          <td><span class="status good">通过</span></td>
+                        </tr>
+                        <tr>
+                          <td>张航远线</td>
+                          <td>边缘化</td>
+                          <td>私线偏移条件</td>
+                          <td><span class="status warn">需补</span></td>
+                        </tr>
+                      </table>
+                    </div>
+                  </section>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <h2>输出与问题</h2>
+              <span>后置事件 / 校验结果</span>
+            </div>
+            <div class="panel-body">
+              <div class="right-stack">
+                <a class="mini-card" href="#tree">
+                  <strong>会后转争夺</strong>
+                  <small>E029-E041</small>
+                  <p>会议结果成为解释权和群众资源争夺对象。</p>
+                </a>
+                <a class="mini-card blue" href="#tree">
+                  <strong>口径重写</strong>
+                  <small>E024-E032</small>
+                  <p>电视台线把结果改写成可传播表达。</p>
+                </a>
+                <a class="mini-card red" href="#tree">
+                  <strong>私线偏移条件</strong>
+                  <small>E030</small>
+                  <p>张航远位置变化进入个人行动风险。</p>
+                </a>
+                <div class="issue-card bad">
+                  <strong>需补强：张航远动作可见性</strong>
+                  <p>目前能看到位置变化，但“为什么会走向私线”的动作桥还偏弱。</p>
+                </div>
+                <div class="issue-card">
+                  <strong>提醒：证据预热不要抢主线</strong>
+                  <p>职业病证据只需要改变判断结构，不应在本事件里提前爆开。</p>
+                </div>
+                <div class="issue-card good">
+                  <strong>通过：事件边界清楚</strong>
+                  <p>禹树后台状态被保留在人物条，不拉长故事事件条。</p>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <footer class="legend-dock">
+          <section class="legend-box">
+            <h2><span class="swatch"></span>人物</h2>
+            <div class="pill-row">
+              <span class="pill">叶依人：承接事实链</span>
+              <span class="pill">张航远：动作桥需补</span>
+              <span class="pill">禹树：后台入口</span>
+            </div>
+          </section>
+          <section class="legend-box">
+            <h2><span class="swatch blue"></span>地理</h2>
+            <div class="pill-row">
+              <span class="pill">会议室</span>
+              <span class="pill">电视台工作区</span>
+              <span class="pill">大仙祠外部场域</span>
+            </div>
+          </section>
+          <section class="legend-box">
+            <h2><span class="swatch amber"></span>组织</h2>
+            <div class="pill-row">
+              <span class="pill">电视台</span>
+              <span class="pill">祠庙解释权网络</span>
+              <span class="pill">慈善资源</span>
+              <span class="pill">职业病证据链</span>
+            </div>
+          </section>
+        </footer>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const views = {
+      timeline: document.getElementById("view-timeline"),
+      tree: document.getElementById("view-tree"),
+      "event-check": document.getElementById("view-event-check")
+    };
+
+    function setRoute() {
+      const route = (location.hash || "#timeline").replace("#", "");
+      const key = Object.prototype.hasOwnProperty.call(views, route) ? route : "timeline";
+      Object.entries(views).forEach(([name, node]) => {
+        node.classList.toggle("active", name === key);
+      });
+      document.querySelectorAll("[data-nav]").forEach((item) => {
+        item.classList.toggle("active", item.dataset.nav === key);
+      });
+    }
+
+    window.addEventListener("hashchange", setRoute);
+    setRoute();
+  </script>
+</body>
+</html>

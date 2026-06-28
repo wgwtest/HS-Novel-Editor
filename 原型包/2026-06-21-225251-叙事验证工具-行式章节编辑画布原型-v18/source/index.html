@@ -1,0 +1,1019 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>章节事件编辑画布 V18</title>
+  <style>
+    :root {
+      --paper: #f6faf8;
+      --panel: #ffffff;
+      --wash: #edf4f1;
+      --wash-2: #e2ece8;
+      --ink: #0b1715;
+      --muted: #536662;
+      --line: #9fb1ad;
+      --grid: #d5dfdc;
+      --grid-strong: #93aaa5;
+      --teal: #087d72;
+      --teal-soft: #d8f0ec;
+      --blue: #2f648c;
+      --blue-soft: #dbeaf4;
+      --red: #bd2947;
+      --red-soft: #f5dce3;
+      --amber: #a66b0b;
+      --amber-soft: #f4e7c8;
+      --violet: #73569c;
+      --violet-soft: #e9e2f1;
+      --done: #596b66;
+      --done-soft: #eef2f0;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 1920px;
+      height: 1080px;
+      margin: 0;
+      overflow: hidden;
+      background:
+        linear-gradient(90deg, rgba(11, 23, 21, 0.035) 1px, transparent 1px) 0 0 / 18px 18px,
+        linear-gradient(180deg, rgba(11, 23, 21, 0.025) 1px, transparent 1px) 0 0 / 18px 18px,
+        #e8efec;
+      color: var(--ink);
+      font-family: "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+    }
+
+    .artboard {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      background: rgba(246, 250, 248, 0.78);
+    }
+
+    .topbar {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      top: 18px;
+      height: 50px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 18px;
+      padding: 0 26px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.82);
+    }
+
+    .brand {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .brand span {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .context {
+      justify-self: end;
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .context b {
+      color: var(--teal);
+      font-weight: 800;
+    }
+
+    .toolbar {
+      position: absolute;
+      left: 44px;
+      top: 82px;
+      width: 1480px;
+      height: 54px;
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 18px;
+      padding: 0 16px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.86);
+    }
+
+    .tool-title {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .tool-title strong {
+      font-size: 19px;
+      font-weight: 800;
+    }
+
+    .tool-title span {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .segmented,
+    .zoom {
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      height: 34px;
+    }
+
+    .segmented button,
+    .zoom button {
+      height: 32px;
+      min-width: 58px;
+      padding: 0 12px;
+      border: 0;
+      border-right: 1px solid var(--line);
+      background: transparent;
+      color: var(--ink);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .segmented button:last-child,
+    .zoom button:last-child {
+      border-right: 0;
+    }
+
+    .segmented .active,
+    .zoom .active {
+      background: var(--ink);
+      color: #fff;
+    }
+
+    .canvas {
+      position: absolute;
+      left: 44px;
+      top: 150px;
+      width: 1480px;
+      height: 870px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      overflow: hidden;
+    }
+
+    .work-grid {
+      position: absolute;
+      left: 240px;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      background:
+        linear-gradient(90deg, rgba(147, 170, 165, 0.55) 1px, transparent 1px) 0 0 / 155px 100%,
+        linear-gradient(90deg, rgba(213, 223, 220, 0.65) 1px, transparent 1px) 0 0 / 77.5px 100%,
+        linear-gradient(180deg, rgba(213, 223, 220, 0.7) 1px, transparent 1px) 0 0 / 100% 26px;
+      pointer-events: none;
+    }
+
+    .axis-left,
+    .axis-real,
+    .axis-chapter {
+      position: absolute;
+      top: 0;
+      border-bottom: 1px solid var(--grid-strong);
+    }
+
+    .axis-left {
+      left: 0;
+      width: 240px;
+      height: 98px;
+      padding: 17px 16px;
+      background: var(--wash-2);
+      border-right: 1px solid var(--line);
+    }
+
+    .axis-left strong {
+      display: block;
+      font-size: 15px;
+      margin-bottom: 10px;
+    }
+
+    .axis-left span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .axis-real {
+      left: 240px;
+      width: 1240px;
+      height: 42px;
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      background: #f2f6f4;
+      color: #687a76;
+      border-left: 0;
+    }
+
+    .axis-real div {
+      padding: 12px 10px 0;
+      border-right: 1px solid var(--grid);
+      font-size: 12px;
+    }
+
+    .axis-real b {
+      color: #52645f;
+      font-weight: 700;
+    }
+
+    .axis-chapter {
+      left: 240px;
+      top: 42px;
+      width: 1240px;
+      height: 56px;
+      display: grid;
+      grid-template-columns: 260px 295px 295px 390px;
+      background: rgba(255, 255, 255, 0.88);
+      border-top: 2px solid #becdca;
+    }
+
+    .axis-chapter div {
+      padding: 9px 12px 0;
+      border-right: 1px solid var(--grid-strong);
+      border-bottom: 2px solid var(--ink);
+      position: relative;
+    }
+
+    .axis-chapter strong {
+      display: block;
+      font-size: 17px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .axis-chapter span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .zone-label {
+      position: absolute;
+      top: 105px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      padding: 0 9px;
+      border: 1px solid #b7c7c3;
+      background: rgba(255, 255, 255, 0.9);
+      font-size: 12px;
+      font-weight: 800;
+      color: #3b514d;
+      z-index: 4;
+    }
+
+    .zone-source { left: 258px; }
+    .zone-process { left: 520px; }
+    .zone-output { left: 1094px; }
+
+    .snap {
+      position: absolute;
+      top: 98px;
+      bottom: 62px;
+      border-left: 2px solid rgba(8, 125, 114, 0.48);
+      z-index: 2;
+    }
+
+    .snap.mid { left: 795px; }
+    .snap.end { left: 1090px; border-left-color: rgba(11, 23, 21, 0.62); }
+
+    .snap span {
+      position: absolute;
+      top: 18px;
+      left: 7px;
+      writing-mode: vertical-rl;
+      font-size: 11px;
+      color: var(--muted);
+      background: rgba(246, 250, 248, 0.9);
+      padding: 5px 2px;
+      border: 1px solid rgba(159, 177, 173, 0.8);
+    }
+
+    .group,
+    .rowlabel,
+    .rowband {
+      position: absolute;
+      left: 0;
+      width: 240px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--grid);
+      z-index: 3;
+    }
+
+    .group {
+      height: 36px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      background: #e8f0ed;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .group em {
+      margin-left: auto;
+      color: var(--muted);
+      font-style: normal;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .rowlabel {
+      height: 70px;
+      padding: 12px 14px;
+      background: rgba(248, 251, 250, 0.96);
+    }
+
+    .rowlabel.continue {
+      height: 78px;
+    }
+
+    .rowlabel .name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 800;
+      margin-bottom: 7px;
+    }
+
+    .caret {
+      width: 0;
+      height: 0;
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
+      border-left: 6px solid var(--ink);
+      flex: 0 0 auto;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--done);
+      flex: 0 0 auto;
+    }
+
+    .dot.teal { background: var(--teal); }
+    .dot.red { background: var(--red); }
+    .dot.violet { background: var(--violet); }
+    .rowlabel .meta {
+      color: var(--muted);
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .rowband {
+      left: 240px;
+      width: 1240px;
+      background: rgba(255, 255, 255, 0.3);
+      z-index: 1;
+    }
+
+    .bar {
+      position: absolute;
+      z-index: 5;
+      min-width: 86px;
+      padding: 7px 10px 5px;
+      border: 2px solid currentColor;
+      border-bottom-width: 5px;
+      background: #fff;
+      color: var(--teal);
+      box-shadow: 0 1px 0 rgba(11, 23, 21, 0.04);
+    }
+
+    .bar strong {
+      display: block;
+      color: var(--ink);
+      font-size: 13px;
+      line-height: 1.1;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .bar span {
+      display: block;
+      margin-top: 4px;
+      font-family: Consolas, "Microsoft YaHei UI", monospace;
+      color: #243532;
+      font-size: 10px;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+
+    .bar.small {
+      height: 32px;
+      padding: 5px 9px 3px;
+      border-bottom-width: 4px;
+    }
+
+    .bar.source {
+      background: var(--done-soft);
+      color: var(--done);
+    }
+
+    .bar.new {
+      background: var(--teal-soft);
+      color: var(--teal);
+    }
+
+    .bar.new.selected {
+      outline: 3px solid var(--ink);
+      outline-offset: 3px;
+    }
+
+    .bar.blue {
+      background: var(--blue-soft);
+      color: var(--blue);
+    }
+
+    .bar.red {
+      background: var(--red-soft);
+      color: var(--red);
+    }
+
+    .bar.amber {
+      background: var(--amber-soft);
+      color: var(--amber);
+    }
+
+    .bar.violet {
+      background: var(--violet-soft);
+      color: var(--violet);
+    }
+
+    .bar.cont {
+      height: 50px;
+      padding-top: 8px;
+    }
+
+    .bar.ghost {
+      border-style: dashed;
+      border-bottom-width: 2px;
+      background: rgba(233, 226, 241, 0.5);
+      color: var(--violet);
+    }
+
+    .empty-slot {
+      position: absolute;
+      z-index: 2;
+      height: 40px;
+      border: 1px dashed rgba(83, 102, 98, 0.45);
+      background: rgba(255, 255, 255, 0.42);
+    }
+
+    .handle {
+      position: absolute;
+      z-index: 7;
+      width: 12px;
+      height: 54px;
+      top: -4px;
+      right: -7px;
+      background: var(--ink);
+      border: 2px solid #fff;
+      box-shadow: 0 0 0 1px var(--ink);
+    }
+
+    .handle::after {
+      content: "";
+      position: absolute;
+      left: 3px;
+      top: 14px;
+      width: 2px;
+      height: 22px;
+      background: rgba(255, 255, 255, 0.8);
+      box-shadow: 4px 0 0 rgba(255, 255, 255, 0.8);
+    }
+
+    .hint {
+      position: absolute;
+      z-index: 8;
+      height: 24px;
+      padding: 4px 8px;
+      border: 1px solid var(--line);
+      background: rgba(246, 250, 248, 0.94);
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .connectors {
+      position: absolute;
+      left: 240px;
+      top: 98px;
+      width: 1240px;
+      height: 566px;
+      z-index: 4;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    .connector {
+      fill: none;
+      stroke: #0b1715;
+      stroke-width: 2;
+      stroke-linecap: square;
+      stroke-linejoin: miter;
+    }
+
+    .connector.alt {
+      stroke: var(--teal);
+    }
+
+    .connector.dim {
+      stroke: rgba(11, 23, 21, 0.38);
+      stroke-dasharray: 6 5;
+    }
+
+    .relation-note {
+      position: absolute;
+      z-index: 8;
+      left: 505px;
+      top: 232px;
+      height: 24px;
+      padding: 3px 8px;
+      border: 1px solid #82948f;
+      background: rgba(255, 255, 255, 0.94);
+      font-size: 12px;
+      color: #22322f;
+    }
+
+    .legend {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      height: 50px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.9);
+      z-index: 9;
+    }
+
+    .legend div {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 14px;
+      border-right: 1px solid var(--grid);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .legend div:last-child {
+      border-right: 0;
+    }
+
+    .key {
+      width: 34px;
+      height: 10px;
+      border: 2px solid currentColor;
+      border-bottom-width: 4px;
+      background: currentColor;
+      opacity: 0.75;
+    }
+
+    .key.done { color: var(--done); }
+    .key.new { color: var(--teal); }
+    .key.continue { color: var(--blue); }
+    .key.line {
+      height: 0;
+      border: 0;
+      border-top: 2px solid var(--ink);
+      background: transparent;
+      opacity: 1;
+    }
+
+    .key.snap {
+      width: 2px;
+      height: 26px;
+      border: 0;
+      background: var(--teal);
+      opacity: 0.6;
+    }
+
+    .inspector {
+      position: absolute;
+      left: 1544px;
+      top: 82px;
+      width: 332px;
+      height: 938px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.9);
+      padding: 16px;
+    }
+
+    .selected-card {
+      border-left: 5px solid var(--teal);
+      min-height: 148px;
+    }
+
+    .card-kicker {
+      display: block;
+      color: var(--muted);
+      font-family: Consolas, monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 7px;
+    }
+
+    .card h2,
+    .card h3 {
+      margin: 0;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .card h2 {
+      font-size: 24px;
+      line-height: 1.05;
+      margin-bottom: 9px;
+    }
+
+    .card h3 {
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 14px;
+    }
+
+    .tag {
+      height: 22px;
+      padding: 3px 8px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      font-family: Consolas, monospace;
+      font-size: 10px;
+      color: var(--ink);
+    }
+
+    .fields {
+      display: grid;
+      grid-template-columns: 76px 1fr;
+      row-gap: 10px;
+      column-gap: 8px;
+      font-size: 13px;
+    }
+
+    .fields dt {
+      color: var(--muted);
+    }
+
+    .fields dd {
+      margin: 0;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.45;
+    }
+
+    .rules {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--ink);
+      font-size: 13px;
+      line-height: 1.85;
+    }
+
+    .spacer {
+      flex: 1;
+      min-height: 160px;
+    }
+
+    .action {
+      height: 40px;
+      border: 1px solid var(--ink);
+      background: var(--paper);
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--ink);
+    }
+
+    .action.primary {
+      background: var(--teal);
+      border-color: var(--teal);
+      color: #fff;
+    }
+
+    .action + .action {
+      margin-top: 8px;
+    }
+
+    .mini-map {
+      height: 86px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 7px;
+    }
+
+    .mini-track {
+      position: relative;
+      height: 14px;
+      background: #eef3f1;
+      border: 1px solid #cad8d4;
+    }
+
+    .mini-track b {
+      position: absolute;
+      top: 2px;
+      height: 8px;
+      background: currentColor;
+    }
+  </style>
+</head>
+<body>
+  <main class="artboard" aria-label="章节事件编辑画布原型">
+    <section class="topbar">
+      <div class="brand">
+        <h1>章节事件编辑画布</h1>
+        <span>从全局时间画布展开的章节维度切片，不承担事件正文编辑。</span>
+      </div>
+      <div></div>
+      <div class="context">当前对象 <b>C13 会议结果</b> / 行式事件生命周期工作台</div>
+    </section>
+
+    <section class="toolbar" aria-label="画布工具栏">
+      <div class="tool-title">
+        <strong>C13 章节切片</strong>
+        <span>左侧是来源事件，中央只做章节内生命周期决策，右侧是输出事件。</span>
+      </div>
+      <div class="segmented" aria-label="视图模式">
+        <button>全局画布</button>
+        <button class="active">章节切片</button>
+        <button>事件详情</button>
+      </div>
+      <div class="zoom" aria-label="编辑模式">
+        <button class="active">行式</button>
+        <button>连线</button>
+        <button>停靠</button>
+      </div>
+    </section>
+
+    <section class="canvas" aria-label="行式章节编辑画布">
+      <div class="work-grid"></div>
+
+      <div class="axis-left">
+        <strong>章节坐标</strong>
+        <span>固定行头 + 章节内部横向工作区</span>
+      </div>
+      <div class="axis-real">
+        <div><b>7/13</b><br>08:00</div>
+        <div>10:00</div>
+        <div>12:00</div>
+        <div>14:00</div>
+        <div>16:00</div>
+        <div>18:00</div>
+        <div>22:00</div>
+        <div><b>7/14</b><br>00:00</div>
+      </div>
+      <div class="axis-chapter">
+        <div><strong>章前输入</strong><span>已存在事件，不自动绑定</span></div>
+        <div><strong>中段处理</strong><span>新事件生成与关系建立</span></div>
+        <div><strong>右侧停靠</strong><span>延续事件横跨整章</span></div>
+        <div><strong>章后输出</strong><span>输出给后续章节或事件</span></div>
+      </div>
+
+      <div class="zone-label zone-source">来源事件区</div>
+      <div class="zone-label zone-process">章节操作区</div>
+      <div class="zone-label zone-output">输出事件区</div>
+      <div class="snap mid"><span>中线停靠</span></div>
+      <div class="snap end"><span>右侧中线</span></div>
+
+      <div class="group" style="top:98px;">已结束历史事件 <em>用于手动建立关系</em></div>
+      <div class="rowlabel" style="top:134px;">
+        <div class="name"><span class="dot"></span>采访材料成形</div>
+        <div class="meta"><span>已完成</span><span>可连线</span></div>
+      </div>
+      <div class="rowlabel" style="top:204px;">
+        <div class="name"><span class="dot"></span>解释权预压</div>
+        <div class="meta"><span>已完成</span><span>已选入</span></div>
+      </div>
+      <div class="rowlabel" style="top:274px;">
+        <div class="name"><span class="dot"></span>样本成形</div>
+        <div class="meta"><span>已完成</span><span>未建立关系</span></div>
+      </div>
+
+      <div class="group" style="top:344px;">章节开始时仍在延续 <em>拖拽决定推进范围</em></div>
+      <div class="rowlabel continue" style="top:380px;">
+        <div class="name"><span class="dot violet"></span>救助显形</div>
+        <div class="meta"><span>延续中</span><span>停靠中线</span></div>
+      </div>
+      <div class="rowlabel continue" style="top:458px;">
+        <div class="name"><span class="dot red"></span>张航远被边缘化</div>
+        <div class="meta"><span>延续中</span><span>横跨整章</span></div>
+      </div>
+      <div class="rowlabel continue" style="top:536px;">
+        <div class="name"><span class="dot teal"></span>职业病证据压力</div>
+        <div class="meta"><span>延续中</span><span>保持压力</span></div>
+      </div>
+
+      <div class="group" style="top:614px;">新事件输出 <em>作为章后事件流</em></div>
+      <div class="rowlabel" style="top:650px;">
+        <div class="name"><span class="caret"></span>后续争夺事件</div>
+        <div class="meta"><span>由本章输出</span><span>C14-C15</span></div>
+      </div>
+      <div class="rowlabel" style="top:720px;">
+        <div class="name"><span class="caret"></span>私线偏移压力</div>
+        <div class="meta"><span>由本章输出</span><span>C15</span></div>
+      </div>
+
+      <div class="rowband" style="top:134px;height:70px;"></div>
+      <div class="rowband" style="top:204px;height:70px;"></div>
+      <div class="rowband" style="top:274px;height:70px;"></div>
+      <div class="rowband" style="top:380px;height:78px;"></div>
+      <div class="rowband" style="top:458px;height:78px;"></div>
+      <div class="rowband" style="top:536px;height:78px;"></div>
+      <div class="rowband" style="top:650px;height:70px;"></div>
+      <div class="rowband" style="top:720px;height:70px;"></div>
+
+      <div class="empty-slot" style="left:502px;top:149px;width:310px;"></div>
+      <div class="empty-slot" style="left:502px;top:219px;width:310px;"></div>
+      <div class="empty-slot" style="left:502px;top:289px;width:310px;"></div>
+
+      <div class="bar source small" style="left:264px;top:153px;width:190px;">
+        <strong>采访材料成形</strong>
+      </div>
+      <div class="bar source small" style="left:264px;top:223px;width:190px;">
+        <strong>解释权预压</strong>
+      </div>
+      <div class="bar source small" style="left:264px;top:293px;width:190px;">
+        <strong>样本成形</strong>
+      </div>
+
+      <div class="bar new selected" style="left:660px;top:146px;width:300px;height:46px;">
+        <strong>新建事件：会议结果落地</strong>
+        <span>由两个历史事件驱动</span>
+      </div>
+      <div class="bar new" style="left:650px;top:276px;width:286px;height:46px;">
+        <strong>新建事件：口径重写入口</strong>
+        <span>一对多派生</span>
+      </div>
+      <div class="bar amber" style="left:1108px;top:153px;width:286px;height:46px;">
+        <strong>输出：会后转争夺</strong>
+        <span>指向 C14-C15</span>
+      </div>
+
+      <div class="bar cont violet" style="left:264px;top:394px;width:532px;">
+        <strong>救助显形</strong>
+        <span>拖到中线：本章推进到中段</span>
+        <i class="handle"></i>
+      </div>
+      <div class="hint" style="left:807px;top:407px;">停在中线，表示本章处理到这里</div>
+
+      <div class="bar cont red" style="left:264px;top:472px;width:826px;">
+        <strong>张航远被边缘化</strong>
+        <span>拖过中区后停在右侧中线：横跨整个章节</span>
+        <i class="handle"></i>
+      </div>
+      <div class="hint" style="left:1102px;top:523px;">右侧停靠，输出前仍在持续</div>
+
+      <div class="bar cont blue" style="left:264px;top:550px;width:650px;">
+        <strong>职业病证据压力</strong>
+        <span>本章维持压力，不进入事件详情编辑</span>
+      </div>
+
+      <div class="bar red" style="left:1110px;top:472px;width:284px;height:46px;">
+        <strong>输出：私线偏移压力</strong>
+        <span>C15 接收</span>
+      </div>
+      <div class="bar blue" style="left:1110px;top:550px;width:284px;height:46px;">
+        <strong>输出：证据压力保留</strong>
+        <span>C14-C16</span>
+      </div>
+      <div class="bar ghost" style="left:650px;top:667px;width:444px;height:34px;">
+        <strong>后续争夺事件占位</strong>
+      </div>
+      <div class="bar ghost" style="left:650px;top:737px;width:444px;height:34px;">
+        <strong>私线偏移压力占位</strong>
+      </div>
+
+      <svg class="connectors" viewBox="0 0 1240 566" aria-hidden="true">
+        <defs>
+          <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L8,4 L0,8 Z" fill="#0b1715"></path>
+          </marker>
+          <marker id="arrow-teal" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L8,4 L0,8 Z" fill="#087d72"></path>
+          </marker>
+        </defs>
+        <path class="connector" marker-end="url(#arrow)" d="M214 72 L330 72 L330 71 L414 71"></path>
+        <path class="connector" marker-end="url(#arrow)" d="M214 142 L330 142 L330 71 L414 71"></path>
+        <path class="connector alt" marker-end="url(#arrow-teal)" d="M214 72 L302 72 L302 201 L404 201"></path>
+        <path class="connector dim" marker-end="url(#arrow)" d="M720 71 L815 71 L815 72 L858 72"></path>
+        <path class="connector dim" marker-end="url(#arrow)" d="M850 399 L862 399"></path>
+      </svg>
+      <div class="relation-note">关系示例：多对一 + 一对多，全部从左向右</div>
+
+      <div class="legend">
+        <div><span class="key done"></span><strong>已完成历史事件</strong> 只作为来源，不自动占用中区</div>
+        <div><span class="key continue"></span><strong>延续事件</strong> 按行拖到中线或右侧中线</div>
+        <div><span class="key new"></span><strong>新建事件</strong> 在章节操作区生成</div>
+        <div><span class="key line"></span><strong>关系连线</strong> 多对一或一对多，方向固定向右</div>
+        <div><span class="key snap"></span><strong>停靠线</strong> 表示处理中段或横跨整章</div>
+      </div>
+    </section>
+
+    <aside class="inspector" aria-label="Inspector">
+      <section class="card selected-card">
+        <span class="card-kicker">SELECTED CHAPTER EVENT</span>
+        <h2>会议结果落地</h2>
+        <p>这是在 C13 中新建的事件对象。它不编辑正文，只声明由哪些来源促成，并输出给后续事件流。</p>
+        <div class="tag-row">
+          <span class="tag">C13</span>
+          <span class="tag">NEW EVENT</span>
+          <span class="tag">多对一</span>
+          <span class="tag">可进入详情</span>
+        </div>
+      </section>
+
+      <section class="card">
+        <h3>Inspector 摘要</h3>
+        <dl class="fields">
+          <dt>来源</dt>
+          <dd>采访材料成形 + 解释权预压</dd>
+          <dt>动作</dt>
+          <dd>在章节操作区中新建事件，并建立关系线。</dd>
+          <dt>输出</dt>
+          <dd>会后转争夺，可传给 C14-C15。</dd>
+          <dt>边界</dt>
+          <dd>事件内部起因、过程、结果进入事件详情页再编辑。</dd>
+        </dl>
+      </section>
+
+      <section class="card">
+        <h3>操作约束</h3>
+        <ul class="rules">
+          <li>已完成历史事件需要手动加入关系，不默认绑定章节。</li>
+          <li>延续事件以整行拖拽，停在中线或右侧中线表达生命周期。</li>
+          <li>中区只决策事件的新增、推进、终结和输出关系。</li>
+          <li>点击条目只选中并显示 Inspector，不自动进入详情。</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h3>小地图</h3>
+        <div class="mini-map">
+          <div class="mini-track"><b style="left:8%;width:18%;color:#596b66;"></b><b style="left:38%;width:25%;color:#087d72;"></b><b style="left:74%;width:18%;color:#a66b0b;"></b></div>
+          <div class="mini-track"><b style="left:8%;width:43%;color:#73569c;"></b></div>
+          <div class="mini-track"><b style="left:8%;width:66%;color:#bd2947;"></b><b style="left:76%;width:18%;color:#bd2947;"></b></div>
+          <div class="mini-track"><b style="left:8%;width:52%;color:#2f648c;"></b><b style="left:76%;width:18%;color:#2f648c;"></b></div>
+        </div>
+      </section>
+
+      <div class="spacer"></div>
+      <button class="action primary">进入事件详情</button>
+      <button class="action">确认章节关系</button>
+      <button class="action">回到全局时间画布</button>
+    </aside>
+  </main>
+</body>
+</html>

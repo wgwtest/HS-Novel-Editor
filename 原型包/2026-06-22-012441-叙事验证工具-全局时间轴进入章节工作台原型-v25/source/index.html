@@ -1,0 +1,1240 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>全局时间轴进入章节工作台 V25</title>
+  <style>
+    :root {
+      --bg: #e9f0ed;
+      --panel: #ffffff;
+      --paper: #f7faf9;
+      --ink: #0a1614;
+      --muted: #566763;
+      --line: #98aaa6;
+      --line-soft: #d8e1de;
+      --teal: #087d72;
+      --teal-soft: #d9efeb;
+      --amber: #a66a10;
+      --amber-soft: #f4e6c6;
+      --red: #bf2948;
+      --red-soft: #f6dce4;
+      --blue: #2e658c;
+      --blue-soft: #dbeaf4;
+      --violet: #73549d;
+      --violet-soft: #e9e1f1;
+      --mono: Consolas, "Cascadia Mono", "Microsoft YaHei UI", monospace;
+      --sans: "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      width: 1920px;
+      height: 1080px;
+      margin: 0;
+      overflow: hidden;
+      color: var(--ink);
+      background:
+        linear-gradient(90deg, rgba(10, 22, 20, 0.03) 1px, transparent 1px) 0 0 / 24px 24px,
+        linear-gradient(180deg, rgba(10, 22, 20, 0.025) 1px, transparent 1px) 0 0 / 24px 24px,
+        var(--bg);
+      font-family: var(--sans);
+    }
+
+    button {
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .artboard {
+      width: 1920px;
+      height: 1080px;
+      padding: 18px;
+    }
+
+    .app {
+      height: 100%;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.94);
+      display: grid;
+      grid-template-rows: 54px 1fr;
+      box-shadow: 0 28px 80px rgba(20, 36, 32, 0.12);
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      align-items: center;
+      padding: 0 24px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfdfc;
+    }
+
+    .brand {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      min-width: 0;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .brand span,
+    .route {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .route {
+      font-family: var(--mono);
+      white-space: nowrap;
+    }
+
+    .route strong {
+      color: var(--teal);
+    }
+
+    .screen {
+      min-height: 0;
+      display: none;
+    }
+
+    .screen.active {
+      display: grid;
+    }
+
+    .global-screen {
+      grid-template-columns: 1fr 360px;
+    }
+
+    .main-zone {
+      min-width: 0;
+      display: grid;
+      grid-template-rows: 56px 1fr;
+      gap: 12px;
+      padding: 18px 18px 18px 22px;
+      border-right: 1px solid var(--line);
+    }
+
+    .toolbar,
+    .inspector,
+    .timeline-shell,
+    .workbench-shell {
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: center;
+      padding: 0 14px;
+    }
+
+    .toolbar h2 {
+      margin: 0 0 4px;
+      font-size: 16px;
+      line-height: 1;
+      font-weight: 800;
+    }
+
+    .toolbar p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.3;
+    }
+
+    .segmented {
+      display: inline-grid;
+      grid-auto-flow: column;
+      border: 1px solid var(--line);
+      background: var(--paper);
+    }
+
+    .segmented button {
+      min-width: 76px;
+      height: 32px;
+      border: 0;
+      border-right: 1px solid var(--line);
+      background: transparent;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .segmented button:last-child {
+      border-right: 0;
+    }
+
+    .segmented button.active {
+      background: var(--ink);
+      color: #fff;
+    }
+
+    .timeline-shell {
+      min-height: 0;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 174px 1fr;
+      position: relative;
+    }
+
+    .track-labels {
+      z-index: 3;
+      border-right: 1px solid var(--line);
+      background: #f4f8f6;
+      display: grid;
+      grid-template-rows: 76px repeat(7, 74px);
+    }
+
+    .label-cell {
+      border-bottom: 1px solid var(--line-soft);
+      padding: 12px 12px;
+      display: grid;
+      align-content: center;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .label-cell.header {
+      background: #edf4f2;
+      font-weight: 800;
+    }
+
+    .label-cell strong {
+      font-size: 13px;
+      line-height: 1.15;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .label-cell span {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .timeline-viewport {
+      min-width: 0;
+      overflow: auto hidden;
+      position: relative;
+      cursor: grab;
+      background:
+        linear-gradient(180deg, rgba(216, 225, 222, 0.72) 1px, transparent 1px) 0 76px / 100% 74px,
+        #fff;
+    }
+
+    .timeline-viewport.dragging {
+      cursor: grabbing;
+      user-select: none;
+    }
+
+    .timeline-canvas {
+      position: relative;
+      height: 594px;
+      min-width: 100%;
+    }
+
+    .chapter-col {
+      position: absolute;
+      top: 0;
+      height: 594px;
+      border-right: 1px solid var(--line-soft);
+    }
+
+    .chapter-head {
+      height: 76px;
+      padding: 14px 12px 8px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfdfc;
+      cursor: pointer;
+    }
+
+    .chapter-head strong {
+      display: block;
+      font-size: 17px;
+      line-height: 1.15;
+      font-weight: 800;
+    }
+
+    .chapter-head span {
+      display: block;
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.2;
+    }
+
+    .chapter-col.selected {
+      background: rgba(8, 125, 114, 0.055);
+      box-shadow: inset 0 0 0 2px rgba(8, 125, 114, 0.46);
+    }
+
+    .chapter-col.selected .chapter-head {
+      background: #edf8f6;
+    }
+
+    .timeline-event {
+      position: absolute;
+      height: 38px;
+      border: 2px solid currentColor;
+      background: var(--teal-soft);
+      color: var(--teal);
+      padding: 7px 10px 6px;
+      overflow: hidden;
+      cursor: pointer;
+      z-index: 4;
+    }
+
+    .timeline-event.amber { color: var(--amber); background: var(--amber-soft); }
+    .timeline-event.red { color: var(--red); background: var(--red-soft); }
+    .timeline-event.blue { color: var(--blue); background: var(--blue-soft); }
+    .timeline-event.violet { color: var(--violet); background: var(--violet-soft); }
+
+    .timeline-event::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 4px;
+      background: currentColor;
+    }
+
+    .timeline-event strong {
+      display: block;
+      color: var(--ink);
+      font-size: 12px;
+      line-height: 1.05;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .timeline-event span {
+      display: block;
+      margin-top: 4px;
+      color: #3a4946;
+      font-family: var(--mono);
+      font-size: 9px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .timeline-event.selected {
+      outline: 3px solid var(--ink);
+      outline-offset: 2px;
+    }
+
+    .inspector {
+      min-width: 0;
+      margin: 18px 18px 18px 0;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      border-top: 3px solid var(--teal);
+      background: #fbfdfc;
+    }
+
+    .kicker {
+      color: var(--teal);
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .inspector h2 {
+      margin: 10px 0 6px;
+      font-size: 22px;
+      line-height: 1.12;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .inspector p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .info-cell {
+      min-height: 70px;
+      padding: 10px 11px;
+      border: 1px solid var(--line-soft);
+      background: var(--paper);
+    }
+
+    .info-cell span,
+    .list-title {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .info-cell strong {
+      display: block;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .object-list {
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line-soft);
+    }
+
+    .object-list ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 8px;
+    }
+
+    .object-list li {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 8px;
+      align-items: baseline;
+      color: var(--ink);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .object-list b {
+      color: var(--teal);
+      font-family: var(--mono);
+      font-size: 10px;
+    }
+
+    .action-area {
+      margin-top: auto;
+      display: grid;
+      gap: 9px;
+    }
+
+    .primary,
+    .secondary {
+      height: 38px;
+      border: 1px solid var(--ink);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .primary {
+      color: #fff;
+      border-color: var(--teal);
+      background: var(--teal);
+    }
+
+    .primary:disabled,
+    .secondary:disabled {
+      opacity: 0.42;
+      cursor: not-allowed;
+    }
+
+    .secondary {
+      color: var(--ink);
+      background: #fff;
+    }
+
+    .workbench-screen {
+      grid-template-columns: 1fr 360px;
+    }
+
+    .workbench-zone {
+      min-width: 0;
+      display: grid;
+      grid-template-rows: 56px 1fr;
+      gap: 12px;
+      padding: 18px 18px 18px 22px;
+      border-right: 1px solid var(--line);
+    }
+
+    .workbench-shell {
+      position: relative;
+      overflow: hidden;
+      min-height: 0;
+      background: #fff;
+    }
+
+    .phase {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      border-right: 1px solid var(--line);
+    }
+
+    .phase.input {
+      left: 0;
+      width: 27%;
+      border-top: 3px solid var(--muted);
+      background: #f7faf9;
+    }
+
+    .phase.process {
+      left: 27%;
+      width: 50%;
+      border-top: 3px solid var(--teal);
+      background:
+        linear-gradient(180deg, rgba(216, 225, 222, 0.70) 1px, transparent 1px) 0 148px / 100% 76px,
+        linear-gradient(90deg, rgba(8, 125, 114, 0.05), rgba(8, 125, 114, 0.01));
+    }
+
+    .phase.output {
+      left: 77%;
+      width: 23%;
+      border-right: 0;
+      border-top: 3px solid var(--amber);
+      background: #fffdf8;
+    }
+
+    .phase header {
+      height: 84px;
+      padding: 16px 18px 10px;
+      border-bottom: 1px solid var(--line-soft);
+      background: rgba(255, 255, 255, 0.86);
+    }
+
+    .phase small {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 1.5px;
+    }
+
+    .phase h3 {
+      margin: 0;
+      font-size: 21px;
+      line-height: 1;
+      font-weight: 800;
+    }
+
+    .phase p {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.25;
+    }
+
+    .bench-row {
+      position: absolute;
+      left: 27%;
+      right: 23%;
+      height: 76px;
+      border-bottom: 1px solid var(--line-soft);
+      z-index: 1;
+    }
+
+    .section-label {
+      position: absolute;
+      left: 18px;
+      width: calc(27% - 36px);
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      border-bottom: 1px solid var(--line-soft);
+      z-index: 5;
+    }
+
+    .ended-label { top: 108px; }
+    .live-label { top: 372px; }
+
+    .bench-card,
+    .bench-span,
+    .bench-output {
+      position: absolute;
+      z-index: 7;
+      border: 2px solid currentColor;
+      background: #fff;
+      padding: 10px 12px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .bench-card {
+      left: 18px;
+      width: calc(27% - 36px);
+      height: 60px;
+      color: var(--muted);
+      background: #eef4f2;
+    }
+
+    .bench-card.unused {
+      opacity: 0.55;
+      border-style: dashed;
+    }
+
+    .bench-span {
+      left: 18px;
+      height: 58px;
+    }
+
+    .bench-span.violet { color: var(--violet); background: var(--violet-soft); }
+    .bench-span.red { color: var(--red); background: var(--red-soft); }
+    .bench-span.blue { color: var(--blue); background: var(--blue-soft); }
+
+    .bench-output {
+      left: calc(77% + 18px);
+      width: calc(23% - 36px);
+      height: 60px;
+      color: var(--amber);
+      background: var(--amber-soft);
+    }
+
+    .bench-output.red { color: var(--red); background: var(--red-soft); }
+    .bench-output.blue { color: var(--blue); background: var(--blue-soft); }
+
+    .bench-card strong,
+    .bench-span strong,
+    .bench-output strong {
+      display: block;
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.15;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .bench-card span,
+    .bench-span span,
+    .bench-output span {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 8px;
+      color: #33433f;
+      font-size: 11px;
+      line-height: 1.2;
+    }
+
+    .bench-item.selected {
+      outline: 3px solid var(--ink);
+      outline-offset: 3px;
+    }
+
+    .relation-svg {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    .relation-svg path {
+      fill: none;
+      stroke: var(--ink);
+      stroke-width: 2;
+      stroke-linecap: square;
+      stroke-linejoin: miter;
+      marker-end: url(#arrow);
+    }
+
+    .relation-svg .muted {
+      stroke: rgba(10, 22, 20, 0.45);
+      stroke-dasharray: 7 6;
+    }
+
+    .back-link {
+      height: 32px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      color: var(--ink);
+      padding: 0 12px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+  </style>
+</head>
+<body>
+  <main class="artboard">
+    <section class="app">
+      <header class="topbar">
+        <div class="brand">
+          <h1 id="pageTitle">全局时间画布</h1>
+          <span id="pageSubtitle">从章节对象进入对应章节工作台，保持章节 ID 与事件投影一致。</span>
+        </div>
+        <div class="route">当前路径 / <strong id="routeLabel">#timeline</strong></div>
+      </header>
+
+      <section class="screen global-screen active" id="globalScreen">
+        <section class="main-zone">
+          <div class="toolbar">
+            <div>
+              <h2>大时间轴</h2>
+              <p>章节是时间底盘上的正文切片；点击章节只选中，右侧确认后进入章节工作台。</p>
+            </div>
+            <div class="segmented" aria-label="时间轴控制">
+              <button type="button" id="zoomOut">缩小</button>
+              <button type="button" id="resetZoom" class="active">复位</button>
+              <button type="button" id="zoomIn">放大</button>
+            </div>
+          </div>
+
+          <div class="timeline-shell">
+            <div class="track-labels" id="trackLabels"></div>
+            <div class="timeline-viewport" id="timelineViewport">
+              <div class="timeline-canvas" id="timelineCanvas"></div>
+            </div>
+          </div>
+        </section>
+
+        <aside class="inspector" id="globalInspector">
+          <div class="kicker" id="globalKind">No Selection</div>
+          <h2 id="globalTitle">尚未选中章节</h2>
+          <p id="globalSummary">在左侧大时间轴里点击章节头。系统只会选中章节，不会误触进入工作台。</p>
+          <div class="info-grid">
+            <div class="info-cell"><span>对象 ID</span><strong id="globalObjectId">未选中</strong></div>
+            <div class="info-cell"><span>对象类型</span><strong id="globalObjectType">等待选择</strong></div>
+            <div class="info-cell"><span>输入</span><strong id="globalInput">等待选择章节</strong></div>
+            <div class="info-cell"><span>输出</span><strong id="globalOutput">等待选择章节</strong></div>
+          </div>
+          <div class="object-list">
+            <span class="list-title">章节对象关系</span>
+            <ul id="globalRelations">
+              <li><b>提示</b><span>选中章节后，这里显示输入事件、延续事件和输出事件摘要。</span></li>
+            </ul>
+          </div>
+          <div class="action-area">
+            <button class="primary" type="button" id="enterWorkbench" disabled>进入章节工作台</button>
+            <button class="secondary" type="button" id="selectC15">选中 C15 示例</button>
+          </div>
+        </aside>
+      </section>
+
+      <section class="screen workbench-screen" id="workbenchScreen">
+        <section class="workbench-zone">
+          <div class="toolbar">
+            <div>
+              <h2 id="workbenchTitle">章节工作台</h2>
+              <p id="workbenchSubtitle">从全局时间画布进入后，读取当前章节对象和章节事件投影。</p>
+            </div>
+            <button class="back-link" type="button" id="backToTimeline">返回全局时间轴</button>
+          </div>
+
+          <div class="workbench-shell" id="workbenchShell">
+            <div class="phase input">
+              <header>
+                <small>INPUT</small>
+                <h3>章前输入</h3>
+                <p>已结束事件只作为来源；延续事件从这里进入本章。</p>
+              </header>
+            </div>
+            <div class="phase process">
+              <header>
+                <small>PROCESS</small>
+                <h3>中段处理</h3>
+                <p>章节函数决定事件生命周期和前后关系，不编辑事件全文。</p>
+              </header>
+            </div>
+            <div class="phase output">
+              <header>
+                <small>OUTPUT</small>
+                <h3>章后输出</h3>
+                <p>输出进入后续章节或全局事件流。</p>
+              </header>
+            </div>
+            <svg class="relation-svg" id="benchRelations">
+              <defs>
+                <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L8,4 L0,8 Z" fill="#0a1614"></path>
+                </marker>
+              </defs>
+            </svg>
+            <div class="section-label ended-label"><span>已结束历史事件</span><span>只作为来源接入</span></div>
+            <div class="section-label live-label"><span>章节开始时仍在延续</span><span>同一条事件投影可跨列</span></div>
+            <div id="benchRows"></div>
+            <div id="benchItems"></div>
+          </div>
+        </section>
+
+        <aside class="inspector" id="benchInspector">
+          <div class="kicker" id="benchKind">Chapter Workbench</div>
+          <h2 id="benchTitleInspect">章节工作台</h2>
+          <p id="benchSummary">当前工作台由全局时间画布进入，显示该章节的输入、处理和输出。</p>
+          <div class="info-grid">
+            <div class="info-cell"><span>章节 ID</span><strong id="benchChapterId">未进入</strong></div>
+            <div class="info-cell"><span>真实时间</span><strong id="benchTime">未进入</strong></div>
+            <div class="info-cell"><span>输入事件</span><strong id="benchInputCount">0</strong></div>
+            <div class="info-cell"><span>输出事件</span><strong id="benchOutputCount">0</strong></div>
+          </div>
+          <div class="object-list">
+            <span class="list-title">当前选中对象</span>
+            <ul id="benchObjectInfo">
+              <li><b>章节</b><span>点击工作台中的事件条，可查看事件投影。</span></li>
+            </ul>
+          </div>
+          <div class="action-area">
+            <button class="primary" type="button" id="enterEventDetail" disabled>进入事件详情</button>
+            <button class="secondary" type="button" id="backToTimeline2">回到大时间轴</button>
+          </div>
+        </aside>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const chapters = [
+      chapter("C10", "采访启动", "2025-07-07", "2025-07-08", "专题裂开，采访身份建立。", "采访主线启动。"),
+      chapter("C11", "样本成形", "2025-07-08", "2025-07-10", "走访材料进入叙事。", "职业病证据线形成。"),
+      chapter("C12", "显形加压", "2025-07-10", "2025-07-12", "大仙祠救助和操控同时显形。", "会议结果获得前置。"),
+      chapter("C13", "会议结果", "2025-07-13", "2025-07-15", "会议暂缓和电视台口径变化。", "会后缓冲开始。"),
+      chapter("C14", "会后吸收", "2025-07-15", "2025-07-17", "慈善、媒体和资源口径吸收冲突。", "C15 私线偏移获得条件。"),
+      chapter("C15", "私线偏移", "2025-07-18", "2025-07-20", "多轨事件同时进入章节。", "C16 诱导风险和群众争夺前置。"),
+      chapter("C16", "群众争夺", "2025-07-21", "2025-07-23", "群众真实处境和解释权冲突。", "流血冲突获得社会压力。"),
+      chapter("C17", "流血冲突", "2025-07-24", "2025-07-26", "诱导、镜头压力和群众情绪叠加。", "吕玉线接管入口出现。"),
+      chapter("C18", "吕玉接管", "2025-07-27", "2025-07-29", "前台崩塌后主线切换。", "后续进入新主线。")
+    ];
+
+    const tracks = [
+      { id: "main", name: "故事主轴", sub: "跨章节推进" },
+      { id: "interview", name: "采访线", sub: "叶依人 / 张航远" },
+      { id: "temple", name: "大仙祠线", sub: "解释权争夺" },
+      { id: "media", name: "电视台线", sub: "口径与资源" },
+      { id: "proof", name: "职业病证据线", sub: "材料与边界" },
+      { id: "zhang", name: "张航远线", sub: "目标漂移" },
+      { id: "lvyu", name: "吕玉线", sub: "后段接管" }
+    ];
+
+    const timelineEvents = [
+      event("E010", "采访启动", "main", "C10", "C11", "主轴启动", "teal"),
+      event("E021", "会议结果落地", "main", "C13", "C14", "会议结果转执行", "teal"),
+      event("E029", "会后转争夺", "main", "C15", "C16", "缓冲转争夺", "teal"),
+      event("E014", "走访与材料整理", "interview", "C11", "C12", "事实链形成", "teal"),
+      event("E041", "重新接触群众", "interview", "C15", "C15", "群众重新进入视野", "teal"),
+      event("E016", "救助显形", "temple", "C11", "C12", "救助与操控同显形", "violet"),
+      event("E044", "重新争夺解释权", "temple", "C16", "C16", "解释权争夺", "red"),
+      event("E028", "口径重写", "media", "C13", "C14", "媒体口径被吸收", "blue"),
+      event("E032", "化学证据预热", "proof", "C14", "C15", "证据压力保留", "amber"),
+      event("E039", "边缘化到私线偏移", "zhang", "C13", "C15", "张航远私线偏移", "red"),
+      event("E050", "主线接管", "lvyu", "C17", "C18", "后段接管", "teal")
+    ];
+
+    const workbenches = {
+      C13: {
+        decision: "会议结果被包装为可执行安排，并向电视台口径与会后缓冲输出。",
+        completed: [
+          item("E014", "走访与材料整理", "已结束", "采访材料来源", "teal", "叶依人 / 张航远 / 林倩"),
+          item("E016", "救助显形", "已结束", "解释权来源", "violet", "叶依人 / 禹树")
+        ],
+        continuing: [
+          span("E021", "会议结果落地", "推进到中段", "会议结果转执行", "teal", 0.46),
+          span("E028", "口径重写", "进入输出区", "媒体口径吸收冲突", "blue", 0.72)
+        ],
+        created: [
+          node("E029", "会后转争夺", "新建事件", "由会议结果输出", "teal", 0.50, 0)
+        ],
+        output: [
+          item("E029", "会后转争夺", "章后输出", "进入 C14-C15", "amber", "会议结果落地")
+        ]
+      },
+      C15: {
+        decision: "本章把会后缓冲、张航远私线和群众接触重新并到章节处理台。",
+        completed: [
+          item("E021", "会议结果落地", "已结束", "本章来源", "teal", "叶依人 / 张航远"),
+          item("E028", "口径重写", "已结束", "媒体来源", "blue", "电视台"),
+          item("E032", "化学证据预热", "已结束", "证据来源", "amber", "林倩")
+        ],
+        continuing: [
+          span("E016", "救助显形", "推进到中段", "大仙祠线延续", "violet", 0.42),
+          span("E039", "张航远被边缘化", "进入输出区", "私线风险横跨整章", "red", 0.86),
+          span("E037", "职业病证据压力", "推进到中段", "证据压力保留", "blue", 0.58)
+        ],
+        created: [
+          node("E041", "重新接触群众", "新建事件", "由会议结果与口径重写驱动", "teal", 0.47, 0),
+          node("E043", "私线偏移压力", "新建事件", "由张航远延续事件输出", "red", 0.66, 1)
+        ],
+        output: [
+          item("E044", "诱导风险", "章后输出", "进入 C16", "red", "张航远私线"),
+          item("E045", "证据压力保留", "章后输出", "进入 C16", "blue", "职业病证据线")
+        ]
+      }
+    };
+
+    let state = {
+      selectedChapterId: null,
+      selectedEventId: null,
+      zoom: 154,
+      activeChapterId: null
+    };
+
+    function chapter(id, title, start, end, input, output) {
+      return { id, title, start, end, input, output };
+    }
+
+    function event(id, title, track, startChapter, endChapter, summary, tone) {
+      return { id, title, track, startChapter, endChapter, summary, tone };
+    }
+
+    function item(id, title, stateLabel, summary, tone, people) {
+      return { id, title, stateLabel, summary, tone, people };
+    }
+
+    function span(id, title, stateLabel, summary, tone, widthRatio) {
+      return { id, title, stateLabel, summary, tone, widthRatio };
+    }
+
+    function node(id, title, stateLabel, summary, tone, xRatio, row) {
+      return { id, title, stateLabel, summary, tone, xRatio, row };
+    }
+
+    function chapterIndex(id) {
+      return chapters.findIndex((chapterItem) => chapterItem.id === id);
+    }
+
+    function toneClass(tone) {
+      return tone && tone !== "teal" ? tone : "";
+    }
+
+    function renderTrackLabels() {
+      const labels = document.getElementById("trackLabels");
+      labels.innerHTML = '<div class="label-cell header"><strong>时间根轴</strong><span>章节为基础单元</span></div>';
+      tracks.forEach((track) => {
+        const node = document.createElement("div");
+        node.className = "label-cell";
+        node.innerHTML = `<strong>${track.name}</strong><span>${track.sub}</span>`;
+        labels.appendChild(node);
+      });
+    }
+
+    function renderTimeline() {
+      renderTrackLabels();
+      const canvas = document.getElementById("timelineCanvas");
+      const width = chapters.length * state.zoom;
+      canvas.style.width = `${width}px`;
+      canvas.innerHTML = "";
+
+      chapters.forEach((chapterItem, index) => {
+        const col = document.createElement("section");
+        col.className = `chapter-col${state.selectedChapterId === chapterItem.id ? " selected" : ""}`;
+        col.style.left = `${index * state.zoom}px`;
+        col.style.width = `${state.zoom}px`;
+        col.dataset.chapterId = chapterItem.id;
+        col.innerHTML = `
+          <header class="chapter-head">
+            <strong>${chapterItem.id}</strong>
+            <span>${chapterItem.title}<br>${chapterItem.start} 至 ${chapterItem.end}</span>
+          </header>
+        `;
+        col.querySelector(".chapter-head").addEventListener("click", () => selectChapter(chapterItem.id));
+        canvas.appendChild(col);
+      });
+
+      timelineEvents.forEach((eventItem) => {
+        const start = chapterIndex(eventItem.startChapter);
+        const end = chapterIndex(eventItem.endChapter);
+        const trackIndex = tracks.findIndex((track) => track.id === eventItem.track);
+        if (start < 0 || end < 0 || trackIndex < 0) return;
+        const node = document.createElement("article");
+        node.className = `timeline-event ${toneClass(eventItem.tone)}${state.selectedEventId === eventItem.id ? " selected" : ""}`;
+        node.style.left = `${start * state.zoom + 12}px`;
+        node.style.top = `${76 + trackIndex * 74 + 18}px`;
+        node.style.width = `${Math.max(92, (end - start + 1) * state.zoom - 24)}px`;
+        node.innerHTML = `<strong>${eventItem.title}</strong><span>${eventItem.id} / ${eventItem.summary}</span>`;
+        node.addEventListener("click", (event) => {
+          event.stopPropagation();
+          selectTimelineEvent(eventItem.id);
+        });
+        canvas.appendChild(node);
+      });
+    }
+
+    function selectChapter(id) {
+      const chapterItem = chapters.find((chapter) => chapter.id === id);
+      state.selectedChapterId = id;
+      state.selectedEventId = null;
+      renderTimeline();
+      document.getElementById("globalKind").textContent = "Selected Chapter";
+      document.getElementById("globalTitle").textContent = `${chapterItem.id} ${chapterItem.title}`;
+      document.getElementById("globalSummary").textContent = "当前只是选中章节。点击下方按钮后，才进入该章节的时间线工作台。";
+      document.getElementById("globalObjectId").textContent = chapterItem.id;
+      document.getElementById("globalObjectType").textContent = "章节对象";
+      document.getElementById("globalInput").textContent = chapterItem.input;
+      document.getElementById("globalOutput").textContent = chapterItem.output;
+      const workbench = workbenches[id] || buildFallbackWorkbench(id);
+      document.getElementById("globalRelations").innerHTML = `
+        <li><b>输入</b><span>${workbench.completed.length} 个已结束事件，${workbench.continuing.length} 个延续事件。</span></li>
+        <li><b>处理</b><span>${workbench.decision}</span></li>
+        <li><b>输出</b><span>${workbench.output.length} 个章后输出事件。</span></li>
+      `;
+      document.getElementById("enterWorkbench").disabled = false;
+      document.getElementById("routeLabel").textContent = `#timeline / selected=${id}`;
+    }
+
+    function selectTimelineEvent(id) {
+      const eventItem = timelineEvents.find((item) => item.id === id);
+      state.selectedEventId = id;
+      state.selectedChapterId = eventItem.startChapter;
+      renderTimeline();
+      document.getElementById("globalKind").textContent = "Selected Event";
+      document.getElementById("globalTitle").textContent = `${eventItem.id} ${eventItem.title}`;
+      document.getElementById("globalSummary").textContent = "当前选中的是全局时间轴中的事件。若要进入章节工作台，应先确认其所属章节。";
+      document.getElementById("globalObjectId").textContent = eventItem.id;
+      document.getElementById("globalObjectType").textContent = "事件对象";
+      document.getElementById("globalInput").textContent = `所在章节：${eventItem.startChapter}`;
+      document.getElementById("globalOutput").textContent = `覆盖至：${eventItem.endChapter}`;
+      document.getElementById("globalRelations").innerHTML = `
+        <li><b>事件</b><span>${eventItem.summary}</span></li>
+        <li><b>章节</b><span>可进入 ${eventItem.startChapter} 工作台查看章节投影。</span></li>
+      `;
+      document.getElementById("enterWorkbench").disabled = false;
+      document.getElementById("routeLabel").textContent = `#timeline / event=${id}`;
+    }
+
+    function buildFallbackWorkbench(id) {
+      const related = timelineEvents.filter((eventItem) => eventItem.startChapter === id || eventItem.endChapter === id);
+      return {
+        decision: "该章节尚未配置详细工作台数据，系统按全局时间轴事件自动生成基础投影。",
+        completed: related.slice(0, 2).map((eventItem) => item(eventItem.id, eventItem.title, "来源事件", eventItem.summary, eventItem.tone, "待绑定")),
+        continuing: related.slice(2, 4).map((eventItem) => span(eventItem.id, eventItem.title, "推进到中段", eventItem.summary, eventItem.tone, 0.45)),
+        created: [],
+        output: related.slice(-1).map((eventItem) => item(eventItem.id, eventItem.title, "章后输出", eventItem.summary, eventItem.tone, "自动投影"))
+      };
+    }
+
+    function enterWorkbench() {
+      const id = state.selectedChapterId || timelineEvents.find((item) => item.id === state.selectedEventId)?.startChapter;
+      if (!id) return;
+      location.hash = `chapter/${id}`;
+      showWorkbench(id);
+    }
+
+    function showTimeline() {
+      document.getElementById("globalScreen").classList.add("active");
+      document.getElementById("workbenchScreen").classList.remove("active");
+      document.getElementById("pageTitle").textContent = "全局时间画布";
+      document.getElementById("pageSubtitle").textContent = "从章节对象进入对应章节工作台，保持章节 ID 与事件投影一致。";
+      document.getElementById("routeLabel").textContent = state.selectedChapterId ? `#timeline / selected=${state.selectedChapterId}` : "#timeline";
+      if (!location.hash.startsWith("#timeline")) history.replaceState(null, "", "#timeline");
+      renderTimeline();
+    }
+
+    function showWorkbench(id) {
+      const chapterItem = chapters.find((chapter) => chapter.id === id) || chapters[5];
+      state.activeChapterId = chapterItem.id;
+      state.selectedChapterId = chapterItem.id;
+      const workbench = workbenches[chapterItem.id] || buildFallbackWorkbench(chapterItem.id);
+      document.getElementById("globalScreen").classList.remove("active");
+      document.getElementById("workbenchScreen").classList.add("active");
+      document.getElementById("pageTitle").textContent = "章节时间线工作台";
+      document.getElementById("pageSubtitle").textContent = "从全局时间画布进入当前章节，处理章前输入、中段处理和章后输出。";
+      document.getElementById("routeLabel").textContent = `#chapter/${chapterItem.id}`;
+      document.getElementById("workbenchTitle").textContent = `${chapterItem.id} ${chapterItem.title} / 章节工作台`;
+      document.getElementById("workbenchSubtitle").textContent = `${chapterItem.start} 至 ${chapterItem.end}。${workbench.decision}`;
+      document.getElementById("benchKind").textContent = "Chapter Workbench";
+      document.getElementById("benchTitleInspect").textContent = `${chapterItem.id} ${chapterItem.title}`;
+      document.getElementById("benchSummary").textContent = workbench.decision;
+      document.getElementById("benchChapterId").textContent = chapterItem.id;
+      document.getElementById("benchTime").textContent = `${chapterItem.start} 至 ${chapterItem.end}`;
+      document.getElementById("benchInputCount").textContent = `${workbench.completed.length + workbench.continuing.length}`;
+      document.getElementById("benchOutputCount").textContent = `${workbench.output.length}`;
+      document.getElementById("benchObjectInfo").innerHTML = `
+        <li><b>输入</b><span>${chapterItem.input}</span></li>
+        <li><b>输出</b><span>${chapterItem.output}</span></li>
+      `;
+      document.getElementById("enterEventDetail").disabled = true;
+      renderWorkbench(chapterItem.id, workbench);
+    }
+
+    function renderWorkbench(chapterId, workbench) {
+      const rows = document.getElementById("benchRows");
+      rows.innerHTML = "";
+      [148, 224, 300, 376, 468, 544, 620].forEach((top) => {
+        const row = document.createElement("div");
+        row.className = "bench-row";
+        row.style.top = `${top}px`;
+        rows.appendChild(row);
+      });
+
+      const items = document.getElementById("benchItems");
+      items.innerHTML = "";
+
+      workbench.completed.forEach((card, index) => {
+        const node = document.createElement("article");
+        node.className = `bench-card bench-item ${card.tone === "teal" ? "" : card.tone}`;
+        node.style.top = `${146 + index * 76}px`;
+        node.dataset.id = card.id;
+        node.innerHTML = `<strong>${card.title}</strong><span><em>${card.stateLabel}</em><em>${card.people}</em></span>`;
+        node.addEventListener("click", () => selectBenchItem(card, "已结束历史事件"));
+        items.appendChild(node);
+      });
+
+      workbench.continuing.forEach((card, index) => {
+        const node = document.createElement("article");
+        node.className = `bench-span bench-item ${toneClass(card.tone)}`;
+        node.style.top = `${452 + index * 76}px`;
+        node.style.width = `calc(27% + ${Math.round(card.widthRatio * 50)}%)`;
+        node.dataset.id = card.id;
+        node.innerHTML = `<strong>${card.title}</strong><span><em>延续中</em><em>${card.stateLabel}</em></span>`;
+        node.addEventListener("click", () => selectBenchItem(card, "延续事件投影"));
+        items.appendChild(node);
+      });
+
+      workbench.created.forEach((card) => {
+        const node = document.createElement("article");
+        node.className = `bench-span bench-item ${toneClass(card.tone)}`;
+        node.style.left = `calc(27% + ${Math.round(card.xRatio * 50)}%)`;
+        node.style.top = `${162 + card.row * 76}px`;
+        node.style.width = "260px";
+        node.dataset.id = card.id;
+        node.innerHTML = `<strong>${card.title}</strong><span><em>${card.stateLabel}</em><em>章内生成</em></span>`;
+        node.addEventListener("click", () => selectBenchItem(card, "章内新建事件"));
+        items.appendChild(node);
+      });
+
+      workbench.output.forEach((card, index) => {
+        const node = document.createElement("article");
+        node.className = `bench-output bench-item ${toneClass(card.tone)}`;
+        node.style.top = `${146 + index * 76}px`;
+        node.dataset.id = card.id;
+        node.innerHTML = `<strong>${card.title}</strong><span><em>${card.stateLabel}</em><em>${card.people}</em></span>`;
+        node.addEventListener("click", () => selectBenchItem(card, "章后输出事件"));
+        items.appendChild(node);
+      });
+
+      drawBenchRelations();
+    }
+
+    function selectBenchItem(card, kind) {
+      document.querySelectorAll(".bench-item").forEach((node) => node.classList.toggle("selected", node.dataset.id === card.id));
+      document.getElementById("benchKind").textContent = kind;
+      document.getElementById("benchTitleInspect").textContent = `${card.id} ${card.title}`;
+      document.getElementById("benchSummary").textContent = card.summary;
+      document.getElementById("benchObjectInfo").innerHTML = `
+        <li><b>事件 ID</b><span>${card.id}</span></li>
+        <li><b>章节</b><span>${state.activeChapterId}</span></li>
+        <li><b>状态</b><span>${card.stateLabel}</span></li>
+        <li><b>说明</b><span>${card.summary}</span></li>
+      `;
+      document.getElementById("enterEventDetail").disabled = false;
+    }
+
+    function drawBenchRelations() {
+      const svg = document.getElementById("benchRelations");
+      const defs = svg.querySelector("defs");
+      svg.innerHTML = "";
+      svg.appendChild(defs);
+      const paths = [
+        "M392 336 L520 336 L520 184 L760 184",
+        "M392 412 L580 412 L580 184 L760 184",
+        "M1068 184 L1174 184"
+      ];
+      paths.forEach((d, index) => {
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", d);
+        if (index >= 2) path.classList.add("muted");
+        svg.appendChild(path);
+      });
+    }
+
+    function setupDragScroll() {
+      const viewport = document.getElementById("timelineViewport");
+      let startX = 0;
+      let startScroll = 0;
+      let dragging = false;
+      viewport.addEventListener("pointerdown", (event) => {
+        dragging = true;
+        startX = event.clientX;
+        startScroll = viewport.scrollLeft;
+        viewport.classList.add("dragging");
+        viewport.setPointerCapture(event.pointerId);
+      });
+      viewport.addEventListener("pointermove", (event) => {
+        if (!dragging) return;
+        viewport.scrollLeft = startScroll - (event.clientX - startX);
+      });
+      viewport.addEventListener("pointerup", (event) => {
+        dragging = false;
+        viewport.classList.remove("dragging");
+        viewport.releasePointerCapture(event.pointerId);
+      });
+    }
+
+    function handleRoute() {
+      const hash = location.hash.replace("#", "");
+      if (hash.startsWith("chapter/")) {
+        showWorkbench(hash.split("/")[1] || "C15");
+        return;
+      }
+      if (hash.startsWith("timeline/")) {
+        showTimeline();
+        selectChapter(hash.split("/")[1] || "C15");
+        return;
+      }
+      showTimeline();
+    }
+
+    document.getElementById("zoomIn").addEventListener("click", () => {
+      state.zoom = Math.min(230, state.zoom + 18);
+      renderTimeline();
+    });
+    document.getElementById("zoomOut").addEventListener("click", () => {
+      state.zoom = Math.max(116, state.zoom - 18);
+      renderTimeline();
+    });
+    document.getElementById("resetZoom").addEventListener("click", () => {
+      state.zoom = 154;
+      renderTimeline();
+    });
+    document.getElementById("enterWorkbench").addEventListener("click", enterWorkbench);
+    document.getElementById("selectC15").addEventListener("click", () => selectChapter("C15"));
+    document.getElementById("backToTimeline").addEventListener("click", () => {
+      history.replaceState(null, "", "#timeline");
+      showTimeline();
+    });
+    document.getElementById("backToTimeline2").addEventListener("click", () => {
+      history.replaceState(null, "", "#timeline");
+      showTimeline();
+    });
+    document.getElementById("enterEventDetail").addEventListener("click", () => {
+      document.getElementById("benchSummary").textContent = "事件详情页入口已确认。下一步应进入事件对象详情页，而不是在章节工作台内展开全文编辑。";
+    });
+
+    window.addEventListener("hashchange", handleRoute);
+    setupDragScroll();
+    renderTimeline();
+    if (!location.hash) history.replaceState(null, "", "#timeline");
+    handleRoute();
+  </script>
+</body>
+</html>

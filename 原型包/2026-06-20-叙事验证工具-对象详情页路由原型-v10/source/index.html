@@ -1,0 +1,937 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>叙事验证工具 对象详情页路由原型 v10</title>
+  <style>
+    :root {
+      --bg: #e9edeb;
+      --panel: #fbfcfb;
+      --paper: #ffffff;
+      --ink: #101716;
+      --muted: #65736f;
+      --line: #9badA8;
+      --line-soft: #dfe7e4;
+      --teal: #087268;
+      --teal-soft: #dcefed;
+      --red: #b42b40;
+      --red-soft: #f3d7de;
+      --violet: #67558a;
+      --violet-soft: #e8e3ef;
+      --amber: #a66a10;
+      --amber-soft: #f3e4c8;
+      --blue: #315f83;
+      --blue-soft: #dbe8f1;
+      --mono: Consolas, "Cascadia Mono", "Courier New", monospace;
+      --sans: "Microsoft YaHei UI", "Noto Sans CJK SC", "PingFang SC", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+    }
+
+    button, input, textarea { font: inherit; }
+
+    .frame {
+      width: 100%;
+      height: 100%;
+      padding: 18px;
+    }
+
+    .app {
+      height: 100%;
+      display: grid;
+      grid-template-rows: 48px 1fr;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      box-shadow: 0 28px 80px rgba(27, 42, 39, 0.12);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 26px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfb;
+    }
+
+    .brand {
+      font-size: 15px;
+      font-weight: 900;
+    }
+
+    .brand span {
+      margin-left: 14px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 400;
+    }
+
+    .route {
+      color: #4e5d5a;
+      font: 11px var(--mono);
+    }
+
+    .route strong { color: var(--teal); }
+
+    .view {
+      display: none;
+      height: 100%;
+      min-height: 0;
+    }
+
+    .view.active { display: grid; }
+
+    .timeline-view {
+      grid-template-columns: 1fr 342px;
+    }
+
+    .canvas-pane {
+      min-width: 0;
+      display: grid;
+      grid-template-rows: 64px 1fr;
+      gap: 10px;
+      padding: 16px 22px 16px 26px;
+      border-right: 1px solid var(--line);
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+    }
+
+    .toolbar h2 {
+      margin: 0 0 3px;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .toolbar p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .btn {
+      height: 34px;
+      padding: 0 14px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 800;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn.primary {
+      border-color: var(--teal);
+      background: var(--teal);
+      color: #fff;
+    }
+
+    .btn.dark {
+      border-color: #0f2522;
+      background: #0f2522;
+      color: #fff;
+    }
+
+    .timeline-board {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .board-grid {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to right, transparent 0, transparent 175px, var(--line) 175px, var(--line) 176px, transparent 176px),
+        repeating-linear-gradient(to right, transparent 0, transparent 159px, rgba(154, 173, 168, .56) 160px),
+        repeating-linear-gradient(to bottom, transparent 0, transparent 51px, rgba(16, 23, 22, .07) 52px);
+    }
+
+    .time-strip {
+      position: absolute;
+      left: 176px;
+      right: 0;
+      top: 0;
+      height: 42px;
+      background: #f8faf9;
+      border-bottom: 1px solid #e1e8e5;
+      color: #7c8a86;
+      font-size: 10px;
+    }
+
+    .time-strip span { position: absolute; top: 22px; }
+
+    .chapter-strip {
+      position: absolute;
+      left: 176px;
+      right: 0;
+      top: 42px;
+      height: 72px;
+      border-bottom: 2px solid #233632;
+      background: #f8fbfa;
+    }
+
+    .chapter-chip {
+      position: absolute;
+      top: 8px;
+      height: 54px;
+      padding: 8px 10px;
+      border: 1px solid #97aba6;
+      border-top: 3px solid #233632;
+      background: #fff;
+    }
+
+    .chapter-chip strong {
+      display: block;
+      font-size: 17px;
+      line-height: 1;
+    }
+
+    .chapter-chip span {
+      display: block;
+      margin-top: 4px;
+      color: #53625f;
+      font-size: 11px;
+    }
+
+    .chapter-chip.focus {
+      border-color: var(--teal);
+      border-top-color: var(--teal);
+      background: var(--teal-soft);
+    }
+
+    .left-labels {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 176px;
+      bottom: 0;
+      z-index: 3;
+      border-right: 1px solid var(--line);
+      background: #f6f9f8;
+    }
+
+    .label-head {
+      height: 42px;
+      padding: 12px 14px;
+      color: #5d6b68;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .label-chapter {
+      height: 72px;
+      padding: 12px 14px;
+      border-top: 1px solid #e1e8e5;
+      border-bottom: 2px solid #233632;
+      background: #e7efec;
+      font-weight: 900;
+    }
+
+    .track-row {
+      height: 52px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 0 14px;
+      border-bottom: 1px solid var(--line-soft);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .track-row.child {
+      height: 26px;
+      padding-left: 30px;
+      background: #fbfdfc;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      background: var(--teal);
+    }
+
+    .dot.red { background: var(--red); }
+    .dot.violet { background: var(--violet); }
+    .dot.blue { background: var(--blue); }
+
+    .event-block {
+      position: absolute;
+      height: 38px;
+      padding: 7px 10px 5px;
+      border: 1px solid #5aa39c;
+      background: var(--teal-soft);
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .event-block::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 4px;
+      background: var(--teal);
+    }
+
+    .event-block small {
+      display: block;
+      margin-top: 2px;
+      color: #34534f;
+      font: 9px var(--mono);
+    }
+
+    .event-block.selected {
+      outline: 3px solid #10201d;
+      outline-offset: 2px;
+    }
+
+    .event-block.red {
+      border-color: #e06b7e;
+      background: var(--red-soft);
+    }
+
+    .event-block.red::after { background: var(--red); }
+    .event-block.violet { border-color: #9b8eb7; background: var(--violet-soft); }
+    .event-block.violet::after { background: var(--violet); }
+    .event-block.amber { border-color: #d0a257; background: var(--amber-soft); }
+    .event-block.amber::after { background: var(--amber); }
+    .event-block.blue { border-color: #7ca2be; background: var(--blue-soft); }
+    .event-block.blue::after { background: var(--blue); }
+
+    .event-block.thin {
+      height: 22px;
+      padding: 3px 7px;
+      background: transparent;
+      font-size: 11px;
+    }
+
+    .event-block.dashed {
+      height: 24px;
+      border: 2px dashed var(--violet);
+      background: transparent;
+    }
+
+    .event-block.dashed::after { display: none; }
+
+    .inspector {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 12px;
+      padding: 18px;
+      background: #f7faf9;
+    }
+
+    .inspect-card, .panel {
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 16px;
+    }
+
+    .accent {
+      border-left: 5px solid var(--teal);
+    }
+
+    .eyebrow {
+      margin-bottom: 9px;
+      color: #596864;
+      font: 10px var(--mono);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    h1, h2, h3, h4, p { margin-top: 0; }
+
+    .inspect-card h3 {
+      margin-bottom: 8px;
+      font-size: 22px;
+      line-height: 1.1;
+    }
+
+    .inspect-card p {
+      margin-bottom: 0;
+      color: #34423f;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 14px;
+    }
+
+    .tag {
+      padding: 4px 7px;
+      border: 1px solid var(--line);
+      background: #fbfcfb;
+      font: 10px var(--mono);
+      font-weight: 700;
+    }
+
+    .kv {
+      display: grid;
+      gap: 11px;
+      font-size: 12px;
+    }
+
+    .kv div {
+      display: grid;
+      grid-template-columns: 62px 1fr;
+      gap: 12px;
+    }
+
+    .kv span {
+      color: var(--muted);
+    }
+
+    .kv strong {
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .action-stack {
+      display: grid;
+      gap: 8px;
+    }
+
+    .detail-view {
+      grid-template-columns: 238px 1fr;
+    }
+
+    .side-nav {
+      border-right: 1px solid var(--line);
+      background: #f1f6f4;
+      padding: 18px 14px;
+    }
+
+    .side-nav h3 {
+      margin: 0 0 14px;
+      font-size: 16px;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 10px 12px;
+      margin-bottom: 6px;
+      border: 1px solid transparent;
+      color: var(--ink);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .nav-item.active {
+      border-color: var(--teal);
+      background: var(--teal-soft);
+    }
+
+    .detail-main {
+      min-width: 0;
+      padding: 22px 26px;
+      overflow: hidden;
+    }
+
+    .object-head {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: start;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .object-head h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      line-height: 1.05;
+    }
+
+    .object-head p {
+      max-width: 860px;
+      color: #42514d;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .object-meta {
+      min-width: 330px;
+      display: grid;
+      gap: 6px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      background: #fff;
+      font-size: 12px;
+    }
+
+    .object-meta div {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .page-grid {
+      margin-top: 16px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .event-grid {
+      grid-template-columns: 1.05fr 1fr 1fr 330px;
+    }
+
+    .chapter-grid {
+      grid-template-columns: repeat(3, 1fr) 330px;
+    }
+
+    .lane-grid {
+      grid-template-columns: 1fr 1fr 1fr 330px;
+    }
+
+    .panel h3 {
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+
+    .panel p {
+      color: #33423f;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .panel-list {
+      display: grid;
+      gap: 9px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .panel-list li {
+      padding: 10px;
+      border: 1px solid var(--line-soft);
+      background: #fbfdfc;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .person-row {
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      gap: 10px;
+      padding: 10px 0;
+      border-top: 1px solid var(--line-soft);
+      font-size: 12px;
+    }
+
+    .person-row:first-of-type { border-top: 0; }
+
+    .person-name {
+      font-weight: 900;
+      color: var(--teal);
+    }
+
+    .field {
+      display: grid;
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .field textarea {
+      width: 100%;
+      min-height: 74px;
+      resize: none;
+      padding: 9px;
+      border: 1px solid var(--line);
+      background: #fbfcfb;
+      color: var(--ink);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .segment {
+      padding: 12px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .segment + .segment { margin-top: 10px; }
+
+    .segment strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+
+    .segment.explicit { border-left: 4px solid var(--teal); }
+    .segment.background { border: 2px dashed var(--violet); }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">叙事验证工具 <span>对象详情页路由原型 v10</span></div>
+        <div class="route">当前路由 / <strong id="routeLabel">#timeline</strong></div>
+      </header>
+
+      <section class="view timeline-view active" id="view-timeline">
+        <main class="canvas-pane">
+          <div class="toolbar">
+            <div>
+              <h2>全局时间线画布</h2>
+              <p>画布只负责全局定位和对象选择；Inspector 确认对象后再进入对应详情页。</p>
+            </div>
+            <div class="button-row">
+              <a class="btn" href="#event">进入事件页</a>
+              <a class="btn" href="#chapter">进入章节函数页</a>
+              <a class="btn" href="#lane">进入人物线页</a>
+            </div>
+          </div>
+
+          <div class="timeline-board">
+            <div class="board-grid"></div>
+            <div class="time-strip">
+              <span style="left:68px">7/8</span>
+              <span style="left:228px">7/10</span>
+              <span style="left:388px">7/12</span>
+              <span style="left:548px">7/14</span>
+              <span style="left:708px">7/16</span>
+              <span style="left:868px">7/18</span>
+              <span style="left:1028px">7/20</span>
+            </div>
+            <div class="chapter-strip">
+              <div class="chapter-chip" style="left:0;width:152px"><strong>C10</strong><span>采访启动</span></div>
+              <div class="chapter-chip" style="left:152px;width:192px"><strong>C11</strong><span>样本成形</span></div>
+              <div class="chapter-chip" style="left:344px;width:172px"><strong>C12</strong><span>显形加压</span></div>
+              <div class="chapter-chip focus" style="left:516px;width:172px"><strong>C13</strong><span>会议结果</span></div>
+              <div class="chapter-chip" style="left:688px;width:258px"><strong>C14</strong><span>会后吸收</span></div>
+              <div class="chapter-chip" style="left:946px;width:172px"><strong>C15</strong><span>私线偏移</span></div>
+            </div>
+            <div class="left-labels">
+              <div class="label-head">真实时间轴</div>
+              <div class="label-chapter">章节覆盖层</div>
+              <div class="track-row">• 故事主轴</div>
+              <div class="track-row">▾ 采访线</div>
+              <div class="track-row child"><i class="dot"></i>叶依人</div>
+              <div class="track-row child"><i class="dot red"></i>张航远</div>
+              <div class="track-row child"><i class="dot violet"></i>禹树</div>
+              <div class="track-row">▾ 大仙祠线</div>
+              <div class="track-row child"><i class="dot violet"></i>禹树</div>
+              <div class="track-row child"><i class="dot blue"></i>吕玉</div>
+              <div class="track-row child"><i class="dot"></i>叶依人</div>
+              <div class="track-row">▸ 电视台线</div>
+              <div class="track-row">▸ 证据线</div>
+              <div class="track-row">▾ 张航远线</div>
+            </div>
+
+            <div class="event-block" style="left:186px;top:124px;width:330px">采访启动<small>E010-E014</small></div>
+            <div class="event-block selected" style="left:526px;top:124px;width:420px">会议结果落地<small>E021-E028</small></div>
+            <div class="event-block" style="left:984px;top:124px;width:320px">会后转争夺<small>E029-E041</small></div>
+            <div class="event-block" style="left:256px;top:176px;width:430px">走访与材料整理<small>C11-C12</small></div>
+            <div class="event-block thin" style="left:256px;top:226px;width:430px">叶 事实链走访</div>
+            <div class="event-block red thin" style="left:526px;top:278px;width:500px">张 被边缘化</div>
+            <div class="event-block violet" style="left:278px;top:348px;width:440px">救助显形<small>C11-C12</small></div>
+            <div class="event-block dashed" style="left:526px;top:398px;width:500px">禹 情报后台发酵</div>
+            <div class="event-block blue" style="left:526px;top:498px;width:220px">口径重写<small>C13-C14</small></div>
+            <div class="event-block amber" style="left:676px;top:552px;width:330px">化学证据预热<small>C14-C15</small></div>
+          </div>
+        </main>
+
+        <aside class="inspector">
+          <section class="inspect-card accent">
+            <div class="eyebrow">Selected Story Event</div>
+            <h3>会议结果落地</h3>
+            <p>当前选中的是故事轴事件。这里先确认对象和摘要，不在右侧塞入完整编辑界面。</p>
+            <div class="tag-list">
+              <span class="tag">C13/C14</span><span class="tag">故事主轴</span><span class="tag">事件对象</span>
+            </div>
+          </section>
+          <section class="inspect-card">
+            <h3>Inspector 摘要</h3>
+            <div class="kv">
+              <div><span>摘要</span><strong>会议暂缓被各方吸收，冲突转入会后缓冲。</strong></div>
+              <div><span>参与</span><strong>叶依人、张航远、电视台口径、大仙祠线外部压力。</strong></div>
+              <div><span>起因</span><strong>会议结果没有直接裁决冲突，而是把压力放入体面秩序。</strong></div>
+              <div><span>过程</span><strong>媒体口径、慈善资源、人物私线同时重分配压力。</strong></div>
+              <div><span>结果</span><strong>会后缓冲成立，并为 C15 私线偏移制造条件。</strong></div>
+            </div>
+          </section>
+          <div class="action-stack">
+            <a class="btn primary" href="#event">进入事件页</a>
+            <a class="btn" href="#chapter">查看覆盖章节</a>
+            <a class="btn" href="#timeline">回到画布状态</a>
+          </div>
+        </aside>
+      </section>
+
+      <section class="view detail-view" id="view-event">
+        <nav class="side-nav">
+          <h3>对象详情</h3>
+          <a class="nav-item" href="#timeline">全局画布</a>
+          <a class="nav-item active" href="#event">事件页</a>
+          <a class="nav-item" href="#chapter">章节函数页</a>
+          <a class="nav-item" href="#lane">人物线页</a>
+        </nav>
+        <main class="detail-main">
+          <div class="object-head">
+            <div>
+              <h1>事件：会议结果落地</h1>
+              <p>事件页以事件为主对象。它关心的是动作因果、参与人物和状态变化，而不是章节内部黑盒。</p>
+              <div class="tag-list">
+                <span class="tag">E021-E028</span><span class="tag">故事主轴</span><span class="tag">C13/C14</span>
+              </div>
+            </div>
+            <div class="object-meta">
+              <div><span>时间</span><strong>07-13 08:00 -> 07-17 16:00</strong></div>
+              <div><span>覆盖章节</span><strong>C13 / C14</strong></div>
+              <div><span>状态</span><strong>待检查</strong></div>
+            </div>
+          </div>
+          <div class="page-grid event-grid">
+            <section class="panel">
+              <h3>起因</h3>
+              <p>会议没有给出真正解决，而是把公开冲突转入可以被机构、媒体和慈善系统吸收的缓冲状态。</p>
+              <ul class="panel-list">
+                <li>前置事件：救助显形、采访材料形成、会议压力到达。</li>
+                <li>触发因素：会议结果暂缓，所有人都需要解释这个暂缓。</li>
+              </ul>
+            </section>
+            <section class="panel">
+              <h3>过程</h3>
+              <p>压力没有消失，而是被多个系统重新分配。电视台调整口径，张航远被边缘化，大仙祠线继续在后台发酵。</p>
+              <ul class="panel-list">
+                <li>媒体口径重写：把冲突放入更温和的叙述框。</li>
+                <li>人物私线酝酿：张航远把失去主导感理解为个人失败。</li>
+              </ul>
+            </section>
+            <section class="panel">
+              <h3>结果</h3>
+              <p>故事从会议结果转入会后缓冲。C15 的私线偏移获得条件，群众争夺的压力开始积累。</p>
+              <ul class="panel-list">
+                <li>输出给章节：C14 负责吸收和重分配。</li>
+                <li>输出给后续事件：C15 私线偏移、C16 群众争夺。</li>
+              </ul>
+            </section>
+            <section class="panel">
+              <h3>事件编辑</h3>
+              <div class="field"><label>事件摘要</label><textarea>会议暂缓被各方吸收，冲突转入会后缓冲。</textarea></div>
+              <div class="field"><label>风险</label><textarea>缓冲不能写成静止，必须显示压力被转移。</textarea></div>
+              <a class="btn primary" href="#timeline">保存并回到画布</a>
+            </section>
+          </div>
+          <div class="page-grid" style="grid-template-columns: 1fr 1fr 1fr; margin-top:14px">
+            <section class="panel">
+              <h3>参与人物</h3>
+              <div class="person-row"><div class="person-name">叶依人</div><div>继续承接采访判断，但采访空间被口径变化压缩。</div></div>
+              <div class="person-row"><div class="person-name">张航远</div><div>被边缘化后开始产生私线证明欲。</div></div>
+              <div class="person-row"><div class="person-name">禹树</div><div>作为情报入口仍在后台发酵，但不替代正文事件。</div></div>
+            </section>
+            <section class="panel">
+              <h3>章节落点</h3>
+              <ul class="panel-list">
+                <li>C13：呈现会议结果和压力转向。</li>
+                <li>C14：呈现会后吸收，不把缓冲写成静止。</li>
+              </ul>
+            </section>
+            <section class="panel">
+              <h3>检查结论</h3>
+              <ul class="panel-list">
+                <li>事件边界成立：正文可见事件，不是人物后台状态。</li>
+                <li>仍需确认：张航远私线偏移的诱导链是否足够连续。</li>
+              </ul>
+            </section>
+          </div>
+        </main>
+      </section>
+
+      <section class="view detail-view" id="view-chapter">
+        <nav class="side-nav">
+          <h3>对象详情</h3>
+          <a class="nav-item" href="#timeline">全局画布</a>
+          <a class="nav-item" href="#event">事件页</a>
+          <a class="nav-item active" href="#chapter">章节函数页</a>
+          <a class="nav-item" href="#lane">人物线页</a>
+        </nav>
+        <main class="detail-main">
+          <div class="object-head">
+            <div>
+              <h1>章节函数：C13 会议结果</h1>
+              <p>章节页以章节为主对象。它把本章当作黑盒函数，检查输入、处理和输出是否闭合。</p>
+              <div class="tag-list">
+                <span class="tag">章节函数</span><span class="tag">C13</span><span class="tag">输入 / 处理 / 输出</span>
+              </div>
+            </div>
+            <div class="object-meta">
+              <div><span>时间</span><strong>07-13 08:00 -> 07-15 12:00</strong></div>
+              <div><span>阶段</span><strong>会议结果</strong></div>
+              <div><span>状态</span><strong>待检查</strong></div>
+            </div>
+          </div>
+          <div class="page-grid chapter-grid">
+            <section class="panel">
+              <h3>输入</h3>
+              <p>进入本章前，救助显形、采访材料和会议压力已经形成。读者需要看到会议结果如何改变各条线。</p>
+              <ul class="panel-list">
+                <li>采访线：事实链已成形，但需要面对机构口径。</li>
+                <li>大仙祠线：解释权入口已暴露。</li>
+                <li>张航远线：自我证明欲尚未完全转入私线。</li>
+              </ul>
+            </section>
+            <section class="panel">
+              <h3>处理</h3>
+              <p>本章不是简单宣布结果，而是把压力转入体面秩序。场景需要表现“暂缓、解释、吸收”的过程。</p>
+              <ul class="panel-list">
+                <li>场景功能：会议结果给出表面秩序。</li>
+                <li>信息功能：读者看见冲突没有解决，只是换了形态。</li>
+                <li>人物功能：叶依人继续观察，张航远开始失衡。</li>
+              </ul>
+            </section>
+            <section class="panel">
+              <h3>输出</h3>
+              <p>本章输出会后缓冲和私线偏移条件。后续 C14 承接吸收，C15 承接张航远的目标漂移。</p>
+              <ul class="panel-list">
+                <li>输出事件：会议结果落地。</li>
+                <li>输出风险：缓冲不能静止，必须带着压力进入下一章。</li>
+                <li>输出人物状态：张航远开始把边缘化理解为失败。</li>
+              </ul>
+            </section>
+            <section class="panel">
+              <h3>章节检查</h3>
+              <ul class="panel-list">
+                <li>承接上游：已承接救助显形和会议压力。</li>
+                <li>制造下游：需要明确指向 C14 会后吸收和 C15 私线偏移。</li>
+                <li>风险：如果只写会议结果，章节函数会过薄。</li>
+              </ul>
+              <a class="btn primary" href="#timeline">回到全局画布</a>
+            </section>
+          </div>
+        </main>
+      </section>
+
+      <section class="view detail-view" id="view-lane">
+        <nav class="side-nav">
+          <h3>对象详情</h3>
+          <a class="nav-item" href="#timeline">全局画布</a>
+          <a class="nav-item" href="#event">事件页</a>
+          <a class="nav-item" href="#chapter">章节函数页</a>
+          <a class="nav-item active" href="#lane">人物线页</a>
+        </nav>
+        <main class="detail-main">
+          <div class="object-head">
+            <div>
+              <h1>人物线：禹树 / 大仙祠线</h1>
+              <p>人物线页暂不做全局人物传记。它只观察某个人在某条故事线里的局部作用、实写段和后台虚段。</p>
+              <div class="tag-list">
+                <span class="tag">禹树</span><span class="tag">大仙祠线</span><span class="tag">组合对象</span>
+              </div>
+            </div>
+            <div class="object-meta">
+              <div><span>人物</span><strong>禹树</strong></div>
+              <div><span>故事线</span><strong>大仙祠线</strong></div>
+              <div><span>状态</span><strong>低承诺原型</strong></div>
+            </div>
+          </div>
+          <div class="page-grid lane-grid">
+            <section class="panel">
+              <h3>实写段</h3>
+              <div class="segment explicit">
+                <strong>情报入口显露</strong>
+                <p>C12 中，禹树的资源信息被卷入解释权争夺。读者能明确看到这个人物参与片段。</p>
+              </div>
+              <div class="segment explicit">
+                <strong>成为诱导锚点</strong>
+                <p>C15 中，禹树的信息被张航远误读，形成私线偏移的诱导点。</p>
+              </div>
+            </section>
+            <section class="panel">
+              <h3>后台虚段</h3>
+              <div class="segment background">
+                <strong>情报后台发酵</strong>
+                <p>C13-C15 中，逻辑上持续存在，但正文未连续跟拍。它解释后续压力，不扩大事件线边界。</p>
+              </div>
+            </section>
+            <section class="panel">
+              <h3>跨线出现</h3>
+              <ul class="panel-list">
+                <li>采访线：禹树是被询问和被误读的对象。</li>
+                <li>大仙祠线：禹树是情报入口和解释权争夺节点。</li>
+                <li>张航远线：禹树的信息成为私线诱导锚点。</li>
+              </ul>
+            </section>
+            <section class="panel">
+              <h3>风险检查</h3>
+              <ul class="panel-list">
+                <li>不能把后台虚段当成正文事件。</li>
+                <li>不能把同一人物在不同故事线里的语义混成一个全局状态。</li>
+                <li>人物线页面目前只验证组合对象是否成立。</li>
+              </ul>
+              <a class="btn primary" href="#timeline">回到全局画布</a>
+            </section>
+          </div>
+        </main>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const views = {
+      timeline: document.getElementById("view-timeline"),
+      event: document.getElementById("view-event"),
+      chapter: document.getElementById("view-chapter"),
+      lane: document.getElementById("view-lane")
+    };
+
+    function route() {
+      const key = location.hash.replace("#", "") || "timeline";
+      const normalized = Object.prototype.hasOwnProperty.call(views, key) ? key : "timeline";
+      Object.entries(views).forEach(([name, node]) => {
+        node.classList.toggle("active", name === normalized);
+      });
+      document.getElementById("routeLabel").textContent = `#${normalized}`;
+    }
+
+    window.addEventListener("hashchange", route);
+    route();
+  </script>
+</body>
+</html>

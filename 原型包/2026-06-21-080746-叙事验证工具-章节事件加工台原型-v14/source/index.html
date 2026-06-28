@@ -1,0 +1,1203 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>叙事验证工具 章节事件加工台原型 v14</title>
+  <style>
+    :root {
+      --bg: #e8eeeb;
+      --paper: #fbfcfb;
+      --ink: #101716;
+      --muted: #65736f;
+      --line: #879d98;
+      --line-soft: #dce6e2;
+      --grid: rgba(135, 157, 152, .18);
+      --teal: #087468;
+      --teal-deep: #063f3a;
+      --teal-soft: #d9efec;
+      --blue: #2e5f83;
+      --blue-soft: #dceaf3;
+      --violet: #66538a;
+      --violet-soft: #e8e2f0;
+      --red: #bd2f49;
+      --red-soft: #f5dce2;
+      --amber: #a66d12;
+      --amber-soft: #f5e7c9;
+      --green: #437363;
+      --green-soft: #e3efe8;
+      --ok: #087468;
+      --ok-soft: #dff1ed;
+      --warn: #a66d12;
+      --warn-soft: #fff0d1;
+      --bad: #bd2f49;
+      --bad-soft: #f5dce2;
+      --mono: Consolas, "Cascadia Mono", "Courier New", monospace;
+      --sans: "Microsoft YaHei UI", "Noto Sans CJK SC", "PingFang SC", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      width: 1920px;
+      height: 1080px;
+      margin: 0;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .frame {
+      width: 100%;
+      height: 100%;
+      padding: 16px;
+    }
+
+    .app {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-rows: 44px 1fr;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      box-shadow: 0 22px 62px rgba(26, 42, 39, .12);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 22px;
+      border-bottom: 1px solid var(--line);
+      background: #f9fbfa;
+    }
+
+    .brand {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .brand span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .nav {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .btn,
+    .nav a {
+      height: 30px;
+      padding: 0 13px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--line);
+      background: #fff;
+      font-size: 12px;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .btn.primary,
+    .nav a.active {
+      border-color: var(--teal);
+      background: var(--teal);
+      color: #fff;
+    }
+
+    .view {
+      display: none;
+      min-height: 0;
+      height: 100%;
+    }
+
+    .view.active { display: grid; }
+
+    h1, h2, h3, p { margin: 0; }
+
+    .eyebrow {
+      margin-bottom: 6px;
+      color: var(--teal-deep);
+      font: 10px/1.1 var(--mono);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .tag {
+      min-height: 26px;
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 8px;
+      border: 1px solid var(--line);
+      background: #f8faf9;
+      color: #33413e;
+      font: 11px/1.1 var(--mono);
+      white-space: nowrap;
+    }
+
+    .tag.strong {
+      border-color: var(--teal);
+      background: var(--teal-soft);
+      color: #073d38;
+      font-weight: 900;
+    }
+
+    .page {
+      grid-template-rows: 78px 1fr 118px;
+      gap: 12px;
+      padding: 18px 22px;
+      min-height: 0;
+    }
+
+    .object-bar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: center;
+      padding: 12px 14px 12px 16px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .object-bar h1 {
+      font-size: 23px;
+      line-height: 1.1;
+    }
+
+    .object-bar p {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .meta-line {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      max-width: 780px;
+    }
+
+    .chapter-layout {
+      display: grid;
+      grid-template-columns: 330px minmax(0, 1fr) 330px;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .panel {
+      min-height: 0;
+      border: 1px solid var(--line);
+      background: #fff;
+      display: grid;
+      grid-template-rows: 44px 1fr;
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--line-soft);
+      background: #f8faf9;
+    }
+
+    .panel-head h2 {
+      font-size: 15px;
+      line-height: 1;
+    }
+
+    .panel-head span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .panel-body {
+      min-height: 0;
+      padding: 12px;
+      overflow: hidden;
+    }
+
+    .input-panel .panel-head { border-top: 4px solid var(--blue); }
+    .process-panel .panel-head { border-top: 4px solid var(--teal); }
+    .output-panel .panel-head { border-top: 4px solid var(--amber); }
+
+    .event-stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .event-card {
+      min-height: 80px;
+      padding: 10px 10px 10px 12px;
+      border: 1px solid #87aaa4;
+      border-left: 5px solid var(--teal);
+      background: var(--teal-soft);
+    }
+
+    .event-card.blue {
+      border-color: #7fa5bf;
+      border-left-color: var(--blue);
+      background: var(--blue-soft);
+    }
+
+    .event-card.violet {
+      border-color: #a79abe;
+      border-left-color: var(--violet);
+      background: var(--violet-soft);
+    }
+
+    .event-card.red {
+      border-color: #d2788a;
+      border-left-color: var(--red);
+      background: var(--red-soft);
+    }
+
+    .event-card.amber {
+      border-color: #d5a85f;
+      border-left-color: var(--amber);
+      background: var(--amber-soft);
+    }
+
+    .event-card.green {
+      border-color: #8aab9e;
+      border-left-color: var(--green);
+      background: var(--green-soft);
+    }
+
+    .event-card.selected {
+      outline: 3px solid #172a27;
+      outline-offset: 2px;
+    }
+
+    .event-card strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+      line-height: 1.15;
+    }
+
+    .event-card small {
+      display: block;
+      margin-bottom: 6px;
+      color: #263431;
+      font: 10px/1 var(--mono);
+      font-weight: 900;
+    }
+
+    .event-card p {
+      color: #3f4d49;
+      font-size: 12px;
+      line-height: 1.42;
+    }
+
+    .event-card .input-kind {
+      display: inline-flex;
+      margin-top: 8px;
+      padding: 3px 6px;
+      border: 1px solid rgba(20, 38, 35, .18);
+      background: rgba(255, 255, 255, .56);
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .process-board {
+      height: 100%;
+      position: relative;
+      border: 1px solid var(--line-soft);
+      background:
+        linear-gradient(to right, var(--grid) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(137, 159, 154, .12) 1px, transparent 1px),
+        #fff;
+      background-size: 92px 100%, 100% 66px;
+      overflow: hidden;
+    }
+
+    .stage-title {
+      position: absolute;
+      top: 12px;
+      height: 28px;
+      padding: 6px 9px;
+      border: 1px solid var(--line);
+      background: #fff;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .operation-node {
+      position: absolute;
+      width: 252px;
+      min-height: 112px;
+      border: 1px solid #7aa8a2;
+      background: #fafdfe;
+      box-shadow: 0 12px 22px rgba(22, 38, 35, .06);
+    }
+
+    .operation-node.wide { width: 310px; }
+    .operation-node.small { min-height: 92px; }
+
+    .op-head {
+      height: 34px;
+      padding: 0 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--line-soft);
+      background: var(--teal-soft);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .operation-node.merge .op-head { background: var(--blue-soft); }
+    .operation-node.conflict .op-head { background: var(--red-soft); }
+    .operation-node.translate .op-head { background: var(--violet-soft); }
+    .operation-node.hold .op-head { background: var(--amber-soft); }
+    .operation-node.output .op-head { background: var(--green-soft); }
+
+    .op-body {
+      padding: 10px;
+      display: grid;
+      gap: 7px;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .op-line {
+      display: grid;
+      grid-template-columns: 60px 1fr;
+      gap: 8px;
+    }
+
+    .op-line span {
+      color: var(--muted);
+      font-weight: 850;
+    }
+
+    .op-line strong {
+      color: #182522;
+      font-weight: 750;
+    }
+
+    .op-status {
+      padding: 3px 6px;
+      border: 1px solid #7cb8ad;
+      background: var(--ok-soft);
+      color: var(--ok);
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .op-status.warn {
+      border-color: #d5a85f;
+      background: var(--warn-soft);
+      color: var(--warn);
+    }
+
+    .op-status.bad {
+      border-color: #df93a0;
+      background: var(--bad-soft);
+      color: var(--bad);
+    }
+
+    .flow-svg {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .flow-svg path {
+      fill: none;
+      stroke: rgba(40, 70, 64, .62);
+      stroke-width: 2.2;
+      marker-end: url(#arrow);
+    }
+
+    .flow-svg .soft { stroke: rgba(102, 83, 138, .58); }
+    .flow-svg .risk { stroke: rgba(189, 47, 73, .62); }
+    .flow-svg .hold { stroke: rgba(166, 109, 18, .66); }
+
+    .pool-note {
+      padding: 10px 11px;
+      border: 1px solid var(--line);
+      background: #f8faf9;
+      color: #3f4d49;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .rule-stack {
+      display: grid;
+      gap: 8px;
+    }
+
+    .rule {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 9px;
+      border: 1px solid var(--line-soft);
+      background: #fff;
+      font-size: 12px;
+    }
+
+    .rule span {
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .context-dock {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    .context-box {
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 12px 14px;
+    }
+
+    .context-box h2 {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 9px;
+      font-size: 15px;
+    }
+
+    .swatch {
+      width: 36px;
+      height: 5px;
+      display: inline-block;
+      background: var(--teal);
+    }
+
+    .swatch.blue { background: var(--blue); }
+    .swatch.amber { background: var(--amber); }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .pill {
+      padding: 5px 8px;
+      border: 1px solid var(--line-soft);
+      background: #f7faf9;
+      font-size: 12px;
+      font-weight: 750;
+      line-height: 1.1;
+    }
+
+    .logic-page {
+      grid-template-rows: 78px 1fr 118px;
+      gap: 12px;
+      padding: 18px 22px;
+    }
+
+    .logic-shell {
+      display: grid;
+      grid-template-columns: 1fr 342px;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .logic-canvas {
+      position: relative;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(to right, var(--grid) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(137, 159, 154, .12) 1px, transparent 1px),
+        #fff;
+      background-size: 110px 100%, 100% 72px;
+      overflow: hidden;
+    }
+
+    .rail {
+      position: absolute;
+      left: 34px;
+      right: 34px;
+      height: 64px;
+      border: 1px solid var(--line);
+      background: rgba(248, 251, 250, .88);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 12px;
+    }
+
+    .rail strong {
+      min-width: 92px;
+      font-size: 13px;
+    }
+
+    .rail .badge {
+      padding: 5px 8px;
+      border: 1px solid var(--line-soft);
+      background: #fff;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .logic-node {
+      position: absolute;
+      width: 280px;
+      min-height: 112px;
+      border: 1px solid #7aa8a2;
+      background: #fff;
+      box-shadow: 0 12px 22px rgba(22, 38, 35, .08);
+      z-index: 3;
+    }
+
+    .logic-node.wide { width: 360px; }
+
+    .logic-node .op-head {
+      background: var(--teal-soft);
+    }
+
+    .logic-node.merge .op-head { background: var(--blue-soft); }
+    .logic-node.conflict .op-head { background: var(--red-soft); }
+    .logic-node.translate .op-head { background: var(--violet-soft); }
+    .logic-node.hold .op-head { background: var(--amber-soft); }
+    .logic-node.output .op-head { background: var(--green-soft); }
+
+    .side-inspector {
+      border: 1px solid var(--line);
+      background: #fff;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-height: 0;
+    }
+
+    .side-inspector .inspect-block {
+      padding: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .inspect-block h2 {
+      margin-bottom: 8px;
+      font-size: 18px;
+    }
+
+    .inspect-block p {
+      color: #3f4d49;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .issue-list {
+      padding: 12px 14px;
+      display: grid;
+      gap: 9px;
+      align-content: start;
+    }
+
+    .issue {
+      padding: 9px 10px;
+      border: 1px solid #d8b56f;
+      border-left: 5px solid var(--warn);
+      background: var(--warn-soft);
+      font-size: 12px;
+      line-height: 1.42;
+    }
+
+    .issue.ok {
+      border-color: #7cb8ad;
+      border-left-color: var(--ok);
+      background: var(--ok-soft);
+    }
+
+    .issue.bad {
+      border-color: #df93a0;
+      border-left-color: var(--bad);
+      background: var(--bad-soft);
+    }
+
+    .issue strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+
+    .check-layout {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .matrix {
+      border: 1px solid var(--line);
+      background: #fff;
+      display: grid;
+      grid-template-rows: 44px 1fr;
+      min-height: 0;
+    }
+
+    .matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 12px;
+    }
+
+    .matrix-table th,
+    .matrix-table td {
+      border: 1px solid var(--line-soft);
+      padding: 9px 10px;
+      vertical-align: top;
+      line-height: 1.4;
+    }
+
+    .matrix-table th {
+      background: #f4f7f6;
+      text-align: left;
+      font-weight: 900;
+    }
+
+    .status {
+      display: inline-flex;
+      padding: 4px 7px;
+      border: 1px solid #7cb8ad;
+      background: var(--ok-soft);
+      color: var(--ok);
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .status.warn {
+      border-color: #d8b56f;
+      background: var(--warn-soft);
+      color: var(--warn);
+    }
+
+    .status.bad {
+      border-color: #df93a0;
+      background: var(--bad-soft);
+      color: var(--bad);
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          叙事验证工具
+          <span>章节事件加工台 / 并列输入 / 内部组合 / 外部输出</span>
+        </div>
+        <nav class="nav" aria-label="原型视图">
+          <a href="#overview" data-nav="overview">加工台总览</a>
+          <a href="#logic" data-nav="logic">内部组合</a>
+          <a href="#check" data-nav="check">输出检查</a>
+        </nav>
+      </header>
+
+      <section class="view page active" id="view-overview">
+        <header class="object-bar">
+          <div>
+            <p class="eyebrow">Chapter Event Workbench</p>
+            <h1>C13 会议结果：章节事件加工台</h1>
+            <p>章节接收并列外部事件输入，内部完成组合与处理，再输出新的事件集；输入池和输出池不强行画因果链。</p>
+          </div>
+          <div class="meta-line">
+            <span class="tag strong">章节函数</span>
+            <span class="tag">并列输入 5</span>
+            <span class="tag">内部操作 6</span>
+            <span class="tag">外部输出 4</span>
+            <a class="btn" href="#logic">看内部组合</a>
+          </div>
+        </header>
+
+        <main class="chapter-layout">
+          <section class="panel input-panel">
+            <div class="panel-head">
+              <h2>左侧输入事件池</h2>
+              <span>并列进入 / 不连线</span>
+            </div>
+            <div class="panel-body">
+              <div class="event-stack">
+                <div class="pool-note">这些事件进入 C13 时是并列材料。它们之间的因果关系不在这里表达。</div>
+                <div class="event-card blue">
+                  <strong>采访材料成形</strong>
+                  <small>E010-E014 / 采访线</small>
+                  <p>采访线已经形成可被会议吸收的材料。</p>
+                  <span class="input-kind">输入材料</span>
+                </div>
+                <div class="event-card violet">
+                  <strong>救助显形</strong>
+                  <small>E016-E020 / 大仙祠线</small>
+                  <p>救助逻辑与解释权压力进入可见层。</p>
+                  <span class="input-kind">输入压力</span>
+                </div>
+                <div class="event-card red">
+                  <strong>张航远被边缘化</strong>
+                  <small>E019 / 张航远线</small>
+                  <p>人物位置变化尚未输出成私线事件。</p>
+                  <span class="input-kind">输入人物状态</span>
+                </div>
+                <div class="event-card amber">
+                  <strong>职业病证据压力</strong>
+                  <small>E018 / 职业病证据线</small>
+                  <p>证据未公开，但已经影响判断结构。</p>
+                  <span class="input-kind">输入潜伏条件</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel process-panel">
+            <div class="panel-head">
+              <h2>中部章节内部加工台</h2>
+              <span>逻辑发生在这里</span>
+            </div>
+            <div class="panel-body">
+              <div class="process-board">
+                <div class="stage-title" style="left:20px;">输入进入章节</div>
+                <div class="stage-title" style="left:390px;">内部组合处理</div>
+                <div class="stage-title" style="right:20px;">形成输出</div>
+                <svg class="flow-svg" viewBox="0 0 940 660" preserveAspectRatio="none">
+                  <defs>
+                    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                      <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(40,70,64,.72)"></path>
+                    </marker>
+                  </defs>
+                  <path d="M 190 128 H 280 V 238 H 350"></path>
+                  <path d="M 190 228 H 280 V 238 H 350"></path>
+                  <path class="risk" d="M 190 328 H 280 V 348 H 350"></path>
+                  <path class="hold" d="M 190 428 H 280 V 458 H 350"></path>
+                  <path d="M 598 238 H 648 V 190 H 704"></path>
+                  <path class="soft" d="M 598 348 H 648 V 300 H 704"></path>
+                  <path class="hold" d="M 598 458 H 648 V 410 H 704"></path>
+                </svg>
+
+                <div class="operation-node merge" style="left:40px;top:84px;">
+                  <div class="op-head"><span>承接输入</span><span class="op-status">通过</span></div>
+                  <div class="op-body">
+                    <div class="op-line"><span>对象</span><strong>采访材料 / 救助压力</strong></div>
+                    <div class="op-line"><span>动作</span><strong>进入会议场景</strong></div>
+                  </div>
+                </div>
+                <div class="operation-node conflict wide" style="left:350px;top:194px;">
+                  <div class="op-head"><span>合流与冲突化</span><span class="op-status">通过</span></div>
+                  <div class="op-body">
+                    <div class="op-line"><span>合流</span><strong>事实链与解释权进入同一场景</strong></div>
+                    <div class="op-line"><span>冲突</span><strong>会议必须给出可承接口径</strong></div>
+                  </div>
+                </div>
+                <div class="operation-node translate wide" style="left:350px;top:324px;">
+                  <div class="op-head"><span>口径转译</span><span class="op-status warn">需补</span></div>
+                  <div class="op-body">
+                    <div class="op-line"><span>对象</span><strong>会议结果 -> 可传播表达</strong></div>
+                    <div class="op-line"><span>风险</span><strong>电视台线动作桥仍需明确</strong></div>
+                  </div>
+                </div>
+                <div class="operation-node hold wide" style="left:350px;top:454px;">
+                  <div class="op-head"><span>悬置与保留入口</span><span class="op-status">通过</span></div>
+                  <div class="op-body">
+                    <div class="op-line"><span>对象</span><strong>职业病证据 / 禹树后台</strong></div>
+                    <div class="op-line"><span>原则</span><strong>不在本章提前爆开</strong></div>
+                  </div>
+                </div>
+                <div class="operation-node output" style="right:40px;top:144px;">
+                  <div class="op-head"><span>输出生成</span><span class="op-status">通过</span></div>
+                  <div class="op-body">
+                    <div class="op-line"><span>生成</span><strong>会议结果落地</strong></div>
+                    <div class="op-line"><span>分流</span><strong>会后争夺 / 口径重写</strong></div>
+                  </div>
+                </div>
+                <div class="operation-node output" style="right:40px;top:374px;">
+                  <div class="op-head"><span>风险输出</span><span class="op-status warn">需补</span></div>
+                  <div class="op-body">
+                    <div class="op-line"><span>输出</span><strong>私线偏移条件</strong></div>
+                    <div class="op-line"><span>问题</span><strong>张航远动作桥偏弱</strong></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel output-panel">
+            <div class="panel-head">
+              <h2>右侧输出事件池</h2>
+              <span>章节产物 / 不互连</span>
+            </div>
+            <div class="panel-body">
+              <div class="event-stack">
+                <div class="pool-note">这些是 C13 处理后的外部事件产物。输出之间的因果关系交给事件图谱查看。</div>
+                <div class="event-card green selected">
+                  <strong>会议结果落地</strong>
+                  <small>E021-E028 / 主输出</small>
+                  <p>本章最主要输出，成为后续争夺的公共前提。</p>
+                  <span class="input-kind">新建/包装</span>
+                </div>
+                <div class="event-card blue">
+                  <strong>口径重写</strong>
+                  <small>E024-E032 / 电视台线</small>
+                  <p>会议结果被转换成可传播、可控、可争夺的表达。</p>
+                  <span class="input-kind">转译输出</span>
+                </div>
+                <div class="event-card red">
+                  <strong>私线偏移条件</strong>
+                  <small>E030 / 张航远线</small>
+                  <p>人物位置变化进入个人行动风险。</p>
+                  <span class="input-kind">风险输出</span>
+                </div>
+                <div class="event-card amber">
+                  <strong>证据继续预热</strong>
+                  <small>E033 / 职业病证据线</small>
+                  <p>证据获得后续正式入场位置，但本章不终结。</p>
+                  <span class="input-kind">悬置输出</span>
+                </div>
+              </div>
+            </div>
+          </section>
+        </main>
+
+        <footer class="context-dock">
+          <section class="context-box">
+            <h2><span class="swatch"></span>人物</h2>
+            <div class="pill-row">
+              <span class="pill">叶依人：承接事实链</span>
+              <span class="pill">张航远：位置下沉</span>
+              <span class="pill">禹树：后台入口</span>
+            </div>
+          </section>
+          <section class="context-box">
+            <h2><span class="swatch blue"></span>地理</h2>
+            <div class="pill-row">
+              <span class="pill">会议场景</span>
+              <span class="pill">电视台空间</span>
+              <span class="pill">大仙祠外部压力场</span>
+            </div>
+          </section>
+          <section class="context-box">
+            <h2><span class="swatch amber"></span>组织</h2>
+            <div class="pill-row">
+              <span class="pill">电视台</span>
+              <span class="pill">祠庙解释权网络</span>
+              <span class="pill">慈善资源</span>
+              <span class="pill">职业病证据链</span>
+            </div>
+          </section>
+        </footer>
+      </section>
+
+      <section class="view logic-page" id="view-logic">
+        <header class="object-bar">
+          <div>
+            <p class="eyebrow">Chapter Internal Logic</p>
+            <h1>C13 内部组合逻辑放大</h1>
+            <p>左侧输入池已经收起为顶部输入轨；本页只看章节内部如何把并列材料组合成有逻辑的正文处理。</p>
+          </div>
+          <div class="meta-line">
+            <span class="tag strong">内部处理</span>
+            <span class="tag">合流 / 冲突化 / 转译 / 悬置 / 生成</span>
+            <a class="btn" href="#overview">回总览</a>
+          </div>
+        </header>
+
+        <main class="logic-shell">
+          <section class="logic-canvas">
+            <div class="rail" style="top:22px;">
+              <strong>输入轨</strong>
+              <span class="badge">采访材料成形</span>
+              <span class="badge">救助显形</span>
+              <span class="badge">边缘化状态</span>
+              <span class="badge">证据压力</span>
+              <span class="badge">解释权预压</span>
+            </div>
+            <div class="rail" style="bottom:22px;">
+              <strong>输出轨</strong>
+              <span class="badge">会议结果落地</span>
+              <span class="badge">口径重写</span>
+              <span class="badge">私线偏移条件</span>
+              <span class="badge">证据继续预热</span>
+            </div>
+
+            <svg class="flow-svg" viewBox="0 0 1480 720" preserveAspectRatio="none">
+              <defs>
+                <marker id="logicArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(40,70,64,.72)"></path>
+                </marker>
+              </defs>
+              <path d="M 240 150 H 318 V 232 H 398" marker-end="url(#logicArrow)"></path>
+              <path d="M 640 232 H 715 V 232 H 790" marker-end="url(#logicArrow)"></path>
+              <path class="soft" d="M 640 350 H 715 V 350 H 790" marker-end="url(#logicArrow)"></path>
+              <path class="risk" d="M 1046 232 H 1100 V 350 H 1155" marker-end="url(#logicArrow)"></path>
+              <path class="hold" d="M 1046 350 H 1100 V 482 H 1155" marker-end="url(#logicArrow)"></path>
+              <path d="M 1046 232 H 1120 V 610 H 1180" marker-end="url(#logicArrow)"></path>
+            </svg>
+
+            <div class="logic-node merge" style="left:88px;top:126px;">
+              <div class="op-head"><span>场景承接</span><span class="op-status">通过</span></div>
+              <div class="op-body">
+                <div class="op-line"><span>输入</span><strong>采访材料 + 救助压力</strong></div>
+                <div class="op-line"><span>处理</span><strong>进入同一会议场景</strong></div>
+              </div>
+            </div>
+            <div class="logic-node conflict wide" style="left:398px;top:196px;">
+              <div class="op-head"><span>合流与冲突化</span><span class="op-status">通过</span></div>
+              <div class="op-body">
+                <div class="op-line"><span>合流</span><strong>并列输入被放进同一公共场景</strong></div>
+                <div class="op-line"><span>冲突</span><strong>事实链与解释权必须产生口径选择</strong></div>
+              </div>
+            </div>
+            <div class="logic-node translate wide" style="left:790px;top:196px;">
+              <div class="op-head"><span>结果包装</span><span class="op-status">通过</span></div>
+              <div class="op-body">
+                <div class="op-line"><span>包装</span><strong>材料压力 -> 会议结果落点</strong></div>
+                <div class="op-line"><span>输出</span><strong>会议结果落地</strong></div>
+              </div>
+            </div>
+            <div class="logic-node translate wide" style="left:790px;top:330px;">
+              <div class="op-head"><span>媒体转译</span><span class="op-status warn">需补</span></div>
+              <div class="op-body">
+                <div class="op-line"><span>转译</span><strong>会议结果 -> 可传播口径</strong></div>
+                <div class="op-line"><span>问题</span><strong>电视台线动作桥仍偏弱</strong></div>
+              </div>
+            </div>
+            <div class="logic-node hold" style="right:78px;top:330px;">
+              <div class="op-head"><span>风险保留</span><span class="op-status warn">提示</span></div>
+              <div class="op-body">
+                <div class="op-line"><span>人物</span><strong>张航远边缘化</strong></div>
+                <div class="op-line"><span>输出</span><strong>私线偏移条件</strong></div>
+              </div>
+            </div>
+            <div class="logic-node output" style="right:78px;top:462px;">
+              <div class="op-head"><span>悬置输出</span><span class="op-status">通过</span></div>
+              <div class="op-body">
+                <div class="op-line"><span>证据</span><strong>职业病线继续预热</strong></div>
+                <div class="op-line"><span>原则</span><strong>不在本章提前爆开</strong></div>
+              </div>
+            </div>
+          </section>
+
+          <aside class="side-inspector">
+            <div class="inspect-block">
+              <p class="eyebrow">Selected Operation</p>
+              <h2>合流与冲突化</h2>
+              <p>该节点是章节内部逻辑的核心：它把并列输入放入同一会议场景，并制造必须给出口径的压力。</p>
+            </div>
+            <div class="issue-list">
+              <div class="issue ok">
+                <strong>成立</strong>
+                输入事件之间没有在输入池强连，逻辑从这里开始发生。
+              </div>
+              <div class="issue ok">
+                <strong>成立</strong>
+                章节处理不是事件摘要，而是把材料、压力和人物位置组合成正文行动。
+              </div>
+              <div class="issue">
+                <strong>需留意</strong>
+                如果把“证据压力”写太强，会抢走本章会议结果的主输出。
+              </div>
+            </div>
+            <div class="action-stack" style="padding:12px 14px;">
+              <a class="btn primary" href="#check">看输出检查</a>
+              <a class="btn" href="#overview">回总览</a>
+            </div>
+          </aside>
+        </main>
+
+        <footer class="context-dock">
+          <section class="context-box">
+            <h2><span class="swatch"></span>内部操作</h2>
+            <div class="pill-row">
+              <span class="pill">承接</span>
+              <span class="pill">合流</span>
+              <span class="pill">冲突化</span>
+              <span class="pill">转译</span>
+              <span class="pill">悬置</span>
+              <span class="pill">生成</span>
+            </div>
+          </section>
+          <section class="context-box">
+            <h2><span class="swatch blue"></span>边界</h2>
+            <div class="pill-row">
+              <span class="pill">输入池不连线</span>
+              <span class="pill">内部才有逻辑</span>
+              <span class="pill">输出池不互连</span>
+            </div>
+          </section>
+          <section class="context-box">
+            <h2><span class="swatch amber"></span>风险</h2>
+            <div class="pill-row">
+              <span class="pill">张航远动作桥</span>
+              <span class="pill">证据线提前爆开</span>
+              <span class="pill">会议写成总结章</span>
+            </div>
+          </section>
+        </footer>
+      </section>
+
+      <section class="view page" id="view-check">
+        <header class="object-bar">
+          <div>
+            <p class="eyebrow">Chapter Output Check</p>
+            <h1>C13 输出事件与章节加工检查</h1>
+            <p>本页检查章节输入、内部处理和输出是否满足边界：输入并列、内部有逻辑、输出清楚、不污染全局时间线。</p>
+          </div>
+          <div class="meta-line">
+            <span class="tag strong">检查状态</span>
+            <span class="tag">4 通过 / 2 需补</span>
+            <a class="btn" href="#overview">回总览</a>
+          </div>
+        </header>
+
+        <main class="check-layout">
+          <section class="matrix">
+            <div class="panel-head">
+              <h2>章节加工检查矩阵</h2>
+              <span>输入 / 内部 / 输出 / 边界</span>
+            </div>
+            <div class="panel-body">
+              <table class="matrix-table">
+                <tr>
+                  <th style="width:140px;">检查项</th>
+                  <th>当前表达</th>
+                  <th style="width:190px;">证据或页面位置</th>
+                  <th style="width:110px;">状态</th>
+                </tr>
+                <tr>
+                  <td>输入并列</td>
+                  <td>左侧输入池只列出外部事件，不在输入卡之间画因果关系。</td>
+                  <td>总览 / 输入事件池</td>
+                  <td><span class="status">通过</span></td>
+                </tr>
+                <tr>
+                  <td>内部有逻辑</td>
+                  <td>合流、冲突化、转译、悬置和生成都发生在中部加工台。</td>
+                  <td>总览 / 内部组合</td>
+                  <td><span class="status">通过</span></td>
+                </tr>
+                <tr>
+                  <td>输出清楚</td>
+                  <td>右侧输出池列出会议结果、口径重写、私线偏移条件和证据继续预热。</td>
+                  <td>总览 / 输出事件池</td>
+                  <td><span class="status">通过</span></td>
+                </tr>
+                <tr>
+                  <td>输出不互连</td>
+                  <td>输出事件之间不画关系线，后续因果交给中心事件知识图谱。</td>
+                  <td>总览 / 输出事件池</td>
+                  <td><span class="status">通过</span></td>
+                </tr>
+                <tr>
+                  <td>电视台转译</td>
+                  <td>会议结果到口径重写的动作桥仍偏弱，需要补一个明确动作。</td>
+                  <td>内部组合 / 媒体转译</td>
+                  <td><span class="status warn">需补</span></td>
+                </tr>
+                <tr>
+                  <td>张航远私线</td>
+                  <td>边缘化到私线偏移条件的动作桥需要更具体，否则输出显得突兀。</td>
+                  <td>输出检查 / 风险保留</td>
+                  <td><span class="status warn">需补</span></td>
+                </tr>
+                <tr>
+                  <td>时间线边界</td>
+                  <td>本版不修改全局时间线，不叠加事件关系箭头。</td>
+                  <td>设计说明 v0.3</td>
+                  <td><span class="status">通过</span></td>
+                </tr>
+              </table>
+            </div>
+          </section>
+
+          <aside class="side-inspector">
+            <div class="inspect-block">
+              <p class="eyebrow">Output Inspector</p>
+              <h2>私线偏移条件</h2>
+              <p>这是 C13 可能输出的风险事件。当前逻辑成立方向明确，但动作桥还不够强。</p>
+            </div>
+            <div class="issue-list">
+              <div class="issue bad">
+                <strong>需补强</strong>
+                张航远不能只因为“被边缘化”就自然进入私线，需要一个可见动作或判断。
+              </div>
+              <div class="issue">
+                <strong>建议</strong>
+                在会议后安排一次被排除、被误读或自证冲动的具体触发。
+              </div>
+              <div class="issue ok">
+                <strong>边界正确</strong>
+                该输出保留在章节加工台内，不拉长故事主轴事件条。
+              </div>
+            </div>
+            <div class="action-stack" style="padding:12px 14px;">
+              <a class="btn primary" href="#logic">回内部组合</a>
+              <a class="btn" href="#overview">回加工台</a>
+            </div>
+          </aside>
+        </main>
+
+        <footer class="context-dock">
+          <section class="context-box">
+            <h2><span class="swatch"></span>通过项</h2>
+            <div class="pill-row">
+              <span class="pill">输入并列</span>
+              <span class="pill">内部有逻辑</span>
+              <span class="pill">输出清楚</span>
+              <span class="pill">时间线不叠箭头</span>
+            </div>
+          </section>
+          <section class="context-box">
+            <h2><span class="swatch blue"></span>需补项</h2>
+            <div class="pill-row">
+              <span class="pill">电视台转译动作</span>
+              <span class="pill">张航远私线动作桥</span>
+            </div>
+          </section>
+          <section class="context-box">
+            <h2><span class="swatch amber"></span>后续入口</h2>
+            <div class="pill-row">
+              <span class="pill">输出事件可进中心图谱</span>
+              <span class="pill">单事件可进事件编辑</span>
+              <span class="pill">章节留在加工台</span>
+            </div>
+          </section>
+        </footer>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const views = {
+      overview: document.getElementById("view-overview"),
+      logic: document.getElementById("view-logic"),
+      check: document.getElementById("view-check")
+    };
+
+    function setRoute() {
+      const route = (location.hash || "#overview").replace("#", "");
+      const key = Object.prototype.hasOwnProperty.call(views, route) ? route : "overview";
+      Object.entries(views).forEach(([name, node]) => {
+        node.classList.toggle("active", name === key);
+      });
+      document.querySelectorAll("[data-nav]").forEach((item) => {
+        item.classList.toggle("active", item.dataset.nav === key);
+      });
+    }
+
+    window.addEventListener("hashchange", setRoute);
+    setRoute();
+  </script>
+</body>
+</html>

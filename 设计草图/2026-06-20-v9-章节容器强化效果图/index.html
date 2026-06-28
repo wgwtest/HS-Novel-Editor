@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>章节容器强化效果图</title>
+  <style>
+    :root {
+      --ink: #101716;
+      --muted: #6d7b78;
+      --line: #9aaca7;
+      --line-soft: #e3e9e7;
+      --panel: #fbfcfb;
+      --time-bg: #f8faf9;
+      --chapter-bg: #eef4f2;
+      --chapter-object: #ffffff;
+      --teal: #087268;
+      --teal-soft: #dcefed;
+      --red: #b42b40;
+      --red-soft: #f3d7de;
+      --violet: #67558a;
+      --violet-soft: #e8e3ef;
+      --amber: #a66a10;
+      --amber-soft: #f3e4c8;
+      --blue: #315f83;
+      --blue-soft: #dbe8f1;
+      --label: 220px;
+      --w: 1320px;
+      --day: 86px;
+      --topbar: 46px;
+      --toolbar: 58px;
+      --time-row: 42px;
+      --chapter-row: 76px;
+      --track-y: 222px;
+      --row: 46px;
+      --child: 28px;
+      --sans: "Microsoft YaHei UI", "Noto Sans CJK SC", "PingFang SC", sans-serif;
+      --mono: Consolas, "Cascadia Mono", "Courier New", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      color: var(--ink);
+      font-family: var(--sans);
+      background: #e9edeb;
+    }
+
+    .frame {
+      width: 1500px;
+      height: 900px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: 0 20px 60px rgba(20, 35, 32, .14);
+      overflow: hidden;
+    }
+
+    .topbar {
+      height: var(--topbar);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .topbar strong {
+      font-size: 15px;
+    }
+
+    .topbar span {
+      margin-left: 12px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 400;
+    }
+
+    .route {
+      color: #4f5f5b;
+      font: 11px var(--mono);
+    }
+
+    .route b {
+      color: var(--teal);
+    }
+
+    .work {
+      height: calc(100% - var(--topbar));
+      display: grid;
+      grid-template-columns: 1fr 300px;
+    }
+
+    .left {
+      min-width: 0;
+      padding: 14px 18px 18px 26px;
+      border-right: 1px solid var(--line);
+    }
+
+    .toolbar {
+      height: var(--toolbar);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .toolbar h3 {
+      margin: 0 0 3px;
+      font-size: 16px;
+    }
+
+    .toolbar p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .toolbar .controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font: 11px var(--mono);
+    }
+
+    .chip {
+      height: 30px;
+      padding: 0 12px;
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      background: #fff;
+      font-weight: 700;
+    }
+
+    .chip.dark {
+      color: #fff;
+      border-color: #0d2421;
+      background: #0d2421;
+    }
+
+    .canvas {
+      position: relative;
+      height: 766px;
+      margin-top: 10px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .label-col {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: var(--label);
+      z-index: 5;
+      border-right: 1px solid var(--line);
+      background: #f5f8f7;
+    }
+
+    .label-time {
+      height: var(--time-row);
+      padding: 12px 14px;
+      background: #f3f6f5;
+      color: #53615e;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .label-chapter {
+      height: var(--chapter-row);
+      padding: 13px 14px;
+      border-top: 1px solid #d8e2de;
+      border-bottom: 1px solid #263b37;
+      background: #e3ece8;
+    }
+
+    .label-chapter b {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+
+    .label-chapter span {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .label-row {
+      height: var(--row);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 14px;
+      border-bottom: 1px solid var(--line-soft);
+      background: #f6f9f8;
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .label-child {
+      height: var(--child);
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding-left: 30px;
+      border-bottom: 1px solid #eef3f1;
+      background: #fafcfb;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .color-dot {
+      width: 7px;
+      height: 7px;
+      background: var(--teal);
+    }
+
+    .color-dot.red { background: var(--red); }
+    .color-dot.violet { background: var(--violet); }
+    .color-dot.amber { background: var(--amber); }
+
+    .timeline {
+      position: absolute;
+      inset: 0 0 0 var(--label);
+      width: var(--w);
+    }
+
+    .time-band {
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: var(--time-row);
+      background: var(--time-bg);
+      border-bottom: 1px solid #e0e7e4;
+    }
+
+    .chapter-band {
+      position: absolute;
+      top: var(--time-row);
+      left: 0;
+      right: 0;
+      height: var(--chapter-row);
+      background: linear-gradient(#f7faf9, #edf4f1);
+      border-bottom: 2px solid #263b37;
+    }
+
+    .day-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: #e6edeb;
+    }
+
+    .day-line.week {
+      background: #d4dedb;
+    }
+
+    .day-label {
+      position: absolute;
+      top: 25px;
+      color: #7a8884;
+      font: 10px var(--sans);
+    }
+
+    .week-label {
+      position: absolute;
+      top: 8px;
+      color: #586762;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .chapter-guide {
+      position: absolute;
+      top: calc(var(--time-row) + var(--chapter-row));
+      bottom: 0;
+      width: 1.5px;
+      background: #a7b9b4;
+      z-index: 1;
+    }
+
+    .chapter-lane {
+      position: absolute;
+      top: calc(var(--time-row) + var(--chapter-row));
+      bottom: 0;
+      z-index: 0;
+      background: rgba(8, 114, 104, .026);
+    }
+
+    .chapter-lane.focus {
+      background: rgba(8, 114, 104, .07);
+    }
+
+    .chapter {
+      position: absolute;
+      top: 9px;
+      height: 58px;
+      z-index: 3;
+      padding: 8px 10px 7px;
+      border: 1px solid #879b96;
+      border-top: 4px solid #263b37;
+      background: var(--chapter-object);
+      box-shadow: 0 1px 0 rgba(16, 23, 22, .07);
+    }
+
+    .chapter.focus {
+      border-color: #087268;
+      border-top-color: #087268;
+      background: #e9f5f3;
+      box-shadow: inset 0 0 0 2px rgba(8, 114, 104, .12);
+    }
+
+    .chapter-id {
+      display: inline-block;
+      min-width: 38px;
+      font-size: 18px;
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .chapter-title {
+      display: block;
+      margin-top: 4px;
+      color: #4d5b58;
+      font-size: 12px;
+    }
+
+    .rows {
+      position: absolute;
+      top: calc(var(--time-row) + var(--chapter-row));
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 2;
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          transparent 0,
+          transparent 45px,
+          rgba(15, 38, 34, .07) 45px,
+          rgba(15, 38, 34, .07) 46px
+        );
+    }
+
+    .event {
+      position: absolute;
+      height: 38px;
+      z-index: 4;
+      padding: 7px 10px;
+      border: 1px solid #5aa39c;
+      background: var(--teal-soft);
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .event::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 4px;
+      background: var(--teal);
+    }
+
+    .event small {
+      display: block;
+      margin-top: 2px;
+      font: 9px var(--mono);
+      color: #32504d;
+    }
+
+    .event.character {
+      height: 22px;
+      padding: 3px 8px;
+      background: transparent;
+      border-color: var(--red);
+      color: var(--ink);
+      font-size: 11px;
+    }
+
+    .event.character::after { height: 3px; background: var(--red); }
+    .event.violet { background: var(--violet-soft); border-color: #9b8eb7; }
+    .event.violet::after { background: var(--violet); }
+    .event.amber { background: var(--amber-soft); border-color: #d1a45f; }
+    .event.amber::after { background: var(--amber); }
+    .event.blue { background: var(--blue-soft); border-color: #7ca2be; }
+    .event.blue::after { background: var(--blue); }
+
+    .event.dashed {
+      background: transparent;
+      border: 2px dashed var(--violet);
+      color: #241b35;
+    }
+
+    .event.dashed::after { display: none; }
+
+    .right {
+      padding: 16px 18px;
+      background: #f7faf9;
+    }
+
+    .panel {
+      margin-bottom: 14px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .panel h4 {
+      margin: 0 0 8px;
+      font-size: 19px;
+    }
+
+    .panel p {
+      margin: 0;
+      color: #53625f;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .tags {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .tag {
+      padding: 4px 7px;
+      border: 1px solid var(--line);
+      font: 10px var(--mono);
+      background: #fbfcfb;
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="topbar">
+      <div><strong>真实时间轴叙事底盘</strong><span>时间是尺，章节是容器，事件是动作。</span></div>
+      <div class="route">时间轴 / <b>章节容器视图</b></div>
+    </div>
+    <div class="work">
+      <main class="left">
+        <div class="toolbar">
+          <div>
+            <h3>时间轴画布</h3>
+            <p>章节覆盖层成为主定位对象，真实日期只保留为上方低权重标尺。</p>
+          </div>
+          <div class="controls">
+            <span class="chip">缩小</span>
+            <span class="chip dark">复位</span>
+            <span class="chip">放大</span>
+            <span class="chip">全展</span>
+          </div>
+        </div>
+
+        <section class="canvas">
+          <aside class="label-col">
+            <div class="label-time">真实时间轴</div>
+            <div class="label-chapter"><b>章节覆盖层</b><span>章节是正文容器</span></div>
+            <div class="label-row">• 故事主轴</div>
+            <div class="label-row">▾ 采访线 <span style="margin-left:auto;color:#667672;font-weight:400">3 人</span></div>
+            <div class="label-child"><i class="color-dot"></i>叶依人</div>
+            <div class="label-child"><i class="color-dot red"></i>张航远</div>
+            <div class="label-child"><i class="color-dot violet"></i>禹树</div>
+            <div class="label-row">▾ 大仙祠线 <span style="margin-left:auto;color:#667672;font-weight:400">3 人</span></div>
+            <div class="label-child"><i class="color-dot violet"></i>禹树</div>
+            <div class="label-child"><i class="color-dot blue" style="background:#315f83"></i>吕玉</div>
+            <div class="label-child"><i class="color-dot"></i>叶依人</div>
+            <div class="label-row">▸ 电视台线 <span style="margin-left:auto;color:#667672;font-weight:400">2 人</span></div>
+            <div class="label-row">▸ 职业病证据线 <span style="margin-left:auto;color:#667672;font-weight:400">2 人</span></div>
+            <div class="label-row">▾ 张航远线 <span style="margin-left:auto;color:#667672;font-weight:400">2 人</span></div>
+            <div class="label-child"><i class="color-dot red"></i>张航远</div>
+            <div class="label-child"><i class="color-dot violet"></i>禹树</div>
+          </aside>
+
+          <div class="timeline">
+            <div class="time-band"></div>
+            <div class="chapter-band"></div>
+
+            <div class="day-line week" style="left:0"></div>
+            <div class="week-label" style="left:6px">7月第2周</div>
+            <div class="day-label" style="left:60px">7/8</div>
+            <div class="day-line" style="left:86px"></div>
+            <div class="day-label" style="left:146px">7/9</div>
+            <div class="day-line" style="left:172px"></div>
+            <div class="day-label" style="left:232px">7/10</div>
+            <div class="day-line" style="left:258px"></div>
+            <div class="day-label" style="left:318px">7/11</div>
+            <div class="day-line" style="left:344px"></div>
+            <div class="day-label" style="left:404px">7/12</div>
+            <div class="day-line" style="left:430px"></div>
+            <div class="day-label" style="left:490px">7/13</div>
+            <div class="day-line week" style="left:516px"></div>
+            <div class="week-label" style="left:522px">7月第3周</div>
+            <div class="day-label" style="left:576px">7/15</div>
+            <div class="day-line" style="left:602px"></div>
+            <div class="day-label" style="left:662px">7/16</div>
+            <div class="day-line" style="left:688px"></div>
+            <div class="day-label" style="left:748px">7/17</div>
+            <div class="day-line" style="left:774px"></div>
+            <div class="day-label" style="left:834px">7/18</div>
+            <div class="day-line" style="left:860px"></div>
+
+            <div class="chapter-lane" style="left:0;width:86px"></div>
+            <div class="chapter-lane" style="left:86px;width:258px"></div>
+            <div class="chapter-lane" style="left:344px;width:172px"></div>
+            <div class="chapter-lane focus" style="left:516px;width:172px"></div>
+            <div class="chapter-lane" style="left:688px;width:258px"></div>
+
+            <div class="chapter-guide" style="left:0"></div>
+            <div class="chapter-guide" style="left:86px"></div>
+            <div class="chapter-guide" style="left:344px"></div>
+            <div class="chapter-guide" style="left:516px"></div>
+            <div class="chapter-guide" style="left:688px"></div>
+            <div class="chapter-guide" style="left:946px"></div>
+
+            <div class="chapter" style="left:0;width:86px"><b class="chapter-id">C10</b><span class="chapter-title">采访启动</span></div>
+            <div class="chapter" style="left:86px;width:258px"><b class="chapter-id">C11</b><span class="chapter-title">样本成形</span></div>
+            <div class="chapter" style="left:344px;width:172px"><b class="chapter-id">C12</b><span class="chapter-title">显形加压</span></div>
+            <div class="chapter focus" style="left:516px;width:172px"><b class="chapter-id">C13</b><span class="chapter-title">会议结果</span></div>
+            <div class="chapter" style="left:688px;width:258px"><b class="chapter-id">C14</b><span class="chapter-title">会后吸收</span></div>
+            <div class="chapter" style="left:946px;width:172px"><b class="chapter-id">C15</b><span class="chapter-title">私线偏移</span></div>
+
+            <div class="rows"></div>
+            <div class="event" style="left:8px;top:132px;width:330px">采访启动<small>E010-E014</small></div>
+            <div class="event" style="left:356px;top:132px;width:420px">会议结果落地<small>E021-E028</small></div>
+            <div class="event" style="left:814px;top:132px;width:300px">会后转争夺<small>E029-E041</small></div>
+
+            <div class="event" style="left:96px;top:184px;width:430px">走访与材料整理<small>C11-C12</small></div>
+            <div class="event character" style="left:96px;top:229px;width:430px">叶 事实链走访</div>
+            <div class="event character" style="left:516px;top:276px;width:500px">张 被边缘化</div>
+
+            <div class="event violet" style="left:118px;top:338px;width:440px">救助显形<small>C11-C12</small></div>
+            <div class="event dashed" style="left:516px;top:384px;width:500px">禹 情报后台发酵</div>
+            <div class="event character" style="left:118px;top:431px;width:240px">叶 观察救助逻辑</div>
+
+            <div class="event blue" style="left:516px;top:484px;width:220px">口径重写<small>C13-C14</small></div>
+            <div class="event amber" style="left:650px;top:536px;width:330px">化学证据预热<small>C14-C15</small></div>
+            <div class="event character" style="left:516px;top:588px;width:500px">边缘化到私线偏移<small>C13-C15</small></div>
+          </div>
+        </section>
+      </main>
+
+      <aside class="right">
+        <div class="panel">
+          <h4>C13 会议结果</h4>
+          <p>章节是正文容器。选中后，章节覆盖区在顶部形成明确对象，并在主画布中留下低透明背景范围。</p>
+          <div class="tags"><span class="tag">C13</span><span class="tag">章节容器</span><span class="tag">选中态</span></div>
+        </div>
+        <div class="panel">
+          <h4>Inspector 摘要</h4>
+          <p>事件仍然是动作条，但它被放回章节容器里阅读。时间只回答“何时”，章节回答“这段正文负责什么”。</p>
+        </div>
+      </aside>
+    </div>
+  </div>
+</body>
+</html>

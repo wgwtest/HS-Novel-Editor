@@ -1,0 +1,1228 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>叙事验证工具 Canvas 多轨时间轴交互原型</title>
+  <style>
+    :root {
+      --bg: #e9edeb;
+      --panel: #fbfcfb;
+      --panel-soft: #f2f6f4;
+      --ink: #101716;
+      --muted: #5f6e6b;
+      --line: #98a9a5;
+      --line-soft: #d4ddda;
+      --teal: #087268;
+      --teal-soft: #dcefed;
+      --amber: #a66a10;
+      --amber-soft: #f3e4c8;
+      --red: #b42b40;
+      --red-soft: #f3d7de;
+      --blue: #315f83;
+      --blue-soft: #dbe8f1;
+      --violet: #67558a;
+      --violet-soft: #e7e2ef;
+      --mono: Consolas, "Cascadia Mono", "Courier New", monospace;
+      --sans: "Microsoft YaHei UI", "Noto Sans CJK SC", "PingFang SC", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: var(--sans);
+      background:
+        linear-gradient(rgba(16, 23, 22, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16, 23, 22, 0.035) 1px, transparent 1px),
+        var(--bg);
+      background-size: 24px 24px;
+      overflow: hidden;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .frame {
+      width: 1920px;
+      height: 1080px;
+      margin: 0 auto;
+      padding: 18px;
+    }
+
+    .app {
+      height: 100%;
+      display: grid;
+      grid-template-columns: 276px 1fr;
+      border: 1px solid var(--line);
+      background: rgba(251, 252, 251, 0.98);
+      box-shadow: 0 28px 80px rgba(27, 42, 39, 0.15);
+    }
+
+    .side {
+      border-right: 1px solid var(--line);
+      background: #e4ebe9;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+    }
+
+    .brand {
+      padding: 28px 24px 22px;
+      border-bottom: 2px solid var(--ink);
+      background: #f7faf9;
+    }
+
+    .eyebrow,
+    .meta,
+    .kbd {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #53625f;
+    }
+
+    .brand h1 {
+      margin: 12px 0 12px;
+      font-size: 26px;
+      line-height: 1.12;
+      letter-spacing: 0;
+    }
+
+    .brand p {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.75;
+      color: #40504d;
+    }
+
+    .workflow {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .workflow h2,
+    .panel-title {
+      margin: 0 0 14px;
+      font-size: 13px;
+      line-height: 1.2;
+    }
+
+    .steps {
+      display: grid;
+      gap: 10px;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: #33423f;
+    }
+
+    .step-num {
+      width: 23px;
+      height: 23px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      background: #f7faf9;
+      font-family: var(--mono);
+      font-size: 11px;
+    }
+
+    .step.active .step-num {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: #fff;
+    }
+
+    .side-mid {
+      padding: 18px;
+      display: grid;
+      align-content: start;
+      gap: 14px;
+    }
+
+    .info-panel {
+      border: 1px solid var(--line);
+      background: rgba(251, 252, 251, 0.78);
+      padding: 14px;
+    }
+
+    .scope-row,
+    .legend-row {
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      gap: 12px;
+      margin-top: 9px;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .scope-row span,
+    .legend-row span {
+      color: #647370;
+    }
+
+    .scope-row strong {
+      font-size: 12px;
+    }
+
+    .legend-row i {
+      width: 42px;
+      height: 8px;
+      align-self: center;
+      display: block;
+      border: 1px solid currentColor;
+      background: var(--teal-soft);
+    }
+
+    .legend-row.main i {
+      color: var(--teal);
+      background: var(--teal);
+    }
+
+    .legend-row.warn i {
+      color: var(--amber);
+      background: var(--amber-soft);
+    }
+
+    .legend-row.risk i {
+      color: var(--red);
+      background: var(--red-soft);
+    }
+
+    .side-bottom {
+      padding: 18px;
+      border-top: 1px solid var(--line);
+      background: #edf2f1;
+    }
+
+    .main {
+      min-width: 0;
+      display: grid;
+      grid-template-rows: 74px 1fr;
+      background: #f9fbfa;
+    }
+
+    .topbar {
+      border-bottom: 1px solid var(--line);
+      padding: 14px 26px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .topbar h2 {
+      margin: 0;
+      font-size: 27px;
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    .topbar p {
+      margin: 5px 0 0;
+      color: #51625f;
+      font-size: 14px;
+    }
+
+    .route {
+      text-align: right;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      color: #4e5d5a;
+    }
+
+    .route strong {
+      color: var(--teal);
+    }
+
+    .workspace {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1fr 354px;
+    }
+
+    .canvas-zone {
+      min-width: 0;
+      border-right: 1px solid var(--line);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      padding: 14px 22px 16px 26px;
+      gap: 10px;
+    }
+
+    .toolbar {
+      border: 1px solid var(--line);
+      background: #fff;
+      min-height: 52px;
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 18px;
+      padding: 9px 12px;
+    }
+
+    .toolbar h3 {
+      margin: 0 0 3px;
+      font-size: 16px;
+    }
+
+    .toolbar p {
+      margin: 0;
+      color: #586865;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .zoom-control {
+      display: grid;
+      grid-template-columns: auto 136px auto;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #53625f;
+    }
+
+    .zoom-control input {
+      width: 136px;
+      accent-color: var(--teal);
+    }
+
+    .tool-buttons {
+      display: inline-grid;
+      grid-auto-flow: column;
+      border: 1px solid var(--line);
+      background: #f7faf9;
+    }
+
+    .tool-buttons button {
+      min-height: 34px;
+      border: 0;
+      border-right: 1px solid var(--line);
+      background: transparent;
+      padding: 0 12px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .tool-buttons button:last-child {
+      border-right: 0;
+    }
+
+    .tool-buttons button.active {
+      background: var(--ink);
+      color: #fff;
+    }
+
+    .canvas-wrap {
+      min-height: 0;
+      border: 1px solid var(--line);
+      background: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #timelineCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: grab;
+    }
+
+    #timelineCanvas.dragging {
+      cursor: grabbing;
+    }
+
+    .canvas-hint {
+      position: absolute;
+      left: 14px;
+      bottom: 12px;
+      padding: 7px 9px;
+      border: 1px solid var(--line);
+      background: rgba(251, 252, 251, 0.92);
+      font-size: 12px;
+      color: #52625f;
+      pointer-events: none;
+    }
+
+    .canvas-hint strong {
+      color: var(--ink);
+    }
+
+    .status-strip {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .status-item {
+      padding: 9px 14px;
+      border-right: 1px solid var(--line);
+    }
+
+    .status-item:last-child {
+      border-right: 0;
+    }
+
+    .status-item h4 {
+      margin: 0 0 4px;
+      font-size: 13px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .mark {
+      width: 25px;
+      height: 4px;
+      background: var(--teal);
+      display: inline-block;
+    }
+
+    .mark.warn {
+      background: var(--amber);
+    }
+
+    .mark.risk {
+      background: var(--red);
+    }
+
+    .status-item p {
+      margin: 0;
+      color: #52625f;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .inspector {
+      min-width: 0;
+      padding: 16px 22px 18px;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      gap: 12px;
+      background: #f7faf9;
+    }
+
+    .inspect-card {
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 14px;
+    }
+
+    .inspect-card.accent {
+      border-left: 5px solid var(--teal);
+    }
+
+    .inspect-card h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .inspect-card p {
+      margin: 0;
+      color: #4d5d5a;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .inspect-body {
+      min-height: 0;
+      overflow: auto;
+      display: grid;
+      align-content: start;
+      gap: 12px;
+    }
+
+    .kv {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .kv div {
+      display: grid;
+      grid-template-columns: 78px 1fr;
+      gap: 10px;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .kv span {
+      color: #657471;
+    }
+
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 12px;
+    }
+
+    .tag {
+      border: 1px solid var(--line);
+      background: #f3f6f5;
+      padding: 4px 7px;
+      font-family: var(--mono);
+      font-size: 10px;
+    }
+
+    .action-stack {
+      display: grid;
+      gap: 8px;
+    }
+
+    .primary-action,
+    .secondary-action {
+      min-height: 38px;
+      border: 1px solid var(--ink);
+      cursor: pointer;
+      padding: 0 14px;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .primary-action {
+      background: var(--teal);
+      color: #fff;
+      border-color: var(--teal);
+    }
+
+    .primary-action:disabled,
+    .secondary-action:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .secondary-action {
+      background: #fff;
+      color: var(--ink);
+    }
+
+    .detail-panel {
+      display: none;
+    }
+
+    .detail-panel.active {
+      display: grid;
+      gap: 12px;
+    }
+
+    .logic-item {
+      border: 1px solid var(--line-soft);
+      background: #f7faf9;
+      padding: 10px 12px;
+      min-height: 58px;
+    }
+
+    .logic-item.warn {
+      border-color: var(--amber);
+      background: var(--amber-soft);
+    }
+
+    .logic-item.risk {
+      border-color: var(--red);
+      background: var(--red-soft);
+    }
+
+    .logic-item strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 13px;
+    }
+
+    .logic-item p {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .notes {
+      margin: 0;
+      padding-left: 18px;
+      color: #23302e;
+      font-size: 13px;
+      line-height: 1.75;
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="app">
+      <aside class="side">
+        <header class="brand">
+          <div class="eyebrow">Canvas Timeline</div>
+          <h1>章节选区时间轴</h1>
+          <p>以章节为基础单元验证多轨事件：缩放、拖拽、选中、确认进入。</p>
+        </header>
+
+        <section class="workflow">
+          <h2>本轮验证</h2>
+          <div class="steps">
+            <div class="step active"><span class="step-num">1</span><span>拖拽时间线</span></div>
+            <div class="step active"><span class="step-num">2</span><span>缩放时间轴</span></div>
+            <div class="step active"><span class="step-num">3</span><span>选中章节或事件</span></div>
+            <div class="step"><span class="step-num">4</span><span>确认后进入详情</span></div>
+            <div class="step"><span class="step-num">5</span><span>返回画布继续编辑</span></div>
+          </div>
+        </section>
+
+        <section class="side-mid">
+          <section class="info-panel">
+            <h2 class="panel-title">画布状态</h2>
+            <div class="scope-row"><span>缩放</span><strong id="side-zoom">72%</strong></div>
+            <div class="scope-row"><span>偏移</span><strong id="side-offset">C10 起</strong></div>
+            <div class="scope-row"><span>选中</span><strong id="side-selected">未选中</strong></div>
+            <div class="scope-row"><span>指针</span><strong>不显示</strong></div>
+          </section>
+
+          <section class="info-panel">
+            <h2 class="panel-title">交互规则</h2>
+            <div class="scope-row"><span>单击</span><strong>只选中</strong></div>
+            <div class="scope-row"><span>滚轮</span><strong>以鼠标为中心缩放</strong></div>
+            <div class="scope-row"><span>拖拽</span><strong>平移时间线</strong></div>
+            <div class="scope-row"><span>按钮</span><strong>确认进入详情</strong></div>
+            <div class="scope-row"><span>章节</span><strong>整列高亮</strong></div>
+          </section>
+        </section>
+
+        <footer class="side-bottom">
+          <section class="info-panel">
+            <h2 class="panel-title">颜色语义</h2>
+            <div class="legend-row main"><span><i></i></span><strong>主轴事件</strong></div>
+            <div class="legend-row warn"><span><i></i></span><strong>证据或未定点</strong></div>
+            <div class="legend-row risk"><span><i></i></span><strong>需要补因果</strong></div>
+          </section>
+        </footer>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <h2>章节选区时间轴</h2>
+            <p>时间线本体由 Canvas 绘制。章节被选中时突出整列，不使用当前指针线。</p>
+          </div>
+          <div class="route">时间轴 / <strong id="route-state">画布模式</strong></div>
+        </header>
+
+        <section class="workspace">
+          <section class="canvas-zone">
+            <div class="toolbar">
+              <div>
+                <h3>时间轴画布</h3>
+                <p>拖拽空白处平移，滚轮缩放。单击章节会高亮章节整列，事件只高亮事件块。</p>
+              </div>
+
+              <label class="zoom-control">
+                <span>缩放</span>
+                <input id="zoomSlider" type="range" min="45" max="150" value="72">
+                <strong id="zoomLabel">72%</strong>
+              </label>
+
+              <div class="tool-buttons" aria-label="画布工具">
+                <button id="zoomOut" type="button">缩小</button>
+                <button id="resetView" type="button" class="active">复位</button>
+                <button id="zoomIn" type="button">放大</button>
+              </div>
+            </div>
+
+            <div class="canvas-wrap" id="canvasWrap">
+              <canvas id="timelineCanvas" aria-label="Canvas 多轨时间线"></canvas>
+              <div class="canvas-hint"><strong>提示</strong> 没有播放头。单击只选中，右侧按钮确认进入。</div>
+            </div>
+
+            <div class="status-strip">
+              <div class="status-item">
+                <h4><span class="mark"></span>动态底盘</h4>
+                <p>章节位置由世界坐标、缩放比例和偏移量计算，不再依赖静态 CSS 格子。</p>
+              </div>
+              <div class="status-item">
+                <h4><span class="mark warn"></span>章节选区</h4>
+                <p>点击章节时突出整个章节列，表达章节单元被选中，而不是当前时间点。</p>
+              </div>
+              <div class="status-item">
+                <h4><span class="mark risk"></span>确认进入</h4>
+                <p>只有点击“进入章节函数”或“拆解事件”，才切换到详情状态。</p>
+              </div>
+            </div>
+          </section>
+
+          <aside class="inspector">
+            <section class="inspect-card accent" id="selectionCard">
+              <div class="eyebrow" id="selectionKind">No Selection</div>
+              <h3 id="selectionTitle">尚未选中对象</h3>
+              <p id="selectionDesc">请在左侧画布中点击章节标题或事件块。系统会先显示 Inspector，不会自动进入详情。</p>
+              <div class="tag-list" id="selectionTags">
+                <span class="tag">WAITING</span>
+              </div>
+            </section>
+
+            <div class="inspect-body">
+              <section class="inspect-card" id="summaryPanel">
+                <h3>Inspector 摘要</h3>
+                <div class="kv">
+                  <div><span>坐标</span><strong id="summaryCoord">未选中</strong></div>
+                  <div><span>轨道</span><strong id="summaryTrack">未选中</strong></div>
+                  <div><span>输入</span><strong id="summaryInput">等待选择对象。</strong></div>
+                  <div><span>输出</span><strong id="summaryOutput">等待选择对象。</strong></div>
+                  <div><span>风险</span><strong id="summaryRisk">等待选择对象。</strong></div>
+                </div>
+              </section>
+
+              <section class="inspect-card detail-panel" id="eventDetail">
+                <h3>事件检查器</h3>
+                <div class="logic-item"><strong>事件输入</strong><p id="eventInput">等待选择事件。</p></div>
+                <div class="logic-item warn"><strong>事件内部</strong><p id="eventInside">等待选择事件。</p></div>
+                <div class="logic-item risk"><strong>事件输出</strong><p id="eventOutput">等待选择事件。</p></div>
+              </section>
+
+              <section class="inspect-card detail-panel" id="chapterDetail">
+                <h3>章节函数</h3>
+                <div class="logic-item"><strong>章节输入</strong><p id="chapterInput">等待选择章节。</p></div>
+                <div class="logic-item warn"><strong>黑盒运作</strong><p id="chapterInside">等待选择章节。</p></div>
+                <div class="logic-item risk"><strong>章节输出</strong><p id="chapterOutput">等待选择章节。</p></div>
+              </section>
+
+              <section class="inspect-card">
+                <h3>操作约束</h3>
+                <ul class="notes">
+                  <li>误触不会进入详情。</li>
+                  <li>Inspector 只解释当前选中的对象。</li>
+                  <li>事件可以是小跨度，也可以跨章节。</li>
+                </ul>
+              </section>
+            </div>
+
+            <div class="action-stack">
+              <button id="enterEvent" class="primary-action" type="button" disabled>拆解事件</button>
+              <button id="enterChapter" class="secondary-action" type="button" disabled>进入章节函数</button>
+              <button id="backToCanvas" class="secondary-action" type="button">回到画布状态</button>
+            </div>
+          </aside>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("timelineCanvas");
+    const wrap = document.getElementById("canvasWrap");
+    const ctx = canvas.getContext("2d");
+    const dpr = window.devicePixelRatio || 1;
+
+    const colors = {
+      ink: "#101716",
+      muted: "#5f6e6b",
+      line: "#98a9a5",
+      lineSoft: "#d4ddda",
+      panel: "#fbfcfb",
+      panelSoft: "#f2f6f4",
+      teal: "#087268",
+      tealSoft: "#dcefed",
+      selectionFill: "rgba(8, 114, 104, 0.075)",
+      selectionBorder: "rgba(8, 114, 104, 0.62)",
+      amber: "#a66a10",
+      amberSoft: "#f3e4c8",
+      red: "#b42b40",
+      redSoft: "#f3d7de",
+      blue: "#315f83",
+      blueSoft: "#dbe8f1",
+      violet: "#67558a",
+      violetSoft: "#e7e2ef"
+    };
+
+    const chapters = [
+      { id: "C10", title: "采访启动", input: "专题裂开，叶依人进入记者身份。", inside: "建立采访身份和第一个爆点。", output: "采访主线启动，张航远发现爆点。" },
+      { id: "C11", title: "样本成形", input: "走访材料进入叙事。", inside: "把苦难转成可追踪事实。", output: "职业病证据线获得初步材料。" },
+      { id: "C12", title: "显形加压", input: "大仙祠救助和操控同时显形。", inside: "判断压力升高。", output: "会议结果和秩序吸收获得前置。" },
+      { id: "C13", title: "会议结果", input: "会议暂缓和电视台口径变化。", inside: "压力被转入体面秩序。", output: "会后缓冲开始。" },
+      { id: "C14", title: "会后吸收", input: "慈善、媒体和资源口径吸收冲突。", inside: "缓冲不是静止，而是再分配。", output: "C15 私线偏移获得条件。" },
+      { id: "C15", title: "私线偏移", input: "多轨事件同时进入章节。", inside: "张航远从边缘化走向私线证明。", output: "C16 诱导风险和群众争夺前置。" },
+      { id: "C16", title: "群众争夺", input: "群众真实处境和解释权冲突。", inside: "各方争夺解释权。", output: "流血冲突获得社会压力。" },
+      { id: "C17", title: "流血冲突", input: "诱导、镜头压力和群众情绪叠加。", inside: "现实冲突被点燃。", output: "吕玉线接管的入口出现。" },
+      { id: "C18", title: "吕玉接管", input: "前台崩塌后主线切换。", inside: "吕玉接管更深层敌手结构。", output: "后续进入新主线。" },
+      { id: "C19", title: "深入敌境", input: "冲突后果需要处理。", inside: "主线深入敌方系统。", output: "现实反制被打开。" },
+      { id: "C20", title: "现实反制", input: "敌境信息返回现实层。", inside: "叶伊人现实手段反制。", output: "吕玉主线巩固。" }
+    ];
+
+    const tracks = [
+      { id: "main", name: "故事主轴", sub: "跨章节推进" },
+      { id: "interview", name: "采访线", sub: "叶依人行动" },
+      { id: "temple", name: "大仙祠线", sub: "解释权争夺" },
+      { id: "media", name: "电视台线", sub: "口径和资源" },
+      { id: "proof", name: "职业病证据线", sub: "材料和边界" },
+      { id: "zhang", name: "张航远线", sub: "目标漂移" },
+      { id: "lvyu", name: "吕玉线", sub: "后段接管" },
+      { id: "fragment", name: "碎片伏笔", sub: "必须对齐章节" }
+    ];
+
+    const events = [
+      event("e-main-10", "main", 0, 2, "采访启动", "E010-E014", "main", "专题裂开，采访身份建立。", "完成主轴启动。", "如果前置不足，后续压力会失真。"),
+      event("e-main-13", "main", 3, 5, "会议结果落地", "E021-E028", "main", "会议暂缓被各方吸收。", "把冲突转入会后缓冲。", "缓冲不能写成静止。"),
+      event("e-main-15", "main", 5, 7, "会后转争夺", "E029-E041", "main", "会后吸收完成。", "转入群众争夺。", "主轴必须压住碎片线。"),
+      event("e-interview-11", "interview", 1, 3, "走访与材料整理", "C11-C12", "main", "叶依人开始形成事实链。", "事实链可被追踪。", "材料不能变成纯说明。"),
+      event("e-interview-15", "interview", 5, 6, "重新接触群众", "C15", "main", "会后口径重写。", "群众真实处境重新进入视野。", "需要显示解释权变化。"),
+      event("e-temple-11", "temple", 1, 3, "救助显形", "C11-C12", "temple", "大仙祠从背景进入可见层。", "救助与控制同时出现。", "不要只写成善意救助。"),
+      event("e-temple-16", "temple", 6, 7, "重新争夺解释权", "C16", "risk", "群众争夺启动。", "大仙祠重新争夺叙述。", "可能抢走采访线。"),
+      event("e-media-13", "media", 3, 5, "口径重写", "C13-C14", "media", "会议结果进入电视台系统。", "媒体口径改写现实感知。", "需要和采访线形成压力。"),
+      event("e-media-16", "media", 6, 7, "镜头压力", "C16", "risk", "群众争夺升级。", "镜头介入现实冲突。", "可能提前引爆。"),
+      event("e-proof-14", "proof", 4, 6, "化学证据预热", "C14-C15", "warn", "样本和材料尚未闭合。", "建立取样边界。", "不能提前裁决职业病真相。"),
+      event("e-proof-17", "proof", 7, 8, "不能提前裁决", "C17", "risk", "证据线压力上升。", "提醒证据边界。", "过强会压过采访和群众争夺。"),
+      event("e-zhang-10", "zhang", 0, 1, "发现爆点", "C10", "warn", "张航远发现新闻价值。", "形成自我证明欲。", "需要后续承接。"),
+      event("e-zhang-15", "zhang", 3, 6, "边缘化到私线偏移", "C13-C15", "risk", "会议暂缓，张航远被边缘化。", "他把私线理解为补足采访线。", "缺少诱导链会显得突兀。"),
+      event("e-zhang-16", "zhang", 6, 7, "诱导风险", "C16", "risk", "私线动机形成。", "外部压力推他错站边。", "需要连续诱导链。"),
+      event("e-lvyu-17", "lvyu", 7, 9, "主线接管", "C17-C18", "main", "前台崩塌，现实冲突升级。", "吕玉接管更深层敌手结构。", "不能来得太突然。"),
+      event("e-frag-14", "fragment", 4, 5, "基金入口", "C14", "warn", "碎片伏笔落入章节格。", "提供群众争夺入口。", "必须服务主轴。")
+    ];
+
+    const world = {
+      chapterWidth: 220,
+      labelWidth: 160,
+      headerHeight: 74,
+      trackHeight: 70,
+      paddingTop: 0
+    };
+
+    const state = {
+      scale: 0.72,
+      offsetX: 0,
+      selected: null,
+      detailMode: "summary",
+      hover: null,
+      isDragging: false,
+      dragStartX: 0,
+      dragStartOffset: 0,
+      moved: false
+    };
+
+    const hitRegions = [];
+
+    function event(id, track, start, end, title, code, tone, input, output, risk) {
+      return { id, track, start, end, title, code, tone, input, output, risk };
+    }
+
+    function resizeCanvas() {
+      const rect = wrap.getBoundingClientRect();
+      canvas.width = Math.round(rect.width * dpr);
+      canvas.height = Math.round(rect.height * dpr);
+      canvas.style.width = `${rect.width}px`;
+      canvas.style.height = `${rect.height}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      draw();
+    }
+
+    function plotWidth() {
+      return canvas.clientWidth - world.labelWidth;
+    }
+
+    function maxOffset() {
+      const total = chapters.length * world.chapterWidth;
+      return Math.max(0, total - plotWidth() / state.scale);
+    }
+
+    function clampOffset() {
+      state.offsetX = Math.max(0, Math.min(maxOffset(), state.offsetX));
+    }
+
+    function screenToWorldX(x) {
+      return (x - world.labelWidth) / state.scale + state.offsetX;
+    }
+
+    function worldToScreenX(x) {
+      return world.labelWidth + (x - state.offsetX) * state.scale;
+    }
+
+    function toneColors(tone) {
+      if (tone === "main") return [colors.tealSoft, colors.teal];
+      if (tone === "warn") return [colors.amberSoft, colors.amber];
+      if (tone === "risk") return [colors.redSoft, colors.red];
+      if (tone === "media") return [colors.blueSoft, colors.blue];
+      if (tone === "temple") return [colors.violetSoft, colors.violet];
+      return ["#e7eceb", "#53625f"];
+    }
+
+    function draw() {
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      ctx.clearRect(0, 0, w, h);
+      hitRegions.length = 0;
+
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, w, h);
+      drawHeader(w);
+      drawTracks(w, h);
+      drawSelectedChapterColumn(w, h);
+      drawEvents(w);
+      updateStateLabels();
+    }
+
+    function drawHeader(w) {
+      ctx.fillStyle = colors.panelSoft;
+      ctx.fillRect(0, 0, w, world.headerHeight);
+      ctx.strokeStyle = colors.ink;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, world.headerHeight);
+      ctx.lineTo(w, world.headerHeight);
+      ctx.stroke();
+
+      ctx.fillStyle = "#e8eeec";
+      ctx.fillRect(0, 0, world.labelWidth, world.headerHeight);
+      ctx.strokeStyle = colors.line;
+      ctx.lineWidth = 1;
+      ctx.strokeRect(0, 0, world.labelWidth, world.headerHeight);
+
+      ctx.fillStyle = colors.ink;
+      ctx.font = "700 14px Microsoft YaHei UI";
+      ctx.fillText("时间根轴", 14, 28);
+      ctx.fillStyle = colors.muted;
+      ctx.font = "12px Microsoft YaHei UI";
+      ctx.fillText("章节是基础刻度", 14, 49);
+
+      chapters.forEach((chapter, index) => {
+        const x = worldToScreenX(index * world.chapterWidth);
+        const cw = world.chapterWidth * state.scale;
+        if (x + cw < world.labelWidth || x > w) return;
+        const selected = state.selected?.type === "chapter" && state.selected.id === chapter.id;
+        ctx.fillStyle = selected ? colors.tealSoft : "#f7faf9";
+        ctx.fillRect(x, 0, cw, world.headerHeight);
+        ctx.strokeStyle = colors.lineSoft;
+        ctx.strokeRect(x, 0, cw, world.headerHeight);
+        if (selected) {
+          ctx.strokeStyle = colors.ink;
+          ctx.lineWidth = 3;
+          ctx.strokeRect(x + 2, 3, cw - 4, world.headerHeight - 7);
+          ctx.lineWidth = 1;
+        }
+        ctx.fillStyle = colors.ink;
+        ctx.font = "700 16px Microsoft YaHei UI";
+        ctx.fillText(chapter.id, x + 12, 25);
+        ctx.fillStyle = colors.muted;
+        ctx.font = "12px Microsoft YaHei UI";
+        ctx.fillText(chapter.title, x + 12, 48);
+        hitRegions.push({ type: "chapter", id: chapter.id, x, y: 0, w: cw, h: world.headerHeight });
+      });
+    }
+
+    function drawTracks(w, h) {
+      tracks.forEach((track, index) => {
+        const y = world.headerHeight + index * world.trackHeight;
+        ctx.fillStyle = index % 2 === 0 ? "#ffffff" : "#fcfdfc";
+        ctx.fillRect(world.labelWidth, y, w - world.labelWidth, world.trackHeight);
+        ctx.fillStyle = "#f3f6f5";
+        ctx.fillRect(0, y, world.labelWidth, world.trackHeight);
+        ctx.strokeStyle = colors.lineSoft;
+        ctx.beginPath();
+        ctx.moveTo(0, y + world.trackHeight);
+        ctx.lineTo(w, y + world.trackHeight);
+        ctx.stroke();
+        ctx.strokeStyle = colors.line;
+        ctx.beginPath();
+        ctx.moveTo(world.labelWidth, y);
+        ctx.lineTo(world.labelWidth, y + world.trackHeight);
+        ctx.stroke();
+
+        ctx.fillStyle = colors.ink;
+        ctx.font = "700 13px Microsoft YaHei UI";
+        ctx.fillText(track.name, 14, y + 29);
+        ctx.fillStyle = colors.muted;
+        ctx.font = "11px Microsoft YaHei UI";
+        ctx.fillText(track.sub, 14, y + 48);
+      });
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(world.labelWidth, 0, w - world.labelWidth, h);
+      ctx.clip();
+      chapters.forEach((_, index) => {
+        const x = worldToScreenX(index * world.chapterWidth);
+        ctx.strokeStyle = colors.lineSoft;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      });
+      ctx.restore();
+    }
+
+    function drawEvents(w) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(world.labelWidth, world.headerHeight, w - world.labelWidth, canvas.clientHeight - world.headerHeight);
+      ctx.clip();
+
+      events.forEach((item) => {
+        const trackIndex = tracks.findIndex((track) => track.id === item.track);
+        const x = worldToScreenX(item.start * world.chapterWidth) + 10;
+        const y = world.headerHeight + trackIndex * world.trackHeight + 12;
+        const width = (item.end - item.start) * world.chapterWidth * state.scale - 20;
+        const height = 46;
+        if (x + width < world.labelWidth || x > w || width < 22) return;
+        const [fill, stroke] = toneColors(item.tone);
+        const selected = state.selected?.type === "event" && state.selected.id === item.id;
+
+        ctx.fillStyle = fill;
+        ctx.fillRect(x, y, width, height);
+        ctx.strokeStyle = selected ? colors.ink : stroke;
+        ctx.lineWidth = selected ? 4 : 1;
+        ctx.strokeRect(x, y, width, height);
+        ctx.lineWidth = 1;
+        ctx.fillStyle = stroke;
+        ctx.fillRect(x, y + height - 4, width, 4);
+
+        ctx.fillStyle = colors.ink;
+        ctx.font = "700 12px Microsoft YaHei UI";
+        clipText(item.title, x + 10, y + 19, Math.max(20, width - 20));
+        ctx.fillStyle = "#3c4b48";
+        ctx.font = "10px Consolas";
+        clipText(item.code, x + 10, y + 36, Math.max(20, width - 20));
+
+        hitRegions.push({ type: "event", id: item.id, x, y, w: width, h: height });
+      });
+
+      ctx.restore();
+    }
+
+    function drawSelectedChapterColumn(w, h) {
+      if (state.selected?.type !== "chapter") return;
+      const index = chapters.findIndex((chapter) => chapter.id === state.selected.id);
+      if (index < 0) return;
+      const x = worldToScreenX(index * world.chapterWidth);
+      const cw = world.chapterWidth * state.scale;
+      if (x + cw < world.labelWidth || x > w) return;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(world.labelWidth, world.headerHeight, w - world.labelWidth, h - world.headerHeight);
+      ctx.clip();
+      ctx.fillStyle = colors.selectionFill;
+      ctx.fillRect(x, world.headerHeight, cw, h - world.headerHeight);
+      ctx.strokeStyle = colors.selectionBorder;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x + 1, world.headerHeight + 1, Math.max(0, cw - 2), Math.max(0, h - world.headerHeight - 2));
+      ctx.restore();
+      ctx.lineWidth = 1;
+    }
+
+    function clipText(text, x, y, maxWidth) {
+      let output = text;
+      while (ctx.measureText(output).width > maxWidth && output.length > 1) {
+        output = output.slice(0, -1);
+      }
+      if (output !== text && output.length > 1) output = output.slice(0, -1) + "...";
+      ctx.fillText(output, x, y);
+    }
+
+    function hitTest(x, y) {
+      for (let i = hitRegions.length - 1; i >= 0; i -= 1) {
+        const r = hitRegions[i];
+        if (x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h) return r;
+      }
+      return null;
+    }
+
+    function selectRegion(region) {
+      state.detailMode = "summary";
+      hideDetails();
+      if (!region) {
+        state.selected = null;
+        updateInspectorEmpty();
+        draw();
+        return;
+      }
+      state.selected = { type: region.type, id: region.id };
+      if (region.type === "event") updateInspectorEvent(region.id);
+      if (region.type === "chapter") updateInspectorChapter(region.id);
+      draw();
+    }
+
+    function updateInspectorEmpty() {
+      document.getElementById("selectionKind").textContent = "No Selection";
+      document.getElementById("selectionTitle").textContent = "尚未选中对象";
+      document.getElementById("selectionDesc").textContent = "请在左侧画布中点击章节标题或事件块。系统会先显示 Inspector，不会自动进入详情。";
+      document.getElementById("selectionTags").innerHTML = '<span class="tag">WAITING</span>';
+      document.getElementById("summaryCoord").textContent = "未选中";
+      document.getElementById("summaryTrack").textContent = "未选中";
+      document.getElementById("summaryInput").textContent = "等待选择对象。";
+      document.getElementById("summaryOutput").textContent = "等待选择对象。";
+      document.getElementById("summaryRisk").textContent = "等待选择对象。";
+      document.getElementById("enterEvent").disabled = true;
+      document.getElementById("enterChapter").disabled = true;
+      document.getElementById("side-selected").textContent = "未选中";
+      document.getElementById("route-state").textContent = "画布模式";
+    }
+
+    function updateInspectorEvent(id) {
+      const item = events.find((eventItem) => eventItem.id === id);
+      const track = tracks.find((trackItem) => trackItem.id === item.track);
+      const start = chapters[item.start].id;
+      const end = chapters[item.end - 1].id;
+      document.getElementById("selectionKind").textContent = "Selected Event";
+      document.getElementById("selectionTitle").textContent = item.title;
+      document.getElementById("selectionDesc").textContent = "当前只是选中事件块。需要点击“拆解事件”，才进入事件检查器。";
+      document.getElementById("selectionTags").innerHTML = `<span class="tag">${start}-${end}</span><span class="tag">${track.name}</span><span class="tag">${item.tone.toUpperCase()}</span>`;
+      document.getElementById("summaryCoord").textContent = `${start}-${end}`;
+      document.getElementById("summaryTrack").textContent = track.name;
+      document.getElementById("summaryInput").textContent = item.input;
+      document.getElementById("summaryOutput").textContent = item.output;
+      document.getElementById("summaryRisk").textContent = item.risk;
+      document.getElementById("eventInput").textContent = item.input;
+      document.getElementById("eventInside").textContent = "事件检查器服务于当前选中的事件块，可以是单章节事件，也可以是跨章节事件。";
+      document.getElementById("eventOutput").textContent = `${item.output} 风险：${item.risk}`;
+      document.getElementById("enterEvent").disabled = false;
+      document.getElementById("enterChapter").disabled = true;
+      document.getElementById("side-selected").textContent = item.title;
+      document.getElementById("route-state").textContent = "事件已选中";
+    }
+
+    function updateInspectorChapter(id) {
+      const item = chapters.find((chapter) => chapter.id === id);
+      document.getElementById("selectionKind").textContent = "Selected Chapter";
+      document.getElementById("selectionTitle").textContent = `${item.id} ${item.title}`;
+      document.getElementById("selectionDesc").textContent = "当前只是选中章节列。需要点击“进入章节函数”，才进入章节内部。";
+      document.getElementById("selectionTags").innerHTML = `<span class="tag">${item.id}</span><span class="tag">章节刻度</span><span class="tag">CONFIRM</span>`;
+      document.getElementById("summaryCoord").textContent = item.id;
+      document.getElementById("summaryTrack").textContent = "章节时间格";
+      document.getElementById("summaryInput").textContent = item.input;
+      document.getElementById("summaryOutput").textContent = item.output;
+      document.getElementById("summaryRisk").textContent = "如果误触即进入，会打断时间线编辑。";
+      document.getElementById("chapterInput").textContent = item.input;
+      document.getElementById("chapterInside").textContent = item.inside;
+      document.getElementById("chapterOutput").textContent = item.output;
+      document.getElementById("enterEvent").disabled = true;
+      document.getElementById("enterChapter").disabled = false;
+      document.getElementById("side-selected").textContent = `${item.id} ${item.title}`;
+      document.getElementById("route-state").textContent = "章节已选中";
+    }
+
+    function hideDetails() {
+      document.getElementById("eventDetail").classList.remove("active");
+      document.getElementById("chapterDetail").classList.remove("active");
+    }
+
+    function enterEventDetail() {
+      if (state.selected?.type !== "event") return;
+      hideDetails();
+      document.getElementById("eventDetail").classList.add("active");
+      document.getElementById("route-state").textContent = "事件检查器";
+      state.detailMode = "event";
+    }
+
+    function enterChapterDetail() {
+      if (state.selected?.type !== "chapter") return;
+      hideDetails();
+      document.getElementById("chapterDetail").classList.add("active");
+      document.getElementById("route-state").textContent = "章节函数";
+      state.detailMode = "chapter";
+    }
+
+    function updateStateLabels() {
+      const zoom = Math.round(state.scale * 100);
+      document.getElementById("zoomLabel").textContent = `${zoom}%`;
+      document.getElementById("zoomSlider").value = zoom;
+      document.getElementById("side-zoom").textContent = `${zoom}%`;
+      const firstVisibleIndex = Math.max(0, Math.floor(state.offsetX / world.chapterWidth));
+      document.getElementById("side-offset").textContent = `${chapters[firstVisibleIndex].id} 起`;
+    }
+
+    function setScale(nextScale, anchorX = world.labelWidth + plotWidth() / 2) {
+      const oldScale = state.scale;
+      const worldAtAnchor = screenToWorldX(anchorX);
+      state.scale = Math.max(0.45, Math.min(1.5, nextScale));
+      state.offsetX = worldAtAnchor - (anchorX - world.labelWidth) / state.scale;
+      if (oldScale !== state.scale) clampOffset();
+      draw();
+    }
+
+    canvas.addEventListener("wheel", (event) => {
+      event.preventDefault();
+      const factor = event.deltaY < 0 ? 1.08 : 0.92;
+      setScale(state.scale * factor, event.offsetX);
+    }, { passive: false });
+
+    canvas.addEventListener("pointerdown", (event) => {
+      canvas.setPointerCapture(event.pointerId);
+      state.isDragging = true;
+      state.dragStartX = event.clientX;
+      state.dragStartOffset = state.offsetX;
+      state.moved = false;
+      canvas.classList.add("dragging");
+    });
+
+    canvas.addEventListener("pointermove", (event) => {
+      if (!state.isDragging) return;
+      const dx = event.clientX - state.dragStartX;
+      if (Math.abs(dx) > 3) state.moved = true;
+      state.offsetX = state.dragStartOffset - dx / state.scale;
+      clampOffset();
+      draw();
+    });
+
+    canvas.addEventListener("pointerup", (event) => {
+      state.isDragging = false;
+      canvas.classList.remove("dragging");
+      const region = hitTest(event.offsetX, event.offsetY);
+      if (!state.moved) selectRegion(region);
+    });
+
+    document.getElementById("zoomSlider").addEventListener("input", (event) => {
+      setScale(Number(event.target.value) / 100);
+    });
+
+    document.getElementById("zoomIn").addEventListener("click", () => setScale(state.scale * 1.15));
+    document.getElementById("zoomOut").addEventListener("click", () => setScale(state.scale * 0.85));
+    document.getElementById("resetView").addEventListener("click", () => {
+      state.scale = 0.72;
+      state.offsetX = 0;
+      state.detailMode = "summary";
+      hideDetails();
+      draw();
+    });
+    document.getElementById("enterEvent").addEventListener("click", enterEventDetail);
+    document.getElementById("enterChapter").addEventListener("click", enterChapterDetail);
+    document.getElementById("backToCanvas").addEventListener("click", () => {
+      hideDetails();
+      state.detailMode = "summary";
+      document.getElementById("route-state").textContent = state.selected ? (state.selected.type === "event" ? "事件已选中" : "章节已选中") : "画布模式";
+    });
+
+    window.addEventListener("resize", resizeCanvas);
+
+    resizeCanvas();
+    updateInspectorEmpty();
+
+    const hash = location.hash.replace("#", "");
+    if (hash === "event-selected") {
+      selectRegion({ type: "event", id: "e-zhang-15" });
+    } else if (hash === "chapter-selected") {
+      selectRegion({ type: "chapter", id: "C15" });
+    } else if (hash === "event-detail") {
+      selectRegion({ type: "event", id: "e-zhang-15" });
+      enterEventDetail();
+    } else if (hash === "chapter-detail") {
+      selectRegion({ type: "chapter", id: "C15" });
+      enterChapterDetail();
+    } else if (hash === "zoomed") {
+      state.scale = 1.16;
+      state.offsetX = world.chapterWidth * 2.2;
+      clampOffset();
+      draw();
+    }
+  </script>
+</body>
+</html>
