@@ -1,12 +1,42 @@
 # Codex Start Here
 
-本文件是小说叙事验证工具迁移、重建 Git 或新开 Codex 会话后的第一入口。新会话应先读本文件，再按下方顺序读取设计说明和数据规范。
+本文件是 HS-Novel-Editor 迁移、重建 Git 或新开 Codex 会话后的第一入口。先读本文件恢复当前事实，再进入 `DOC/CODEX_DOC/` 查看正式工程文档。
 
 ## 项目定位
 
-本仓库只管理 `验证工具` 内部内容，用于验证小说结构管理工具，不直接改动外层小说正文、设定和成熟支撑材料。
+本仓库只管理小说叙事结构管理工具本身，不直接改动外层小说正文、设定和成熟支撑材料。
 
-当前核心工具是“基准时间轴原型 V1”：以真实时间为底盘，以章节覆盖层和故事线轨道组织事件、人物参与条、章节函数入口和 Inspector。
+项目最初是“小说叙事验证工具”，当前已经转向长期产品化：以基准时间轴、章节函数、故事线、人物参与条和投影数据集为核心，逐步沉淀成可持续迭代的 HS-Novel-Editor。
+
+当前核心实现是“基准时间轴原型 V1”：以真实时间为底盘，以章节覆盖层和故事线轨道组织事件、人物参与条、章节函数入口和 Inspector。
+
+## 正式工程文档根
+
+长期研发文档统一放在：
+
+```text
+DOC/CODEX_DOC/
+```
+
+当前活动节点：
+
+```text
+P0.1 文档治理底座
+```
+
+关键入口：
+
+```text
+DOC/CODEX_DOC/README.md
+DOC/CODEX_DOC/00-本地工程策略映射.md
+DOC/CODEX_DOC/01_需求分析/00-工程总体分析.md
+DOC/CODEX_DOC/02_设计说明/00-设计事实源索引.md
+DOC/CODEX_DOC/03_规范与流程/00-文档治理与迁移规则.md
+DOC/CODEX_DOC/04_研发计划/01-WBS-0-HS-Novel-Editor-研发总纲-研发计划.md
+DOC/CODEX_DOC/04_研发计划/02-WBS-P0.1-文档治理底座-研发计划.md
+DOC/CODEX_DOC/05_节点合同/01-WBS-P0.1-文档治理底座-节点合同.md
+DOC/CODEX_DOC/06_测试文档/02_验收入口/00-验收主入口.md
+```
 
 ## 当前主入口
 
@@ -31,7 +61,7 @@
 推荐在 `source` 目录启动：
 
 ```powershell
-cd C:\OpenCodeWorkSpace\TestProject\文章重写\验证工具\原型包\2026-06-22-叙事验证工具-基准时间轴原型-v1\source
+cd C:\CodexWorkSpace\CodexProject\HS-Novel-Editor\原型包\2026-06-22-叙事验证工具-基准时间轴原型-v1\source
 npx --yes vite --host 127.0.0.1 --port 4173
 ```
 
@@ -44,7 +74,7 @@ http://127.0.0.1:4173/index.html
 如果没有 Vite，也可以临时用 Python 静态服务：
 
 ```powershell
-cd C:\OpenCodeWorkSpace\TestProject\文章重写\验证工具\原型包\2026-06-22-叙事验证工具-基准时间轴原型-v1\source
+cd C:\CodexWorkSpace\CodexProject\HS-Novel-Editor\原型包\2026-06-22-叙事验证工具-基准时间轴原型-v1\source
 python -m http.server 4173 --bind 127.0.0.1
 ```
 
@@ -53,17 +83,16 @@ python -m http.server 4173 --bind 127.0.0.1
 新 Codex 会话应按以下顺序恢复上下文：
 
 1. `CODEX_START_HERE.md`
-2. `CURRENT_HANDOFF.md`
-3. `README.md`
-4. `设计说明/2026-06-28-基准时间轴页面总设计说明-v1.2.md`
-5. `设计说明/2026-06-28-基准时间轴投影数据集定义-v1.0.md`
-6. `设计说明/2026-06-24-事件拆分规则与智能体执行准则-v1.0.md`
-7. `设计说明/2026-06-28-事件采集与人物参与策略规范-v1.0.md`
-8. `设计说明/2026-06-23-对象可视化要素与颜色编码规则-v1.0.md`
-9. `设计说明/2026-06-22-核心对象定义与系统记录总纲-v0.9.md`
-10. `设计说明/2026-06-22-全局时间轴与章节工作台贯通设计-v1.0.md`
+2. `DOC/CODEX_DOC/README.md`
+3. `DOC/CODEX_DOC/00-本地工程策略映射.md`
+4. `DOC/CODEX_DOC/01_需求分析/00-工程总体分析.md`
+5. `DOC/CODEX_DOC/02_设计说明/00-设计事实源索引.md`
+6. `DOC/CODEX_DOC/03_规范与流程/00-文档治理与迁移规则.md`
+7. `DOC/CODEX_DOC/04_研发计划/01-WBS-0-HS-Novel-Editor-研发总纲-研发计划.md`
+8. `CURRENT_HANDOFF.md`
+9. `README.md`
 
-如果设计说明之间出现冲突，以较新的、面向当前基准时间轴 V1 的文档为准。
+如需追溯专题设计，再按 `DOC/CODEX_DOC/02_设计说明/00-设计事实源索引.md` 读取 `设计说明/` 下的历史设计文档。
 
 ## 核心概念
 
@@ -153,39 +182,21 @@ node scripts/validate-visual-encoding.mjs
 
 涉及页面交互、缩放、点击、拖拽或 Inspector 的改动，必须用真实浏览器验证。
 
-## 迁移规则
+## Git 与素材边界
 
-迁移到新文件夹时，至少迁移以下内容：
+当前仓库已经初始化并推送到：
 
 ```text
-README.md
-CODEX_START_HERE.md
-CURRENT_HANDOFF.md
-小说叙事验证工具-策划案.md
-叙事验证工具-需求规格说明-v0.1.md
-设计说明/
-原型包/2026-06-22-叙事验证工具-基准时间轴原型-v1/
+https://github.com/wgwtest/HS-Novel-Editor.git
 ```
 
-如果还需要保留历史原型过程，再迁移整个 `原型包/`。
-
-重建 Git 时不要复制旧 `.git` 目录。推荐流程：
-
-```powershell
-Copy-Item -Recurse <旧验证工具目录> <新目录>
-Remove-Item -Recurse -Force <新目录>\.git
-cd <新目录>
-git init
-git add .
-git commit -m "初始化小说叙事验证工具"
-```
-
-如果要推送到远端，再设置新的 remote。
+`验证作品/` 是本地素材区，只可作为只读引用，必须保持在 `.gitignore` 中，不能提交。
 
 ## 工作边界
 
+- 新的稳定工程文档默认写入 `DOC/CODEX_DOC/`。
+- 既有 `设计说明/` 和 `原型包/` 暂作为历史事实源与资产根保留，不在 P0.1 中移动。
 - 不直接修改外层小说正文和成熟支撑材料。
 - 数据拆分、故事线分类和人物参与信息必须先落到设计说明或数据规则，再写入投影数据集。
 - UI 页面不能绕过数据模型直接写死业务判断。
-- 旧原型可以参考，但当前实现事实源是“基准时间轴原型 V1”和本文件列出的设计说明。
-
+- 旧原型可以参考，但当前实现事实源是“基准时间轴原型 V1”和 `DOC/CODEX_DOC/02_设计说明/00-设计事实源索引.md` 指向的设计文档。
