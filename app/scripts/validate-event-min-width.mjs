@@ -44,8 +44,25 @@ assert(
   "Event hit region must use drawX/drawWidth after min-width calculation and clipped vertical bounds."
 );
 
-const clippedMatch = html.match(/function clippedEventRect\(x, width, viewportWidth\) \{[\s\S]*?\n    \}/);
-const displayMatch = html.match(/function eventDisplayRect\(x, width, viewportWidth\) \{[\s\S]*?\n    \}/);
+function extractFunction(source, name) {
+  const signature = `function ${name}(`;
+  const start = source.indexOf(signature);
+  if (start < 0) return null;
+  const bodyStart = source.indexOf("{", start);
+  let depth = 0;
+  for (let index = bodyStart; index < source.length; index += 1) {
+    const char = source[index];
+    if (char === "{") depth += 1;
+    if (char === "}") {
+      depth -= 1;
+      if (depth === 0) return source.slice(start, index + 1);
+    }
+  }
+  return null;
+}
+
+const clippedMatch = extractFunction(html, "clippedEventRect");
+const displayMatch = extractFunction(html, "eventDisplayRect");
 
 assert(clippedMatch, "clippedEventRect not found.");
 assert(displayMatch, "eventDisplayRect not found.");
@@ -57,8 +74,8 @@ vm.createContext(context);
 vm.runInContext(
   [
     "const MIN_EVENT_BLOCK_WIDTH = 72;",
-    clippedMatch[0],
-    displayMatch[0],
+    clippedMatch,
+    displayMatch,
     "globalThis.__eventDisplayRect = eventDisplayRect;",
   ].join("\n"),
   context

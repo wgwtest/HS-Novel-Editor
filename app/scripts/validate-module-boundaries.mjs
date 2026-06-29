@@ -19,6 +19,7 @@ for (const requiredPath of [
   "src/state/persisted-state.js",
   "src/timeline/geometry.js",
   "src/timeline/hit-test.js",
+  "src/timeline/renderer.js",
   "src/inspector/inspector-controller.js"
 ]) {
   assert(fs.existsSync(path.join(appRoot, requiredPath)), `Missing module boundary file: ${requiredPath}`);
@@ -33,6 +34,7 @@ assert(mainJs.includes('from "./app/event-bindings.js"'), "main.js must import D
 assert(mainJs.includes('from "./app/route.js"'), "main.js must import initial route handling from app/route.js.");
 assert(mainJs.includes('from "./timeline/geometry.js"'), "main.js must import timeline geometry from timeline/geometry.js.");
 assert(mainJs.includes('from "./timeline/hit-test.js"'), "main.js must import hit testing from timeline/hit-test.js.");
+assert(mainJs.includes('from "./timeline/renderer.js"'), "main.js must import timeline rendering from timeline/renderer.js.");
 assert(mainJs.includes('from "./inspector/inspector-controller.js"'), "main.js must import inspector controller from inspector/inspector-controller.js.");
 assert(!mainJs.includes("localStorage."), "main.js must not directly access localStorage after P2.4.2.");
 assert(!/await fetch\(/.test(mainJs), "main.js must not directly fetch story data after P2.4.2.");
@@ -46,6 +48,13 @@ assert(!mainJs.includes("function labelColumnHitTest("), "main.js must not defin
 assert(!mainJs.includes("function hitTest("), "main.js must not define hit testing after P2.4.6.");
 assert(!mainJs.includes("function applyInitialRoute("), "main.js must not define initial route handling after P2.4.6.");
 assert(!mainJs.includes(".addEventListener("), "main.js must not bind DOM events directly after P2.4.7.");
+assert(!mainJs.includes("function draw("), "main.js must not define Canvas drawing after P2.4.8.");
+assert(!mainJs.includes("function drawHeader("), "main.js must not define Canvas header drawing after P2.4.8.");
+assert(!mainJs.includes("function drawTracks("), "main.js must not define Canvas track drawing after P2.4.8.");
+assert(!mainJs.includes("function drawEvents("), "main.js must not define Canvas event drawing after P2.4.8.");
+assert(!mainJs.includes("function drawSelectedChapterColumn("), "main.js must not define selected chapter rendering after P2.4.8.");
+assert(!mainJs.includes("function clipText("), "main.js must not define Canvas text clipping after P2.4.8.");
+assert(!mainJs.includes("function eventDisplayRect("), "main.js must not define event display clipping after P2.4.8.");
 assert(appSource.includes("function validateStoryManifest("), "Story manifest validation must remain present in app source.");
 assert(appSource.includes("function loadPersistedState("), "Persisted state loading must remain present in app source.");
 assert(appSource.includes("function savePersistedState("), "Persisted state saving must remain present in app source.");
@@ -55,5 +64,6 @@ assert(appSource.includes("function updateInspectorEvent("), "Event Inspector re
 assert(appSource.includes("function createHitTester("), "Hit tester factory must remain present in app source.");
 assert(appSource.includes("function applyInitialRoute("), "Initial route handling must remain present in app source.");
 assert(appSource.includes("function bindAppEvents("), "DOM event binding must remain present in app source.");
+assert(appSource.includes("function createTimelineRenderer("), "Timeline renderer factory must remain present in app source.");
 
 console.log("Module boundary validation passed.");

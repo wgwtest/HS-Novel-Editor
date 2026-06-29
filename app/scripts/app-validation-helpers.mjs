@@ -36,6 +36,9 @@ export function readAppSource(metaUrl) {
     fs.existsSync(path.join(appRoot, "src", "timeline", "hit-test.js"))
       ? fs.readFileSync(path.join(appRoot, "src", "timeline", "hit-test.js"), "utf8")
       : "",
+    fs.existsSync(path.join(appRoot, "src", "timeline", "renderer.js"))
+      ? fs.readFileSync(path.join(appRoot, "src", "timeline", "renderer.js"), "utf8")
+      : "",
     fs.readFileSync(path.join(appRoot, "src", "styles", "main.css"), "utf8")
   ];
 
