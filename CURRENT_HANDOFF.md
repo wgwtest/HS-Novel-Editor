@@ -6,7 +6,7 @@
 
 HS-Novel-Editor 已从一次性“小说叙事验证工具”转向长期产品化项目。当前正式运行实现已经切换到 `app/`：页面可读取 JSON 投影数据集，并通过真实时间轴、章节覆盖层、故事线轨道、人物参与条、章节函数入口和 Inspector 验证叙事结构。
 
-本轮正在推进 `P2.4 app 工程化解耦与正式入口切换`：已经建立 `app/` 正式前端工程根，完成运行壳、数据与状态层、时间轴几何模型、Inspector 控制器拆分，并把启动入口切换到 `app/index.html`。
+本轮正在推进 `P2.4 app 工程化解耦`：已经建立 `app/` 正式前端工程根，完成运行壳、数据与状态层、时间轴几何模型、Inspector 控制器、初始路由、命中测试拆分，并把启动入口切换到 `app/index.html`。
 
 当前浏览器入口：
 
@@ -48,6 +48,7 @@ DOC/CODEX_DOC/06_测试文档/02_验收入口/00-验收主入口.md
 6. 建立 `DOC/CODEX_DOC/` 作为正式工程文档根。
 7. 建立 `app/` 正式运行入口，原型包冻结为历史行为基线。
 8. 将数据加载、状态持久化、时间轴几何模型和 Inspector 控制器拆出 `main.js`。
+9. 将 hash 初始化路由和 Canvas 命中测试拆出 `main.js`。
 
 ## 当前实现事实
 
@@ -61,7 +62,9 @@ app/src/main.js
 app/src/data/story-loader.js
 app/src/state/persisted-state.js
 app/src/timeline/geometry.js
+app/src/timeline/hit-test.js
 app/src/inspector/inspector-controller.js
+app/src/app/route.js
 ```
 
 基准时间轴页面当前已经具备双轴模式实现：
@@ -84,7 +87,7 @@ app/src/inspector/inspector-controller.js
 3. app 后续仍需继续解耦：
    - Canvas 绘制函数仍集中在 `app/src/main.js`。
    - DOM 事件绑定总线仍集中在 `app/src/main.js`。
-   - hit region 构建和命中测试仍需后续拆分。
+   - hit region 构建仍随 Canvas 绘制流程集中在 `app/src/main.js`。
 
 ## 最近通过的校验
 
@@ -99,7 +102,7 @@ npm run check
 机测记录：
 
 ```text
-DOC/CODEX_DOC/06_测试文档/03_机测记录/2026-06-30-003538-入口切换与工程化改造-机测记录.md
+DOC/CODEX_DOC/06_测试文档/03_机测记录/2026-06-30-004143-路由与命中测试拆分-机测记录.md
 ```
 
 涉及页面交互、缩放、点击、拖拽或 Inspector 的改动，必须用真实浏览器验证。

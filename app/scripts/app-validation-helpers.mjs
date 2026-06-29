@@ -21,11 +21,17 @@ export function readAppSource(metaUrl) {
     fs.readFileSync(path.join(appRoot, "src", "main.js"), "utf8"),
     fs.readFileSync(path.join(appRoot, "src", "data", "story-loader.js"), "utf8"),
     fs.readFileSync(path.join(appRoot, "src", "state", "persisted-state.js"), "utf8"),
+    fs.existsSync(path.join(appRoot, "src", "app", "route.js"))
+      ? fs.readFileSync(path.join(appRoot, "src", "app", "route.js"), "utf8")
+      : "",
     fs.existsSync(path.join(appRoot, "src", "inspector", "inspector-controller.js"))
       ? fs.readFileSync(path.join(appRoot, "src", "inspector", "inspector-controller.js"), "utf8")
       : "",
     fs.existsSync(path.join(appRoot, "src", "timeline", "geometry.js"))
       ? fs.readFileSync(path.join(appRoot, "src", "timeline", "geometry.js"), "utf8")
+      : "",
+    fs.existsSync(path.join(appRoot, "src", "timeline", "hit-test.js"))
+      ? fs.readFileSync(path.join(appRoot, "src", "timeline", "hit-test.js"), "utf8")
       : "",
     fs.readFileSync(path.join(appRoot, "src", "styles", "main.css"), "utf8")
   ];

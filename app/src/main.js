@@ -12,6 +12,7 @@ import {
   savePersistedState as savePersistedStateToStorage,
   setDatasetViewState as writeDatasetViewState
 } from "./state/persisted-state.js";
+import { applyInitialRoute } from "./app/route.js";
 import { createInspectorController } from "./inspector/inspector-controller.js";
 import {
   createTimelineGeometry,
@@ -22,6 +23,7 @@ import {
   parseTime,
   weekOfMonth
 } from "./timeline/geometry.js";
+import { createHitTester } from "./timeline/hit-test.js";
 
     const canvas = document.getElementById("timelineCanvas");
     const wrap = document.getElementById("canvasWrap");
@@ -172,6 +174,7 @@ import {
 
     const hitRegions = [];
     let rowLayout = [];
+    const { hitTest } = createHitTester({ hitRegions, world });
     const timelineGeometry = createTimelineGeometry({
       chapters,
       state,
@@ -1055,26 +1058,6 @@ import {
       return displayWidth > 0 ? { x: displayLeft, width: displayWidth } : null;
     }
 
-    function labelColumnHitTest(x, y) {
-      if (x > world.labelWidth) return null;
-      for (let i = hitRegions.length - 1; i >= 0; i -= 1) {
-        const r = hitRegions[i];
-        if (r.type !== "track" && r.type !== "character") continue;
-        if (x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h) return r;
-      }
-      return null;
-    }
-
-    function hitTest(x, y) {
-      const labelHit = labelColumnHitTest(x, y);
-      if (labelHit) return labelHit;
-      for (let i = hitRegions.length - 1; i >= 0; i -= 1) {
-        const r = hitRegions[i];
-        if (x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h) return r;
-      }
-      return null;
-    }
-
     function selectRegion(region, options = {}) {
       state.detailMode = "summary";
       hideDetails();
@@ -1289,59 +1272,23 @@ import {
 
     window.addEventListener("resize", resizeCanvas);
 
-    function applyInitialRoute() {
-      const hash = location.hash.replace("#", "");
-      if (hash === "track-selected") {
-        const media = trackById("media");
-        if (media) media.expanded = false;
-        selectRegion({ type: "track", id: "media" });
-      } else if (hash === "character-selected") {
-        const interview = trackById("interview");
-        if (interview) interview.expanded = true;
-        selectRegion({ type: "character", id: "interview:yiren", track: "interview", character: "yiren" });
-      } else if (hash === "event-selected") {
-        const interview = trackById("interview");
-        if (interview) interview.expanded = true;
-        selectRegion({ type: "event", id: "E005" });
-      } else if (hash === "background-selected") {
-        const temple = trackById("temple");
-        if (temple) temple.expanded = true;
-        selectRegion({ type: "event", id: "CE-T-yiren-bg-1" });
-      } else if (hash.startsWith("chapter=")) {
-        const chapterId = decodeURIComponent(hash.slice("chapter=".length));
-        if (chapters.some((chapter) => chapter.id === chapterId)) {
-          selectRegion({ type: "chapter", id: chapterId });
-        } else if (chapters.length > 0) {
-          selectRegion({ type: "chapter", id: chapters[0].id });
-        }
-      } else if (hash === "chapter-selected") {
-        selectRegion({ type: "chapter", id: chapters.some((chapter) => chapter.id === "C15") ? "C15" : chapters[0]?.id });
-      } else if (hash === "event-detail") {
-        const interview = trackById("interview");
-        if (interview) interview.expanded = true;
-        selectRegion({ type: "event", id: "E005" });
-      } else if (hash === "chapter-detail") {
-        selectRegion({ type: "chapter", id: chapters.some((chapter) => chapter.id === "C15") ? "C15" : chapters[0]?.id });
-      } else if (hash === "all-expanded") {
-        tracks.forEach((track) => {
-          if (track.characters.length > 0) track.expanded = true;
-        });
-        clampOffsets();
-        draw();
-      } else if (hash === "zoomed") {
-        state.scale = ZOOM_MAX;
-        state.offsetX = timeToWorld("2025-07-07T12:00");
-        clampOffsets();
-        updateStateLabels();
-        draw();
-      }
-    }
-
     async function boot() {
       await loadStoryData();
       resizeCanvas();
       if (!state.selected) updateInspectorEmpty();
-      applyInitialRoute();
+      applyInitialRoute({
+        chapters,
+        clampOffsets,
+        draw,
+        location,
+        selectRegion,
+        state,
+        timeToWorld,
+        trackById,
+        tracks,
+        updateStateLabels,
+        zoomMax: ZOOM_MAX
+      });
     }
 
     boot();
