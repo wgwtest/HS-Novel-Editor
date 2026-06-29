@@ -1,23 +1,23 @@
 # 当前交接说明
 
-更新时间：2026-06-29
+更新时间：2026-06-30
 
 ## 当前状态
 
-HS-Novel-Editor 已从一次性“小说叙事验证工具”转向长期产品化项目。当前运行实现仍是“基准时间轴原型 V1”：页面可读取 JSON 投影数据集，并通过真实时间轴、章节覆盖层、故事线轨道、人物参与条、章节函数入口和 Inspector 验证叙事结构。
+HS-Novel-Editor 已从一次性“小说叙事验证工具”转向长期产品化项目。当前正式运行实现已经切换到 `app/`：页面可读取 JSON 投影数据集，并通过真实时间轴、章节覆盖层、故事线轨道、人物参与条、章节函数入口和 Inspector 验证叙事结构。
 
-本轮正在推进 `P0.1 文档治理底座`：已经建立 `DOC/CODEX_DOC/` 正式工程文档根，并把启动入口、研发计划、节点合同、验收入口、机测记录和交接记录接入统一结构。
+本轮正在推进 `P2.4 app 工程化解耦与正式入口切换`：已经建立 `app/` 正式前端工程根，完成运行壳、数据与状态层、时间轴几何模型、Inspector 控制器拆分，并把启动入口切换到 `app/index.html`。
 
 当前浏览器入口：
 
 ```text
-http://127.0.0.1:4173/index.html
+http://127.0.0.1:4174/index.html
 ```
 
 当前源码入口：
 
 ```text
-原型包/2026-06-22-叙事验证工具-基准时间轴原型-v1/source/index.html
+app/index.html
 ```
 
 ## 当前重要入口
@@ -46,15 +46,22 @@ DOC/CODEX_DOC/06_测试文档/02_验收入口/00-验收主入口.md
 4. 更新页面文案，把下拉框和状态栏统一为“投影数据集”。
 5. 建立 `CODEX_START_HERE.md` 作为新会话第一入口。
 6. 建立 `DOC/CODEX_DOC/` 作为正式工程文档根。
+7. 建立 `app/` 正式运行入口，原型包冻结为历史行为基线。
+8. 将数据加载、状态持久化、时间轴几何模型和 Inspector 控制器拆出 `main.js`。
 
 ## 当前实现事实
 
 ```text
-原型包/2026-06-22-叙事验证工具-基准时间轴原型-v1/source/index.html
-原型包/2026-06-22-叙事验证工具-基准时间轴原型-v1/source/chapter-workbench.html
-原型包/2026-06-22-叙事验证工具-基准时间轴原型-v1/source/data/stories/index.json
-原型包/2026-06-22-叙事验证工具-基准时间轴原型-v1/source/data/schema.json
-原型包/2026-06-22-叙事验证工具-基准时间轴原型-v1/source/scripts/
+app/index.html
+app/chapter-workbench.html
+app/public/data/stories/index.json
+app/public/data/schema.json
+app/scripts/
+app/src/main.js
+app/src/data/story-loader.js
+app/src/state/persisted-state.js
+app/src/timeline/geometry.js
+app/src/inspector/inspector-controller.js
 ```
 
 基准时间轴页面当前已经具备双轴模式实现：
@@ -62,6 +69,8 @@ DOC/CODEX_DOC/06_测试文档/02_验收入口/00-验收主入口.md
 - 真实时间轴模式按真实时间比例显示。
 - 章节等宽轴模式按章节等宽显示。
 - 两种模式通过轴投影接口驱动事件条绘制，避免事件条维护两套分叉绘制逻辑。
+
+原型包 `原型包/2026-06-22-叙事验证工具-基准时间轴原型-v1/source/` 当前只作为历史行为基线和视觉回归基线。
 
 ## 当前待处理问题
 
@@ -72,21 +81,17 @@ DOC/CODEX_DOC/06_测试文档/02_验收入口/00-验收主入口.md
 2. 故事线分类仍处于验证阶段：
    - 故事线应以核心人物关系、行为处置和持续冲突组织。
    - 不能把“问题类型”或“处理事项”误当成故事线。
-3. 文档治理仍需人工确认：
-   - `DOC/CODEX_DOC/` 的目录命名和 WBS 拆分需要确认后再作为后续默认规范。
-   - P0.1 不移动 `设计说明/` 和 `原型包/`，只建立索引和映射。
+3. app 后续仍需继续解耦：
+   - Canvas 绘制函数仍集中在 `app/src/main.js`。
+   - DOM 事件绑定总线仍集中在 `app/src/main.js`。
+   - hit region 构建和命中测试仍需后续拆分。
 
 ## 最近通过的校验
 
-2026-06-29 已在 `source` 目录运行以下校验：
+2026-06-30 已在 `app` 目录运行以下校验：
 
 ```powershell
-node scripts/validate-story-datasets.mjs
-node scripts/validate-character-participation.mjs
-node scripts/validate-axis-modes.mjs
-node scripts/validate-event-min-width.mjs
-node scripts/validate-hit-priority.mjs
-node scripts/validate-visual-encoding.mjs
+npm run check
 ```
 
 结果：全部通过。
@@ -94,7 +99,7 @@ node scripts/validate-visual-encoding.mjs
 机测记录：
 
 ```text
-DOC/CODEX_DOC/06_测试文档/03_机测记录/2026-06-29-001629-文档治理底座-机测记录.md
+DOC/CODEX_DOC/06_测试文档/03_机测记录/2026-06-30-003538-入口切换与工程化改造-机测记录.md
 ```
 
 涉及页面交互、缩放、点击、拖拽或 Inspector 的改动，必须用真实浏览器验证。

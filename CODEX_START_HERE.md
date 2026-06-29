@@ -21,7 +21,7 @@ DOC/CODEX_DOC/
 当前活动节点：
 
 ```text
-P0.1 文档治理底座
+P2.4 app 工程化解耦与正式入口切换
 ```
 
 关键入口：
@@ -40,17 +40,19 @@ DOC/CODEX_DOC/06_测试文档/02_验收入口/00-验收主入口.md
 
 ## 当前主入口
 
-当前可运行页面位于：
+当前正式运行入口位于：
 
 ```text
-原型包/2026-06-22-叙事验证工具-基准时间轴原型-v1/source/index.html
+app/index.html
 ```
 
 章节函数页面位于：
 
 ```text
-原型包/2026-06-22-叙事验证工具-基准时间轴原型-v1/source/chapter-workbench.html
+app/chapter-workbench.html
 ```
+
+原型包 `原型包/2026-06-22-叙事验证工具-基准时间轴原型-v1/source/` 从现在起冻结为历史行为基线和视觉回归基线，不再作为产品功能主开发目录。
 
 不要再以早期 v6、v7、v9 原型作为当前实现基准。早期原型只保留为设计过程记录。
 
@@ -58,24 +60,23 @@ DOC/CODEX_DOC/06_测试文档/02_验收入口/00-验收主入口.md
 
 必须用 HTTP 服务打开页面，不建议直接 `file://` 打开，因为页面需要读取本地 JSON 数据集。
 
-推荐在 `source` 目录启动：
+推荐在 `app` 目录启动：
 
 ```powershell
-cd C:\CodexWorkSpace\CodexProject\HS-Novel-Editor\原型包\2026-06-22-叙事验证工具-基准时间轴原型-v1\source
-npx --yes vite --host 127.0.0.1 --port 4173
+cd C:\CodexWorkSpace\CodexProject\HS-Novel-Editor\app
+npm run dev
 ```
 
 然后打开：
 
 ```text
-http://127.0.0.1:4173/index.html
+http://127.0.0.1:4174/index.html
 ```
 
-如果没有 Vite，也可以临时用 Python 静态服务：
+`npm run dev` 当前封装的是 Python 静态服务：
 
 ```powershell
-cd C:\CodexWorkSpace\CodexProject\HS-Novel-Editor\原型包\2026-06-22-叙事验证工具-基准时间轴原型-v1\source
-python -m http.server 4173 --bind 127.0.0.1
+python -m http.server 4174 --bind 127.0.0.1
 ```
 
 ## 必读顺序
@@ -113,19 +114,19 @@ python -m http.server 4173 --bind 127.0.0.1
 数据目录：
 
 ```text
-原型包/2026-06-22-叙事验证工具-基准时间轴原型-v1/source/data/stories/
+app/public/data/stories/
 ```
 
 数据清单：
 
 ```text
-原型包/2026-06-22-叙事验证工具-基准时间轴原型-v1/source/data/stories/index.json
+app/public/data/stories/index.json
 ```
 
 Schema：
 
 ```text
-原型包/2026-06-22-叙事验证工具-基准时间轴原型-v1/source/data/schema.json
+app/public/data/schema.json
 ```
 
 ### 章节函数
@@ -143,9 +144,9 @@ Schema：
 ## 当前数据文件
 
 ```text
-source/data/stories/story-current.json
-source/data/stories/story-c1-c5-resplit-v0.1.json
-source/data/stories/story-c1-c14-storylines-preview-v0.1.json
+app/public/data/stories/story-current.json
+app/public/data/stories/story-c1-c5-resplit-v0.1.json
+app/public/data/stories/story-c1-c14-storylines-preview-v0.1.json
 ```
 
 `story-current.json` 是当前默认投影数据。
@@ -156,28 +157,17 @@ source/data/stories/story-c1-c14-storylines-preview-v0.1.json
 
 ## 常用校验命令
 
-在 `source` 目录执行：
+在 `app` 目录执行：
 
 ```powershell
-node scripts/build-storyline-preview-dataset.mjs
-node scripts/validate-story-datasets.mjs
-node scripts/validate-character-participation.mjs
-node scripts/validate-storyline-preview-quality.mjs
-node scripts/validate-axis-modes.mjs
-node scripts/validate-event-min-width.mjs
-node scripts/validate-hit-priority.mjs
-node scripts/validate-visual-encoding.mjs
+cd C:\CodexWorkSpace\CodexProject\HS-Novel-Editor\app
+npm run check
 ```
 
 提交前至少运行：
 
 ```powershell
-node scripts/validate-story-datasets.mjs
-node scripts/validate-character-participation.mjs
-node scripts/validate-axis-modes.mjs
-node scripts/validate-event-min-width.mjs
-node scripts/validate-hit-priority.mjs
-node scripts/validate-visual-encoding.mjs
+npm run check
 ```
 
 涉及页面交互、缩放、点击、拖拽或 Inspector 的改动，必须用真实浏览器验证。

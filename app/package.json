@@ -5,6 +5,6 @@
   "type": "module",
   "scripts": {
     "dev": "python -m http.server 4174 --bind 127.0.0.1",
-    "check": "node scripts/validate-app-shell.mjs && node scripts/validate-module-boundaries.mjs && node scripts/validate-story-datasets.mjs && node scripts/validate-character-participation.mjs && node scripts/validate-axis-modes.mjs && node scripts/validate-event-min-width.mjs && node scripts/validate-hit-priority.mjs && node scripts/validate-visual-encoding.mjs && node scripts/validate-view-state-management.mjs && node scripts/validate-wide-canvas-drag.mjs"
+    "check": "node scripts/validate-app-shell.mjs && node scripts/validate-formal-entrypoint.mjs && node scripts/validate-module-boundaries.mjs && node scripts/validate-story-datasets.mjs && node scripts/validate-character-participation.mjs && node scripts/validate-axis-modes.mjs && node scripts/validate-event-min-width.mjs && node scripts/validate-hit-priority.mjs && node scripts/validate-visual-encoding.mjs && node scripts/validate-view-state-management.mjs && node scripts/validate-wide-canvas-drag.mjs"
   }
 }
