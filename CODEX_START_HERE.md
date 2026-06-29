@@ -32,6 +32,7 @@ DOC/CODEX_DOC/00-本地工程策略映射.md
 DOC/CODEX_DOC/01_需求分析/00-工程总体分析.md
 DOC/CODEX_DOC/02_设计说明/00-设计事实源索引.md
 DOC/CODEX_DOC/03_规范与流程/00-文档治理与迁移规则.md
+DOC/CODEX_DOC/03_规范与流程/01_数据构建流程/00-数据构建流程总览.md
 DOC/CODEX_DOC/04_研发计划/01-WBS-0-HS-Novel-Editor-研发总纲-研发计划.md
 DOC/CODEX_DOC/04_研发计划/02-WBS-P0.1-文档治理底座-研发计划.md
 DOC/CODEX_DOC/05_节点合同/01-WBS-P0.1-文档治理底座-节点合同.md
@@ -89,9 +90,10 @@ python -m http.server 4174 --bind 127.0.0.1
 4. `DOC/CODEX_DOC/01_需求分析/00-工程总体分析.md`
 5. `DOC/CODEX_DOC/02_设计说明/00-设计事实源索引.md`
 6. `DOC/CODEX_DOC/03_规范与流程/00-文档治理与迁移规则.md`
-7. `DOC/CODEX_DOC/04_研发计划/01-WBS-0-HS-Novel-Editor-研发总纲-研发计划.md`
-8. `CURRENT_HANDOFF.md`
-9. `README.md`
+7. `DOC/CODEX_DOC/03_规范与流程/01_数据构建流程/00-数据构建流程总览.md`
+8. `DOC/CODEX_DOC/04_研发计划/01-WBS-0-HS-Novel-Editor-研发总纲-研发计划.md`
+9. `CURRENT_HANDOFF.md`
+10. `README.md`
 
 如需追溯专题设计，再按 `DOC/CODEX_DOC/02_设计说明/00-设计事实源索引.md` 读取 `设计说明/` 下的历史设计文档。
 
@@ -155,6 +157,12 @@ app/public/data/stories/story-c1-c14-storylines-preview-v0.1.json
 
 `story-c1-c14-storylines-preview-v0.1.json` 用于验证故事线分类、章节归属和对象域降级。
 
+数据从小说素材到界面投影 JSON 的生产流程见：
+
+```text
+DOC/CODEX_DOC/03_规范与流程/01_数据构建流程/00-数据构建流程总览.md
+```
+
 ## 常用校验命令
 
 在 `app` 目录执行：
@@ -185,6 +193,7 @@ https://github.com/wgwtest/HS-Novel-Editor.git
 ## 工作边界
 
 - 新的稳定工程文档默认写入 `DOC/CODEX_DOC/`。
+- 数据构建流程文档归入 `DOC/CODEX_DOC/03_规范与流程/01_数据构建流程/`，用于管理从小说素材到投影 JSON 的采集、生成、校验和登记流程。
 - 既有 `设计说明/` 和 `原型包/` 暂作为历史事实源与资产根保留，不在 P0.1 中移动。
 - 不直接修改外层小说正文和成熟支撑材料。
 - 数据拆分、故事线分类和人物参与信息必须先落到设计说明或数据规则，再写入投影数据集。
