@@ -59,7 +59,15 @@
         "endAt": { "type": "string" },
         "input": { "type": "string" },
         "inside": { "type": "string" },
-        "output": { "type": "string" }
+        "output": { "type": "string" },
+        "sourceStatus": {
+          "type": "string",
+          "description": "Source-state marker such as completed_text, planned_outline, or planned_followup."
+        },
+        "sourceRef": {
+          "type": "string",
+          "description": "Human-readable source reference for outline or manuscript-derived data."
+        }
       }
     },
     "character": {
@@ -113,7 +121,15 @@
         "input": { "type": "string" },
         "output": { "type": "string" },
         "risk": { "type": "string" },
-        "visibility": { "enum": ["explicit", "background"] }
+        "visibility": { "enum": ["explicit", "background"] },
+        "sourceStatus": {
+          "type": "string",
+          "description": "Source-state marker such as completed_text, planned_outline, or planned_followup."
+        },
+        "sourceRef": {
+          "type": "string",
+          "description": "Human-readable source reference for outline or event-thread-derived data."
+        }
       },
       "allOf": [
         {

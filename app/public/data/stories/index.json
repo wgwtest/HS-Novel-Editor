@@ -18,6 +18,12 @@
       "label": "C1-C14 故事线分类预览 v0.1",
       "file": "story-c1-c14-storylines-preview-v0.1.json",
       "description": "由故事线定义转写的基准时间轴投影数据集，用于验证顶层故事线、章节归属和对象域降级。"
+    },
+    {
+      "id": "c1-c35-outline-preview-v0-1",
+      "label": "C1-C35 大纲映射预览 v0.1",
+      "file": "story-c1-c35-outline-preview-v0.1.json",
+      "description": "把第二卷《致命采访》C1-C14 已成文结构和 C15-C35 大纲规划映射为基准时间轴投影数据集。"
     }
   ]
 }

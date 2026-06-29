@@ -1,0 +1,3246 @@
+{
+  "meta": {
+    "name": "致命采访 C1-C35 大纲映射故事线定义",
+    "version": "0.1.0",
+    "status": "outline_projection_for_review",
+    "scope": "第002卷 C1-C14 已成文内容 + C15-C35 大纲规划内容",
+    "createdAt": "2026-06-30",
+    "purpose": "把第二卷大纲、事件脉络和既有 C1-C14 故事线定义推进为 C1-C35 版本化源定义，供基准时间轴投影 JSON 生成使用。",
+    "sourceBasis": [
+      "app/public/data/storyline-definitions/storylines-c1-c14-v0.1.json",
+      "第002卷第001章至第014章正文",
+      "致命采访-分章大纲.txt",
+      "致命采访-事件脉络.md",
+      "用户确认：把第二卷大纲内容继续映射到 JSON，不覆盖当前基准数据"
+    ],
+    "notRuntimeDataset": true,
+    "runtimeMigrationNote": "本文件是 C1-C35 outline preview 的源定义；运行层数据由 build-c1-c35-outline-dataset.mjs 生成。"
+  },
+  "principles": {
+    "storylineDefinition": "故事线是一组围绕稳定行动主体、关系结构和行为处置展开的跨章节事件集合。它必须有核心人物或核心关系场，并能解释这些人为什么反复出现在同一组事件里。",
+    "notStoryline": [
+      "只有被推动、被观察、被救助的群体，不构成顶层故事线。",
+      "只有证据、物件、材料或症状，不构成顶层故事线。",
+      "只有一个问题领域或主题判断，不构成顶层故事线。",
+      "只有幕后状态延续、但没有正文事件推进，不构成顶层故事线。"
+    ],
+    "mainAxisMode": {
+      "selected": "B",
+      "name": "阶段块主轴",
+      "definition": "故事主轴不复刻所有事件，而只记录阶段性结构变化：采访启动、调查成形、大仙祠显形、慈善内场接管、会后执行压力等。",
+      "reason": "主轴用于看全局推进，不应替代具体故事线。具体人物关系和事件处置仍放在各顶层故事线中。"
+    },
+    "eventAssignmentRule": {
+      "primaryStoryline": "每个事件只能有一个主显示故事线，用于决定它在时间轴中的主轨道。",
+      "relatedStorylines": "事件可以被多条故事线引用，用于 Inspector、事件详情页和关系图中说明交叉影响。",
+      "domains": "病患群体、职业病证据、符纸符水、三页材料等作为 domains 或 objects 记录，不直接变成顶层轨道。",
+      "visualRule": "全局时间轴只显示 storylines；domains 可作为筛选标签、背景带、Inspector 标签或事件详情字段。"
+    },
+    "outlineProjectionBoundary": {
+      "definition": "C15-C35 来自大纲和事件脉络，不等同于已成文正文事实；运行 JSON 必须保留 planned_outline 或 planned_followup 来源状态。",
+      "rule": "C1-C14 标记为 completed_text；C15-C28 标记为 planned_outline；C29-C35 标记为 planned_followup。"
+    }
+  },
+  "completedChapters": {
+    "volume": "第002卷",
+    "included": [
+      "C1",
+      "C2",
+      "C3",
+      "C4",
+      "C5",
+      "C6",
+      "C7",
+      "C8",
+      "C9",
+      "C10",
+      "C11",
+      "C12",
+      "C13",
+      "C14",
+      "C15",
+      "C16",
+      "C17",
+      "C18",
+      "C19",
+      "C20",
+      "C21",
+      "C22",
+      "C23",
+      "C24",
+      "C25",
+      "C26",
+      "C27",
+      "C28",
+      "C29",
+      "C30",
+      "C31",
+      "C32",
+      "C33",
+      "C34",
+      "C35"
+    ],
+    "completedText": [
+      "C1",
+      "C2",
+      "C3",
+      "C4",
+      "C5",
+      "C6",
+      "C7",
+      "C8",
+      "C9",
+      "C10",
+      "C11",
+      "C12",
+      "C13",
+      "C14"
+    ],
+    "plannedOutline": [
+      "C15",
+      "C16",
+      "C17",
+      "C18",
+      "C19",
+      "C20",
+      "C21",
+      "C22",
+      "C23",
+      "C24",
+      "C25",
+      "C26",
+      "C27",
+      "C28"
+    ],
+    "plannedFollowup": [
+      "C29",
+      "C30",
+      "C31",
+      "C32",
+      "C33",
+      "C34",
+      "C35"
+    ],
+    "excluded": [],
+    "phaseBlocks": [
+      {
+        "id": "P1",
+        "name": "采访启动与裂口出现",
+        "chapters": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "summary": "电视台定题，皮革厂采访从改革宣传被老妇丢符和病患家庭撕开裂口，叶依人、张航远、林倩的调查关系开始成形。",
+        "sourceStatus": "completed_text",
+        "sourceRef": "第002卷第001-014章正文与既有事件脉络"
+      },
+      {
+        "id": "P2",
+        "name": "内部处置与调查组三角形成",
+        "chapters": [
+          "C4",
+          "C5",
+          "C6",
+          "C7",
+          "C8"
+        ],
+        "summary": "叶依人通过禹树和杨家内部会议看见旧账风险；电视台正式授权跟进，林倩进入调查组，老吴和三页材料把病患、补偿、组织控制和证据网络连起来。",
+        "sourceStatus": "completed_text",
+        "sourceRef": "第002卷第001-014章正文与既有事件脉络"
+      },
+      {
+        "id": "P3",
+        "name": "大仙祠正面显形与采访组分流",
+        "chapters": [
+          "C9",
+          "C10",
+          "C11"
+        ],
+        "summary": "马三魁和大仙祠正面登场，采访组三人没有形成统一判断；张航远被林盼儿打开私线，叶依人被推向慈善晚宴入口。",
+        "sourceStatus": "completed_text",
+        "sourceRef": "第002卷第001-014章正文与既有事件脉络"
+      },
+      {
+        "id": "P4",
+        "name": "慈善内场接管旧区问题",
+        "chapters": [
+          "C12",
+          "C13",
+          "C14"
+        ],
+        "summary": "叶依人把病患救助包装成可执行公共议题，楼上内场把旧社区改造、资金、裁决票和公开表演绑在一起，最终形成暂缓改造但救助先行的阶段结果。",
+        "sourceStatus": "completed_text",
+        "sourceRef": "第002卷第001-014章正文与既有事件脉络"
+      },
+      {
+        "id": "P5",
+        "name": "会后缓冲与假性好转",
+        "chapters": [
+          "C15",
+          "C16"
+        ],
+        "summary": "会议结果进入城市机器和民生口径，救助与筛查进入筹备期；叶依人认识群众复杂性，张航远被边缘化，林盼儿开始双线诱导。",
+        "sourceStatus": "planned_outline",
+        "sourceRef": "致命采访-分章大纲.txt:第十五章-第十六章；致命采访-事件脉络.md:E029-E035"
+      },
+      {
+        "id": "P6",
+        "name": "热闹进场与职业病线反拆",
+        "chapters": [
+          "C17",
+          "C18",
+          "C19"
+        ],
+        "summary": "救助系统大规模进入旧社区，林倩和化学小姑娘拆开职业病共同叙事，马三魁重新收拢群众，张航远实际站错边。",
+        "sourceStatus": "planned_outline",
+        "sourceRef": "致命采访-分章大纲.txt:第十七章-第十九章；致命采访-事件脉络.md:E036-E041"
+      },
+      {
+        "id": "P7",
+        "name": "舆论冲突与证据回拉",
+        "chapters": [
+          "C20",
+          "C21",
+          "C22",
+          "C23"
+        ],
+        "summary": "镜头下流血冲突引发舆论战和证据战，张航远被林盼儿进一步套牢，林倩在化学小姑娘帮助下回到具体证据。",
+        "sourceStatus": "planned_outline",
+        "sourceRef": "致命采访-分章大纲.txt:第二十章-第二十三章；致命采访-事件脉络.md:E042-E045"
+      },
+      {
+        "id": "P8",
+        "name": "敌境背叛与前台崩塌",
+        "chapters": [
+          "C24",
+          "C25",
+          "C26",
+          "C27",
+          "C28"
+        ],
+        "summary": "闭门护法升级为敌境陷阱，张航远背叛现实爆发，叶依人用现实知识自救，马三魁前台崩塌，吕玉亲自下场。",
+        "sourceStatus": "planned_outline",
+        "sourceRef": "致命采访-分章大纲.txt:第二十四章-第二十八章；致命采访-事件脉络.md:E046-E048"
+      },
+      {
+        "id": "P9",
+        "name": "吕玉吸灵网络与小卷收束",
+        "chapters": [
+          "C29",
+          "C30",
+          "C31",
+          "C32",
+          "C33",
+          "C34",
+          "C35"
+        ],
+        "summary": "吕玉以供奉协议压向杨家，禹树把五味符纸和吸灵网络转成可拆解模型，最终击溃吕玉体系并打开城市资源争夺战下一阶段。",
+        "sourceStatus": "planned_followup",
+        "sourceRef": "致命采访-分章大纲.txt:第二十九章-第三十五章"
+      }
+    ]
+  },
+  "storylines": [
+    {
+      "id": "main",
+      "name": "故事主轴",
+      "type": "main_axis",
+      "isTopLevel": true,
+      "visibleAsTrack": true,
+      "definition": "只追踪全局结构推进和阶段性转折，不承载具体人物关系的全部事件。",
+      "coreAgents": [],
+      "coreRelations": [],
+      "chapterSpan": [
+        "C1",
+        "C35"
+      ],
+      "currentStage": "第二卷从采访裂口推进到吕玉吸灵网络被击溃，并打开城市资源争夺战下一阶段。",
+      "baseColor": "#4f625d",
+      "visualRole": "global_stage_band"
+    },
+    {
+      "id": "yiren_pov",
+      "name": "叶依人主视角成长线",
+      "type": "character_storyline",
+      "isTopLevel": true,
+      "visibleAsTrack": true,
+      "definition": "叶依人从被电视台和杨家推到前台，到逐步意识到采访、慈善、家族和公共发声都要付出现实代价的主视角线。",
+      "coreAgents": [
+        "叶依人"
+      ],
+      "coreRelations": [
+        "叶依人-莫妮卡",
+        "叶依人-张航远",
+        "叶依人-林倩",
+        "叶依人-禹树",
+        "叶依人-林盼儿"
+      ],
+      "chapterSpan": [
+        "C1",
+        "C35"
+      ],
+      "startsFrom": "被电视台重新推回记者位置。",
+      "currentStage": "叶依人从同情和发声进入公共危机处置、敌境自救和小卷收束。",
+      "baseColor": "#087268",
+      "childCharacterCandidates": [
+        "莫妮卡",
+        "张航远",
+        "林倩",
+        "禹树",
+        "林盼儿"
+      ]
+    },
+    {
+      "id": "investigation_team",
+      "name": "采访组三人关系线",
+      "type": "relationship_storyline",
+      "isTopLevel": true,
+      "visibleAsTrack": true,
+      "definition": "叶依人、张航远、林倩三人在采访任务、事实整理、职业判断和心理误读中形成并逐步分裂的工作关系线。",
+      "coreAgents": [
+        "叶依人",
+        "张航远",
+        "林倩"
+      ],
+      "coreRelations": [
+        "叶依人-张航远",
+        "叶依人-林倩",
+        "张航远-林倩"
+      ],
+      "chapterSpan": [
+        "C1",
+        "C32"
+      ],
+      "startsFrom": "张航远作为专题助理进入采访任务，林倩后来以资料助理身份入组。",
+      "currentStage": "采访组三人关系从协作走向分裂，林倩最终通过证据工作部分回归。",
+      "baseColor": "#0f766e",
+      "childCharacterCandidates": [
+        "叶依人",
+        "张航远",
+        "林倩"
+      ]
+    },
+    {
+      "id": "tv_media_power",
+      "name": "电视台关系线",
+      "type": "organization_relationship_storyline",
+      "isTopLevel": true,
+      "visibleAsTrack": true,
+      "definition": "电视台内部核心利益相关人员围绕选题、授权、素材、剪辑、压责和传播位置形成的关系线。它不是单纯的媒体口径线，而是熊丽、张航远、叶依人与背后授权者之间的行动关系。",
+      "coreAgents": [
+        "熊丽",
+        "叶依人",
+        "张航远",
+        "周启衡",
+        "电视台相关授权者"
+      ],
+      "coreRelations": [
+        "熊丽-叶依人",
+        "熊丽-张航远",
+        "电视台-杨氏相关方",
+        "周启衡-电视台传播资源"
+      ],
+      "chapterSpan": [
+        "C1",
+        "C35"
+      ],
+      "startsFrom": "电视台确定皮革厂深度专题并配置采访人员。",
+      "currentStage": "电视台从专题启动、口径吸收到舆论剪辑和后续清算。",
+      "baseColor": "#315f83",
+      "childCharacterCandidates": [
+        "熊丽",
+        "叶依人",
+        "张航远",
+        "林倩",
+        "周启衡",
+        "凯里",
+        "电视台相关授权者",
+        "二房传媒线"
+      ]
+    },
+    {
+      "id": "yang_inner_circle",
+      "name": "杨家近身处置线",
+      "type": "family_inner_circle_storyline",
+      "isTopLevel": true,
+      "visibleAsTrack": true,
+      "definition": "莫妮卡、叶依人、林倩、杨心蕊、老林、禹树等近身圈层如何认定皮革厂旧账、旧社区风险和叶依人的位置，并把问题转成可处理方案的内部关系线。",
+      "coreAgents": [
+        "莫妮卡",
+        "叶依人",
+        "林倩",
+        "杨心蕊",
+        "老林",
+        "禹树"
+      ],
+      "coreRelations": [
+        "莫妮卡-叶依人",
+        "禹树-叶依人",
+        "老林-杨心蕊",
+        "禹树-林倩",
+        "莫妮卡-杨家近身圈"
+      ],
+      "chapterSpan": [
+        "C4",
+        "C30"
+      ],
+      "startsFrom": "听溪茶舍和家庭会议把采访题材转化为杨家旧账和现实处置问题。",
+      "currentStage": "杨家近身处置线从稳定内场到接入吕玉节点拆解。",
+      "baseColor": "#6d4c41",
+      "childCharacterCandidates": [
+        "莫妮卡",
+        "叶依人",
+        "林倩",
+        "杨心蕊",
+        "老林",
+        "禹树",
+        "家主派化学小姑娘",
+        "杨家主系"
+      ]
+    },
+    {
+      "id": "yang_clan_power",
+      "name": "杨氏家族权力交锋线",
+      "type": "clan_power_storyline",
+      "isTopLevel": true,
+      "visibleAsTrack": true,
+      "definition": "杨氏家族及其外部资源围绕旧厂旧区问题如何交锋、甩锅、投票、让渡裁决权和重新包装结果的权力线。",
+      "coreAgents": [
+        "家主系代表",
+        "二房传媒线",
+        "周启衡",
+        "沈砚清",
+        "钢铁主席",
+        "莫妮卡",
+        "叶依人"
+      ],
+      "coreRelations": [
+        "家主系-二房线",
+        "周启衡-传媒席",
+        "钢铁主席-内场众人",
+        "莫妮卡-家主系",
+        "叶依人-裁决票"
+      ],
+      "chapterSpan": [
+        "C13",
+        "C35"
+      ],
+      "startsFrom": "慈善晚宴把旧社区问题从采访调查推入上层资源桌面。",
+      "currentStage": "家族权力交锋从楼上内场投票推进到供奉协议和资源战后续入口。",
+      "baseColor": "#7b1f1f",
+      "childCharacterCandidates": [
+        "杨家主系",
+        "莫妮卡",
+        "叶依人",
+        "吕玉",
+        "周启衡",
+        "二房传媒线",
+        "沈砚清",
+        "钢铁主席"
+      ]
+    },
+    {
+      "id": "daxian_control",
+      "name": "大仙祠控制线",
+      "type": "organization_control_storyline",
+      "isTopLevel": true,
+      "visibleAsTrack": true,
+      "definition": "马三魁、林盼儿及大仙祠体系如何接住病患群体、提供最低限度救助，同时把苦难转化为仪式、服从和控制的故事线。",
+      "coreAgents": [
+        "马三魁",
+        "林盼儿",
+        "老吴",
+        "老李一家",
+        "病患家属代表"
+      ],
+      "coreRelations": [
+        "马三魁-病患家属",
+        "林盼儿-张航远",
+        "林盼儿-叶依人",
+        "老吴-采访组"
+      ],
+      "chapterSpan": [
+        "C1",
+        "C28"
+      ],
+      "startsFrom": "老妇丢符和病患家庭异常让符纸和大仙祠进入视野。",
+      "currentStage": "大仙祠前台控制从苦难包装推进到闭门护法、敌境陷阱和前台崩塌。",
+      "baseColor": "#6a4c93",
+      "childCharacterCandidates": [
+        "马三魁",
+        "林盼儿",
+        "老吴",
+        "老吴老婆",
+        "老李一家",
+        "病患家属代表",
+        "老人信众",
+        "张航远",
+        "叶依人"
+      ]
+    },
+    {
+      "id": "zhang_fall",
+      "name": "张航远个人坠落线",
+      "type": "character_storyline",
+      "isTopLevel": true,
+      "visibleAsTrack": true,
+      "definition": "张航远从职业敏感、正义叙事和被需要感出发，逐渐滑向私欲、越界、误读授权和被林盼儿捕获的个人线。",
+      "coreAgents": [
+        "张航远"
+      ],
+      "coreRelations": [
+        "张航远-叶依人",
+        "张航远-林倩",
+        "张航远-林盼儿",
+        "张航远-熊丽"
+      ],
+      "chapterSpan": [
+        "C2",
+        "C35"
+      ],
+      "startsFrom": "被配置为采访助理后，既有职业能力，也带着自证和欲望风险。",
+      "currentStage": "张航远从边缘化、被捕获、实际背叛到正义包装彻底破裂。",
+      "baseColor": "#b4233c",
+      "childCharacterCandidates": [
+        "张航远",
+        "林盼儿",
+        "叶依人",
+        "林倩",
+        "凯里"
+      ]
+    },
+    {
+      "id": "city_charity_redevelopment",
+      "name": "城市资源与慈善旧改线",
+      "type": "city_resource_storyline",
+      "isTopLevel": true,
+      "visibleAsTrack": true,
+      "definition": "副局长、钢铁主席、地产、能源、金融、基金会、议员等城市资源方如何把旧社区、病患救助、慈善基金和改造项目放上桌面重新分配的故事线。",
+      "coreAgents": [
+        "钢铁主席",
+        "副局长",
+        "基金会代表",
+        "地产代表",
+        "金融代表",
+        "能源代表",
+        "议员代表",
+        "叶依人"
+      ],
+      "coreRelations": [
+        "钢铁主席-内场众人",
+        "副局长-慈善资源",
+        "基金会-专项基金",
+        "旧社区-改造项目"
+      ],
+      "chapterSpan": [
+        "C12",
+        "C35"
+      ],
+      "startsFrom": "叶依人在慈善晚宴发言，把病患救助转译为系统性救助路径。",
+      "currentStage": "城市资源与慈善旧改从救助承诺落地到公共危机、供奉协议和下一阶段资源战。",
+      "baseColor": "#a66a10",
+      "childCharacterCandidates": [
+        "钢铁主席",
+        "副局长",
+        "基金会代表",
+        "地产代表",
+        "金融代表",
+        "能源代表",
+        "议员代表",
+        "叶依人",
+        "志愿者队伍",
+        "医疗社工",
+        "老工人群体"
+      ]
+    },
+    {
+      "id": "chemistry_evidence_collaboration",
+      "name": "林倩与化学证据协作线",
+      "type": "evidence_collaboration_storyline",
+      "isTopLevel": true,
+      "visibleAsTrack": true,
+      "definition": "林倩、家主派化学小姑娘和禹树如何把职业病疑云、符纸、符水、香灰、药瓶和五味体系转成可检测、可复核的材料链。",
+      "coreAgents": [
+        "林倩",
+        "家主派化学小姑娘",
+        "禹树"
+      ],
+      "coreRelations": [
+        "林倩-化学小姑娘",
+        "林倩-禹树",
+        "样品链-数据表"
+      ],
+      "chapterSpan": [
+        "C17",
+        "C34"
+      ],
+      "startsFrom": "志愿者进场后，化学小姑娘建立取样规范并与林倩形成工作默契。",
+      "currentStage": "证据协作线把职业病疑云、五味符纸和吕玉节点拆解合并到同一条破局链。",
+      "baseColor": "#2f7c85",
+      "childCharacterCandidates": [
+        "林倩",
+        "家主派化学小姑娘",
+        "禹树",
+        "叶依人",
+        "志愿者队伍",
+        "病患家属代表",
+        "吕玉"
+      ]
+    },
+    {
+      "id": "lvyu_hidden_network",
+      "name": "吕玉吸灵网络线",
+      "type": "hidden_cultivator_network_storyline",
+      "isTopLevel": true,
+      "visibleAsTrack": true,
+      "definition": "吕玉如何从大仙祠前台失败后进入前台，并被禹树用现实证据、数据分类和低耗法术拆解其吸灵网络。",
+      "coreAgents": [
+        "吕玉",
+        "禹树",
+        "叶依人",
+        "林盼儿"
+      ],
+      "coreRelations": [
+        "吕玉-大仙祠前台",
+        "吕玉-杨家供奉协议",
+        "禹树-吕玉节点拆解"
+      ],
+      "chapterSpan": [
+        "C25",
+        "C35"
+      ],
+      "startsFrom": "叶依人深入敌境时的现实反制与禹树背后拆解吕玉节点重合。",
+      "currentStage": "吕玉吸灵网络被正面击溃，小卷进入清算和下一阶段入口。",
+      "baseColor": "#1f5a53",
+      "childCharacterCandidates": [
+        "吕玉",
+        "禹树",
+        "叶依人",
+        "林盼儿",
+        "老吴老婆",
+        "杨家主系",
+        "马三魁",
+        "林倩",
+        "家主派化学小姑娘"
+      ]
+    }
+  ],
+  "domains": [
+    {
+      "id": "old_factory_patients",
+      "name": "旧厂病患家庭群体",
+      "type": "affected_group",
+      "isTopLevelStoryline": false,
+      "reasonNotStoryline": "这组人目前没有稳定主动决策主体，也没有一个可持续追踪的核心人物关系场。多数时候他们被采访组、大仙祠、电视台、慈善资源方和杨家力量推动或解释。",
+      "useAs": [
+        "event.domain",
+        "inspector.tag",
+        "background_band",
+        "detail_page_context"
+      ],
+      "relatedStorylines": [
+        "yiren_pov",
+        "investigation_team",
+        "daxian_control",
+        "city_charity_redevelopment"
+      ]
+    },
+    {
+      "id": "occupational_disease_evidence",
+      "name": "职业病证据",
+      "type": "evidence_domain",
+      "isTopLevelStoryline": false,
+      "reasonNotStoryline": "证据不是行动主体。林倩、禹树、化学小姑娘等人围绕证据的采集、整理和判断可以形成事件，但证据本身只作为对象域存在。",
+      "useAs": [
+        "event.objects",
+        "event.domain",
+        "evidence_panel",
+        "filter_tag"
+      ],
+      "relatedStorylines": [
+        "investigation_team",
+        "yang_inner_circle",
+        "city_charity_redevelopment"
+      ]
+    },
+    {
+      "id": "talisman_system",
+      "name": "符纸 / 符水 / 五味体系",
+      "type": "control_tool_domain",
+      "isTopLevelStoryline": false,
+      "reasonNotStoryline": "符纸、符水和五味体系是大仙祠控制线里的物件与机制，不应单独成为顶层故事线。",
+      "useAs": [
+        "event.objects",
+        "daxian_control.mechanism",
+        "evidence_panel"
+      ],
+      "relatedStorylines": [
+        "daxian_control",
+        "investigation_team"
+      ]
+    },
+    {
+      "id": "three_page_materials",
+      "name": "三页材料",
+      "type": "document_evidence",
+      "isTopLevelStoryline": false,
+      "reasonNotStoryline": "三页材料是采访组和杨家近身处置线之间的资料节点，不是故事线。",
+      "useAs": [
+        "event.objects",
+        "chapter_input",
+        "inspector.link"
+      ],
+      "relatedStorylines": [
+        "investigation_team",
+        "yang_inner_circle"
+      ]
+    },
+    {
+      "id": "adjudication_vote",
+      "name": "裁决票",
+      "type": "decision_mechanism",
+      "isTopLevelStoryline": false,
+      "reasonNotStoryline": "裁决票是内场权力转移机制，不是行动主体。它归属于杨氏家族权力交锋线和城市资源与慈善旧改线。",
+      "useAs": [
+        "event.objects",
+        "power_mechanism",
+        "chapter_output"
+      ],
+      "relatedStorylines": [
+        "yang_clan_power",
+        "city_charity_redevelopment",
+        "yiren_pov"
+      ]
+    },
+    {
+      "id": "special_fund",
+      "name": "旧社区失能家庭专项基金",
+      "type": "fund_mechanism",
+      "isTopLevelStoryline": false,
+      "reasonNotStoryline": "专项基金是资源配置工具，本身不构成故事线。围绕基金的承诺、甩锅、落地和失真应归到城市资源与慈善旧改线。",
+      "useAs": [
+        "event.objects",
+        "resource_mechanism",
+        "inspector.tag"
+      ],
+      "relatedStorylines": [
+        "city_charity_redevelopment",
+        "yiren_pov"
+      ]
+    },
+    {
+      "id": "volunteer_relief_system",
+      "name": "志愿者 / 互助协会 / 医疗筛查",
+      "type": "relief_execution_domain",
+      "isTopLevelStoryline": false,
+      "reasonNotStoryline": "救助系统是资源执行机制，不是稳定行动主体；其效果应归入城市资源与慈善旧改线、叶依人主视角成长线和证据协作线。",
+      "useAs": [
+        "event.domain",
+        "resource_mechanism",
+        "inspector.tag"
+      ],
+      "relatedStorylines": [
+        "city_charity_redevelopment",
+        "yiren_pov",
+        "chemistry_evidence_collaboration"
+      ]
+    },
+    {
+      "id": "public_opinion_versions",
+      "name": "舆论剪辑版本",
+      "type": "media_output_domain",
+      "isTopLevelStoryline": false,
+      "reasonNotStoryline": "视频版本是电视台和二房传媒线的产物，本身不构成独立故事线。",
+      "useAs": [
+        "event.objects",
+        "inspector.tag"
+      ],
+      "relatedStorylines": [
+        "tv_media_power",
+        "yang_clan_power"
+      ]
+    },
+    {
+      "id": "chemical_sample_chain",
+      "name": "化学样品链",
+      "type": "evidence_domain",
+      "isTopLevelStoryline": false,
+      "reasonNotStoryline": "样品链是林倩与化学小姑娘协作线中的材料对象，不是行动主体。",
+      "useAs": [
+        "event.objects",
+        "evidence_panel",
+        "filter_tag"
+      ],
+      "relatedStorylines": [
+        "chemistry_evidence_collaboration",
+        "lvyu_hidden_network"
+      ]
+    },
+    {
+      "id": "enemy_space",
+      "name": "大仙祠后殿 / 旧厂暗处 / 供奉空间",
+      "type": "danger_space_domain",
+      "isTopLevelStoryline": false,
+      "reasonNotStoryline": "敌境空间承载张航远背叛、叶依人自救和吕玉节点显形，但不是主动关系线。",
+      "useAs": [
+        "event.location",
+        "danger_context",
+        "inspector.tag"
+      ],
+      "relatedStorylines": [
+        "daxian_control",
+        "zhang_fall",
+        "lvyu_hidden_network"
+      ]
+    },
+    {
+      "id": "lvyu_absorption_network",
+      "name": "吕玉吸灵网络",
+      "type": "hidden_mechanism_domain",
+      "isTopLevelStoryline": false,
+      "reasonNotStoryline": "吸灵网络是吕玉线的控制机制和最终战场对象，不单独脱离人物关系成为故事线。",
+      "useAs": [
+        "event.objects",
+        "mechanism_panel",
+        "filter_tag"
+      ],
+      "relatedStorylines": [
+        "lvyu_hidden_network",
+        "chemistry_evidence_collaboration"
+      ]
+    },
+    {
+      "id": "yang_supply_contract",
+      "name": "杨家旧供奉协议",
+      "type": "power_contract_domain",
+      "isTopLevelStoryline": false,
+      "reasonNotStoryline": "供奉协议是吕玉压向杨家和城市资源战衔接的契约对象，归属杨氏家族权力交锋线与吕玉线。",
+      "useAs": [
+        "event.objects",
+        "power_mechanism",
+        "chapter_output"
+      ],
+      "relatedStorylines": [
+        "yang_clan_power",
+        "lvyu_hidden_network"
+      ]
+    },
+    {
+      "id": "city_resource_war",
+      "name": "城市资源争夺战入口",
+      "type": "next_arc_domain",
+      "isTopLevelStoryline": false,
+      "reasonNotStoryline": "这是下一阶段入口，不应提前作为当前小卷的完整故事线。",
+      "useAs": [
+        "chapter_output",
+        "next_arc_marker"
+      ],
+      "relatedStorylines": [
+        "city_charity_redevelopment",
+        "yang_clan_power"
+      ]
+    }
+  ],
+  "chapterStorylineMatrix": [
+    {
+      "chapter": "C1",
+      "title": "厂门口丢失的符",
+      "primaryStorylines": [
+        "tv_media_power",
+        "investigation_team",
+        "daxian_control",
+        "yiren_pov"
+      ],
+      "domains": [
+        "old_factory_patients",
+        "talisman_system"
+      ],
+      "summary": "电视台定题并配置张航远，皮革厂正面采访被老妇丢符和求助撕开裂口。",
+      "sourceStatus": "completed_text",
+      "sourceRef": "第002卷第001-014章正文；致命采访-事件脉络.md:E001-E028"
+    },
+    {
+      "chapter": "C2",
+      "title": "逼仄小屋里的男人",
+      "primaryStorylines": [
+        "investigation_team",
+        "tv_media_power",
+        "zhang_fall",
+        "yiren_pov"
+      ],
+      "domains": [
+        "old_factory_patients"
+      ],
+      "summary": "采访组确认病患家庭真实困境，熊丽吸收素材并压责，张航远受挫后出现代偿式滑坡。",
+      "sourceStatus": "completed_text",
+      "sourceRef": "第002卷第001-014章正文；致命采访-事件脉络.md:E001-E028"
+    },
+    {
+      "chapter": "C3",
+      "title": "第二天的暗访",
+      "primaryStorylines": [
+        "investigation_team",
+        "zhang_fall",
+        "yiren_pov"
+      ],
+      "domains": [
+        "old_factory_patients"
+      ],
+      "summary": "叶依人和张航远私下回访，老妇暴起，张航远救人受伤并用职业病判断刺中叶依人。",
+      "sourceStatus": "completed_text",
+      "sourceRef": "第002卷第001-014章正文；致命采访-事件脉络.md:E001-E028"
+    },
+    {
+      "chapter": "C4",
+      "title": "听溪茶舍的冷面",
+      "primaryStorylines": [
+        "yang_inner_circle",
+        "yiren_pov",
+        "investigation_team"
+      ],
+      "domains": [
+        "occupational_disease_evidence",
+        "old_factory_patients"
+      ],
+      "summary": "禹树冷拆事实链，杨家近身圈把采访问题转成旧账、数据化核查和现实处置问题。",
+      "sourceStatus": "completed_text",
+      "sourceRef": "第002卷第001-014章正文；致命采访-事件脉络.md:E001-E028"
+    },
+    {
+      "chapter": "C5",
+      "title": "电视台的正式任务",
+      "primaryStorylines": [
+        "tv_media_power",
+        "investigation_team",
+        "yang_inner_circle",
+        "zhang_fall"
+      ],
+      "domains": [
+        "occupational_disease_evidence"
+      ],
+      "summary": "电视台正式安排一周跟进，莫妮卡让林倩入组，三人调查组形成，张航远把任务误读成正义授权。",
+      "sourceStatus": "completed_text",
+      "sourceRef": "第002卷第001-014章正文；致命采访-事件脉络.md:E001-E028"
+    },
+    {
+      "chapter": "C6",
+      "title": "明线采访，暗线调查",
+      "primaryStorylines": [
+        "investigation_team",
+        "yiren_pov",
+        "zhang_fall"
+      ],
+      "domains": [
+        "old_factory_patients",
+        "occupational_disease_evidence"
+      ],
+      "summary": "三人走访十一户家庭，林倩建立数据记录，张航远的直觉判断、物化和攀附心态同时暴露。",
+      "sourceStatus": "completed_text",
+      "sourceRef": "第002卷第001-014章正文；致命采访-事件脉络.md:E001-E028"
+    },
+    {
+      "chapter": "C7",
+      "title": "老吴的线索",
+      "primaryStorylines": [
+        "investigation_team",
+        "daxian_control",
+        "zhang_fall"
+      ],
+      "domains": [
+        "old_factory_patients",
+        "talisman_system"
+      ],
+      "summary": "老吴把马先生、盼姐、符纸和失踪老人连起来，采访组第一次获得大仙祠组织节点。",
+      "sourceStatus": "completed_text",
+      "sourceRef": "第002卷第001-014章正文；致命采访-事件脉络.md:E001-E028"
+    },
+    {
+      "chapter": "C8",
+      "title": "三页材料",
+      "primaryStorylines": [
+        "investigation_team",
+        "tv_media_power",
+        "yang_inner_circle"
+      ],
+      "domains": [
+        "three_page_materials",
+        "occupational_disease_evidence",
+        "old_factory_patients"
+      ],
+      "summary": "采访组向熊丽汇报，电视台限制口径；莫妮卡上山找禹树，杨家近身圈建立风险清单和事件网络分析。",
+      "sourceStatus": "completed_text",
+      "sourceRef": "第002卷第001-014章正文；致命采访-事件脉络.md:E001-E028"
+    },
+    {
+      "chapter": "C9",
+      "title": "马三魁登场",
+      "primaryStorylines": [
+        "daxian_control",
+        "investigation_team",
+        "yiren_pov"
+      ],
+      "domains": [
+        "old_factory_patients",
+        "talisman_system"
+      ],
+      "summary": "三人深入大仙祠法会，马三魁把真实苦难、维权失败和大仙庇护包装成仪式控制。",
+      "sourceStatus": "completed_text",
+      "sourceRef": "第002卷第001-014章正文；致命采访-事件脉络.md:E001-E028"
+    },
+    {
+      "chapter": "C10",
+      "title": "大仙祠后夜",
+      "primaryStorylines": [
+        "investigation_team",
+        "daxian_control",
+        "zhang_fall",
+        "yang_inner_circle",
+        "yiren_pov"
+      ],
+      "domains": [
+        "talisman_system"
+      ],
+      "summary": "法会后三人分流，林盼儿进入张航远私人空间，叶依人与莫妮卡复盘马三魁并非全假，而是拿真实苦难做控制。",
+      "sourceStatus": "completed_text",
+      "sourceRef": "第002卷第001-014章正文；致命采访-事件脉络.md:E001-E028"
+    },
+    {
+      "chapter": "C11",
+      "title": "那种地方，她们进不去",
+      "primaryStorylines": [
+        "yiren_pov",
+        "daxian_control",
+        "yang_inner_circle",
+        "city_charity_redevelopment"
+      ],
+      "domains": [
+        "old_factory_patients"
+      ],
+      "summary": "叶依人通过林盼儿理解老李一家和慈善晚宴门槛，决定准时进入上层场域。",
+      "sourceStatus": "completed_text",
+      "sourceRef": "第002卷第001-014章正文；致命采访-事件脉络.md:E001-E028"
+    },
+    {
+      "chapter": "C12",
+      "title": "慈善晚宴的路径",
+      "primaryStorylines": [
+        "city_charity_redevelopment",
+        "yiren_pov",
+        "yang_inner_circle"
+      ],
+      "domains": [
+        "old_factory_patients",
+        "special_fund"
+      ],
+      "summary": "叶依人把病患救助转译成病历、档案、补助、转介和照护路径，钢铁主席提出旧社区失能家庭专项援助入口。",
+      "sourceStatus": "completed_text",
+      "sourceRef": "第002卷第001-014章正文；致命采访-事件脉络.md:E001-E028"
+    },
+    {
+      "chapter": "C13",
+      "title": "楼上内场与五比五",
+      "primaryStorylines": [
+        "yang_clan_power",
+        "city_charity_redevelopment",
+        "yiren_pov"
+      ],
+      "domains": [
+        "adjudication_vote",
+        "special_fund",
+        "old_factory_patients"
+      ],
+      "summary": "楼上内场把旧社区改造、资金、舆论口径和裁决票绑在一起，五比五后钢铁主席把风险推给叶依人。",
+      "sourceStatus": "completed_text",
+      "sourceRef": "第002卷第001-014章正文；致命采访-事件脉络.md:E001-E028"
+    },
+    {
+      "chapter": "C14",
+      "title": "会后吸收 / 一次认栽",
+      "primaryStorylines": [
+        "yiren_pov",
+        "yang_clan_power",
+        "city_charity_redevelopment",
+        "yang_inner_circle"
+      ],
+      "domains": [
+        "adjudication_vote",
+        "special_fund",
+        "old_factory_patients"
+      ],
+      "summary": "叶依人接招，先逼各方承认筛查、基金、救助、转介、暂缓清退和媒体口径条件，再按下暂缓票，莫妮卡截断后续羞辱。",
+      "sourceStatus": "completed_text",
+      "sourceRef": "第002卷第001-014章正文；致命采访-事件脉络.md:E001-E028"
+    },
+    {
+      "chapter": "C15",
+      "title": "会议定调之后",
+      "startAt": "2025-07-14T07:00",
+      "endAt": "2025-07-14T18:00",
+      "primaryStorylines": [
+        "yang_clan_power",
+        "tv_media_power",
+        "city_charity_redevelopment",
+        "yiren_pov",
+        "yang_inner_circle",
+        "zhang_fall"
+      ],
+      "domains": [
+        "adjudication_vote",
+        "special_fund",
+        "volunteer_relief_system"
+      ],
+      "summary": "楼上内场结论被转化为高层定调，电视台改做民生专区，救助筛查进入筹备期，叶依人被吸收入监督配置，张航远第一次清楚感到自己远离事件中心。",
+      "sourceStatus": "planned_outline",
+      "sourceRef": "致命采访-分章大纲.txt:第十五章；致命采访-事件脉络.md:E029-E035"
+    },
+    {
+      "chapter": "C16",
+      "title": "缓冲期的假性好转",
+      "startAt": "2025-07-14T18:00",
+      "endAt": "2025-07-17T18:00",
+      "primaryStorylines": [
+        "investigation_team",
+        "yiren_pov",
+        "daxian_control",
+        "zhang_fall"
+      ],
+      "domains": [
+        "old_factory_patients",
+        "volunteer_relief_system",
+        "talisman_system"
+      ],
+      "summary": "三天缓冲期里后台筹备、前台继续走访，叶依人看见群众复杂性，林盼儿开始双线诱导，张航远误以为自己仍掌握调查节奏。",
+      "sourceStatus": "planned_outline",
+      "sourceRef": "致命采访-分章大纲.txt:第十六章；致命采访-事件脉络.md:E031-E035"
+    },
+    {
+      "chapter": "C17",
+      "title": "热闹进场",
+      "startAt": "2025-07-18T08:00",
+      "endAt": "2025-07-18T20:00",
+      "primaryStorylines": [
+        "city_charity_redevelopment",
+        "chemistry_evidence_collaboration",
+        "yang_inner_circle",
+        "yiren_pov"
+      ],
+      "domains": [
+        "volunteer_relief_system",
+        "chemical_sample_chain",
+        "old_factory_patients"
+      ],
+      "summary": "志愿者、基金、医疗筛查和电视台大规模进入旧社区，善意秩序机器照进现场，禹树低调入镜，化学小姑娘与林倩建立取样协作。",
+      "sourceStatus": "planned_outline",
+      "sourceRef": "致命采访-分章大纲.txt:第十七章；致命采访-事件脉络.md:E036-E038"
+    },
+    {
+      "chapter": "C18",
+      "title": "职业病线收束",
+      "startAt": "2025-07-19T08:00",
+      "endAt": "2025-07-19T22:00",
+      "primaryStorylines": [
+        "chemistry_evidence_collaboration",
+        "investigation_team",
+        "daxian_control"
+      ],
+      "domains": [
+        "occupational_disease_evidence",
+        "chemical_sample_chain",
+        "talisman_system"
+      ],
+      "summary": "林倩和化学小姑娘把病患按车间、工种、症状、样品和符水残留拆开登记，撬动群众第一次具体质疑马三魁的共同苦难叙事。",
+      "sourceStatus": "planned_outline",
+      "sourceRef": "致命采访-分章大纲.txt:第十八章；致命采访-事件脉络.md:E039"
+    },
+    {
+      "chapter": "C19",
+      "title": "重新收拢",
+      "startAt": "2025-07-20T08:00",
+      "endAt": "2025-07-20T23:00",
+      "primaryStorylines": [
+        "daxian_control",
+        "zhang_fall",
+        "yiren_pov"
+      ],
+      "domains": [
+        "talisman_system",
+        "old_factory_patients"
+      ],
+      "summary": "马三魁以闭门护法和集体忏悔重新收拢群众，五味符纸体系正式露出，张航远把事实拆解误读成冷酷管理并开始实际站错边。",
+      "sourceStatus": "planned_outline",
+      "sourceRef": "致命采访-分章大纲.txt:第十九章；致命采访-事件脉络.md:E040-E041"
+    },
+    {
+      "chapter": "C20",
+      "title": "镜头下的流血冲突",
+      "startAt": "2025-07-21T08:00",
+      "endAt": "2025-07-21T22:00",
+      "primaryStorylines": [
+        "daxian_control",
+        "city_charity_redevelopment",
+        "tv_media_power",
+        "zhang_fall",
+        "yiren_pov"
+      ],
+      "domains": [
+        "volunteer_relief_system",
+        "public_opinion_versions",
+        "old_factory_patients"
+      ],
+      "summary": "志愿者清理和马三魁闭门护法正面相撞，冲突在镜头下流血，张航远起到坏作用，叶依人用公共危机处置能力压住现场。",
+      "sourceStatus": "planned_outline",
+      "sourceRef": "致命采访-分章大纲.txt:第二十章；致命采访-事件脉络.md:E042-E043"
+    },
+    {
+      "chapter": "C21",
+      "title": "舆论起火与查账查人",
+      "startAt": "2025-07-22T08:00",
+      "endAt": "2025-07-23T18:00",
+      "primaryStorylines": [
+        "tv_media_power",
+        "yang_inner_circle",
+        "chemistry_evidence_collaboration",
+        "daxian_control"
+      ],
+      "domains": [
+        "public_opinion_versions",
+        "chemical_sample_chain",
+        "occupational_disease_evidence"
+      ],
+      "summary": "流血冲突被剪成多种舆论版本，大房调查系统与林倩、化学小姑娘查补贴、香火钱、符水和药瓶残留，马三魁放出半真半假的旧厂材料。",
+      "sourceStatus": "planned_outline",
+      "sourceRef": "致命采访-分章大纲.txt:第二十一章；致命采访-事件脉络.md:E044"
+    },
+    {
+      "chapter": "C22",
+      "title": "张航远与林盼儿",
+      "startAt": "2025-07-23T20:00",
+      "endAt": "2025-07-24T03:00",
+      "primaryStorylines": [
+        "zhang_fall",
+        "daxian_control",
+        "yiren_pov"
+      ],
+      "domains": [
+        "talisman_system"
+      ],
+      "summary": "张航远把林盼儿误判为关键受害者，并在私人空间、越界亲密和正义幻觉中被进一步套牢，开始在镜头和解释上偏向大仙祠一侧。",
+      "sourceStatus": "planned_outline",
+      "sourceRef": "致命采访-分章大纲.txt:第二十二章；致命采访-事件脉络.md:E041"
+    },
+    {
+      "chapter": "C23",
+      "title": "姐妹线与再拉回",
+      "startAt": "2025-07-24T08:00",
+      "endAt": "2025-07-25T18:00",
+      "primaryStorylines": [
+        "chemistry_evidence_collaboration",
+        "investigation_team",
+        "zhang_fall",
+        "yiren_pov"
+      ],
+      "domains": [
+        "chemical_sample_chain",
+        "old_factory_patients"
+      ],
+      "summary": "林倩被假证据、张航远姿态和群众苦难拉扯，化学小姑娘用样品和标签规范把她拉回具体证据，两人建立姐妹式工作关系。",
+      "sourceStatus": "planned_outline",
+      "sourceRef": "致命采访-分章大纲.txt:第二十三章；致命采访-事件脉络.md:E045"
+    },
+    {
+      "chapter": "C24",
+      "title": "闭门护法",
+      "startAt": "2025-07-26T08:00",
+      "endAt": "2025-07-26T20:00",
+      "primaryStorylines": [
+        "daxian_control",
+        "zhang_fall",
+        "investigation_team"
+      ],
+      "domains": [
+        "enemy_space",
+        "talisman_system"
+      ],
+      "summary": "马三魁夫妇以闭门护法升级控制，叶依人、林倩和张航远得到核心证据线索，张航远把陷阱包装成风险控制并推动少带人深入。",
+      "sourceStatus": "planned_outline",
+      "sourceRef": "致命采访-分章大纲.txt:第二十四章；致命采访-事件脉络.md:E046"
+    },
+    {
+      "chapter": "C25",
+      "title": "深入敌境",
+      "startAt": "2025-07-27T08:00",
+      "endAt": "2025-07-27T23:00",
+      "primaryStorylines": [
+        "daxian_control",
+        "zhang_fall",
+        "yiren_pov",
+        "lvyu_hidden_network"
+      ],
+      "domains": [
+        "enemy_space",
+        "talisman_system",
+        "lvyu_absorption_network"
+      ],
+      "summary": "三人进入大仙祠后殿或旧厂暗处后被分开，张航远暴露背叛，叶依人进入羞辱、控制和载体标记风险，幕后节点开始显形。",
+      "sourceStatus": "planned_outline",
+      "sourceRef": "致命采访-分章大纲.txt:第二十五章；致命采访-事件脉络.md:E046-E047"
+    },
+    {
+      "chapter": "C26",
+      "title": "前台崩塌",
+      "startAt": "2025-07-28T08:00",
+      "endAt": "2025-07-28T22:00",
+      "primaryStorylines": [
+        "yiren_pov",
+        "chemistry_evidence_collaboration",
+        "daxian_control",
+        "lvyu_hidden_network"
+      ],
+      "domains": [
+        "enemy_space",
+        "chemical_sample_chain",
+        "lvyu_absorption_network"
+      ],
+      "summary": "叶依人用禹树小知识反制现实险境，林倩和化学小姑娘拼出前台伪造，马三魁香头体系崩塌，吕玉必须亲自收尾。",
+      "sourceStatus": "planned_outline",
+      "sourceRef": "致命采访-分章大纲.txt:第二十六章；致命采访-事件脉络.md:E047-E048"
+    },
+    {
+      "chapter": "C27",
+      "title": "林盼儿反咬",
+      "startAt": "2025-07-29T08:00",
+      "endAt": "2025-07-29T20:00",
+      "primaryStorylines": [
+        "zhang_fall",
+        "daxian_control",
+        "lvyu_hidden_network",
+        "investigation_team"
+      ],
+      "domains": [
+        "talisman_system",
+        "lvyu_absorption_network"
+      ],
+      "summary": "林盼儿放出张航远把柄，将私人越界和敌境背叛串在一起，并带着叶依人载体信息、符水、香火和信众名单逃向吕玉。",
+      "sourceStatus": "planned_outline",
+      "sourceRef": "致命采访-分章大纲.txt:第二十七章；致命采访-事件脉络.md:E048"
+    },
+    {
+      "chapter": "C28",
+      "title": "吕玉下场",
+      "startAt": "2025-07-30T08:00",
+      "endAt": "2025-07-30T22:00",
+      "primaryStorylines": [
+        "lvyu_hidden_network",
+        "yiren_pov",
+        "chemistry_evidence_collaboration",
+        "yang_inner_circle"
+      ],
+      "domains": [
+        "lvyu_absorption_network",
+        "chemical_sample_chain",
+        "talisman_system"
+      ],
+      "summary": "吕玉发现前台体系被拆穿后亲自收尾，信众香火、符纸残留、符水样品和吸灵网络压向杨家，叶依人的现实脱困与禹树幕后拆解重合。",
+      "sourceStatus": "planned_outline",
+      "sourceRef": "致命采访-分章大纲.txt:第二十八章；致命采访-事件脉络.md:E048"
+    },
+    {
+      "chapter": "C29",
+      "title": "杨氏集团对峙",
+      "startAt": "2025-07-31T08:00",
+      "endAt": "2025-07-31T22:00",
+      "primaryStorylines": [
+        "lvyu_hidden_network",
+        "yang_clan_power",
+        "yang_inner_circle",
+        "city_charity_redevelopment"
+      ],
+      "domains": [
+        "yang_supply_contract",
+        "city_resource_war"
+      ],
+      "summary": "吕玉以旧供奉协议和保厂承诺压杨家，杨家主旧协议暴露，莫妮卡负责家族对接，叶依人被推到前台，城市资源争夺战正式连接。",
+      "sourceStatus": "planned_followup",
+      "sourceRef": "致命采访-分章大纲.txt:第二十九章"
+    },
+    {
+      "chapter": "C30",
+      "title": "吕玉第一次败退",
+      "startAt": "2025-08-01T08:00",
+      "endAt": "2025-08-01T22:00",
+      "primaryStorylines": [
+        "lvyu_hidden_network",
+        "chemistry_evidence_collaboration",
+        "yang_inner_circle"
+      ],
+      "domains": [
+        "lvyu_absorption_network",
+        "chemical_sample_chain"
+      ],
+      "summary": "禹树利用传感器、数据表、化学样品、五味符纸分类和低耗法术切断部分节点，吕玉第一次败退但退回不败之地。",
+      "sourceStatus": "planned_followup",
+      "sourceRef": "致命采访-分章大纲.txt:第三十章"
+    },
+    {
+      "chapter": "C31",
+      "title": "不败之地",
+      "startAt": "2025-08-02T08:00",
+      "endAt": "2025-08-02T22:00",
+      "primaryStorylines": [
+        "lvyu_hidden_network",
+        "daxian_control",
+        "chemistry_evidence_collaboration"
+      ],
+      "domains": [
+        "lvyu_absorption_network",
+        "enemy_space",
+        "chemical_sample_chain"
+      ],
+      "summary": "大仙祠深处成为吕玉经营多年的吸灵场，病人、符纸、香火、旧厂化学污染、符水添加物和供奉阵法纠缠在一起。",
+      "sourceStatus": "planned_followup",
+      "sourceRef": "致命采访-分章大纲.txt:第三十一章"
+    },
+    {
+      "chapter": "C32",
+      "title": "林倩崩裂与回归",
+      "startAt": "2025-08-03T08:00",
+      "endAt": "2025-08-03T22:00",
+      "primaryStorylines": [
+        "chemistry_evidence_collaboration",
+        "investigation_team",
+        "zhang_fall",
+        "yiren_pov"
+      ],
+      "domains": [
+        "chemical_sample_chain",
+        "talisman_system"
+      ],
+      "summary": "林倩把张航远、林盼儿、五味符纸、化学样品和禹树判断串上，意识到自己曾被漂亮闭环误导，并在化学小姑娘帮助下落回证据。",
+      "sourceStatus": "planned_followup",
+      "sourceRef": "致命采访-分章大纲.txt:第三十二章；致命采访-事件脉络.md:E045"
+    },
+    {
+      "chapter": "C33",
+      "title": "禹树破局",
+      "startAt": "2025-08-04T08:00",
+      "endAt": "2025-08-04T22:00",
+      "primaryStorylines": [
+        "lvyu_hidden_network",
+        "chemistry_evidence_collaboration"
+      ],
+      "domains": [
+        "lvyu_absorption_network",
+        "chemical_sample_chain",
+        "talisman_system"
+      ],
+      "summary": "禹树把五味符纸视为信号分类，把信众反应视为反馈网络，把符水和香灰残留视为现实刺激，找到吕玉吸灵网络节律。",
+      "sourceStatus": "planned_followup",
+      "sourceRef": "致命采访-分章大纲.txt:第三十三章"
+    },
+    {
+      "chapter": "C34",
+      "title": "正面击溃",
+      "startAt": "2025-08-05T08:00",
+      "endAt": "2025-08-05T22:00",
+      "primaryStorylines": [
+        "lvyu_hidden_network",
+        "chemistry_evidence_collaboration",
+        "yiren_pov"
+      ],
+      "domains": [
+        "lvyu_absorption_network",
+        "chemical_sample_chain"
+      ],
+      "summary": "吕玉吸纳信众精气神攻击，禹树反向利用传感网络、符纸数据、化学样品和低耗法术破坏节点同步，让吸灵网络反噬。",
+      "sourceStatus": "planned_followup",
+      "sourceRef": "致命采访-分章大纲.txt:第三十四章"
+    },
+    {
+      "chapter": "C35",
+      "title": "清算与入口",
+      "startAt": "2025-08-06T08:00",
+      "endAt": "2025-08-06T22:00",
+      "primaryStorylines": [
+        "lvyu_hidden_network",
+        "tv_media_power",
+        "yang_clan_power",
+        "city_charity_redevelopment",
+        "zhang_fall"
+      ],
+      "domains": [
+        "city_resource_war",
+        "public_opinion_versions",
+        "yang_supply_contract"
+      ],
+      "summary": "吕玉败亡或重创，病人不会立刻痊愈但继续恶化的根被拔掉，马三魁夫妇体系崩塌，电视台、二房传媒线和张航远进入清算，小卷打开城市资源争夺战下一阶段。",
+      "sourceStatus": "planned_followup",
+      "sourceRef": "致命采访-分章大纲.txt:第三十五章"
+    }
+  ],
+  "chapterBeats": [
+    {
+      "chapter": "C1",
+      "storyline": "tv_media_power",
+      "title": "定题配置采访人员",
+      "summary": "电视台把皮革厂改革宣传定成深度专题，并把叶依人与张航远放进同一采访任务。",
+      "participants": [
+        "熊丽",
+        "叶依人",
+        "张航远"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C1",
+      "storyline": "investigation_team",
+      "title": "厂门口采访被求助撕开",
+      "summary": "叶依人和张航远在厂门口遭遇老妇丢符与求助，采访任务第一次偏离宣传口径。",
+      "participants": [
+        "叶依人",
+        "张航远"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C1",
+      "storyline": "daxian_control",
+      "title": "丢符求助露出控制入口",
+      "summary": "老妇对符纸和求助的执念让大仙祠控制结构露出第一个外部入口。",
+      "participants": [
+        "马三魁",
+        "病患家属代表"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C1",
+      "storyline": "yiren_pov",
+      "title": "第一次撞见题材裂口",
+      "summary": "叶依人发现眼前题材不是单纯改革宣传，而是被家庭、病痛和信仰撕开的现实裂口。",
+      "participants": [
+        "叶依人",
+        "张航远"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C2",
+      "storyline": "investigation_team",
+      "title": "逼仄小屋确认真实困境",
+      "summary": "采访组进入病患家庭，确认求助并非情绪表演，而是生活结构已经塌陷。",
+      "participants": [
+        "叶依人",
+        "张航远"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C2",
+      "storyline": "tv_media_power",
+      "title": "熊丽吸收素材并压责",
+      "summary": "熊丽接收采访素材，同时把风险和责任重新压回前线采访人员。",
+      "participants": [
+        "熊丽",
+        "叶依人",
+        "张航远"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C2",
+      "storyline": "zhang_fall",
+      "title": "受挫后出现代偿滑坡",
+      "summary": "张航远把采访受挫理解成个人被否定，开始用更激烈的判断补偿失控感。",
+      "participants": [
+        "张航远",
+        "叶依人"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C2",
+      "storyline": "yiren_pov",
+      "title": "被迫承认采访对象不是素材",
+      "summary": "叶依人开始意识到病患家庭不是可被剪进专题的素材，而是会反向改变采访立场的人。",
+      "participants": [
+        "叶依人",
+        "张航远"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C3",
+      "storyline": "investigation_team",
+      "title": "私下回访触发暴起",
+      "summary": "叶依人与张航远脱离正式安排回访，老妇暴起使采访组第一次承担失控后果。",
+      "participants": [
+        "叶依人",
+        "张航远"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C3",
+      "storyline": "zhang_fall",
+      "title": "救人受伤换来正义错觉",
+      "summary": "张航远救人受伤后把职业病判断当成个人价值证明，越界冲动进一步加重。",
+      "participants": [
+        "张航远",
+        "叶依人"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C3",
+      "storyline": "yiren_pov",
+      "title": "职业病判断刺中叶依人",
+      "summary": "张航远的判断让叶依人第一次意识到采访背后可能存在更深的病因和责任链。",
+      "participants": [
+        "叶依人",
+        "张航远"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C4",
+      "storyline": "yang_inner_circle",
+      "title": "禹树冷拆旧账风险",
+      "summary": "禹树把采访中的人情震动拆成旧账、证据和处置成本，迫使杨家近身圈接入。",
+      "participants": [
+        "禹树",
+        "莫妮卡",
+        "叶依人",
+        "杨心蕊"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C4",
+      "storyline": "yiren_pov",
+      "title": "从情绪冲击转向现实处置",
+      "summary": "叶依人从同情和愤怒中被拉回现实，开始看见救助、证据和家族处置之间的转换成本。",
+      "participants": [
+        "叶依人",
+        "禹树",
+        "莫妮卡"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C4",
+      "storyline": "investigation_team",
+      "title": "采访问题转成可核查事实",
+      "summary": "采访组三人关系线里的采访冲击被转写为可以继续核查的数据、人物和旧账问题。",
+      "participants": [
+        "叶依人",
+        "张航远",
+        "林倩"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C5",
+      "storyline": "tv_media_power",
+      "title": "正式任务授权一周跟进",
+      "summary": "电视台把皮革厂专题升级为一周跟进任务，授权同时也把失控风险制度化。",
+      "participants": [
+        "熊丽",
+        "叶依人",
+        "张航远"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C5",
+      "storyline": "investigation_team",
+      "title": "林倩入组形成三角",
+      "summary": "莫妮卡让林倩入组，采访组三人从临时配合变成稳定调查结构。",
+      "participants": [
+        "叶依人",
+        "张航远",
+        "林倩"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C5",
+      "storyline": "yang_inner_circle",
+      "title": "莫妮卡把外部采访纳入内圈",
+      "summary": "莫妮卡把采访任务转成杨家近身圈可观察、可校验、可控制的内部事项。",
+      "participants": [
+        "莫妮卡",
+        "叶依人",
+        "林倩"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C5",
+      "storyline": "zhang_fall",
+      "title": "把任务误读成正义授权",
+      "summary": "张航远把正式任务理解成自己被认可，个人滑坡从受挫转向自我授权。",
+      "participants": [
+        "张航远",
+        "叶依人",
+        "熊丽"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C6",
+      "storyline": "investigation_team",
+      "title": "十一户走访建立材料底盘",
+      "summary": "三人完成多户走访，林倩把混乱叙述整理成可复查的材料底盘。",
+      "participants": [
+        "叶依人",
+        "张航远",
+        "林倩"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C6",
+      "storyline": "yiren_pov",
+      "title": "看见同情之外的工作量",
+      "summary": "叶依人意识到真正困难不在于感动，而在于把每一户家庭转成可处理的问题。",
+      "participants": [
+        "叶依人",
+        "林倩",
+        "张航远"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C6",
+      "storyline": "zhang_fall",
+      "title": "直觉判断暴露攀附心态",
+      "summary": "张航远在走访中持续用直觉和姿态抢占位置，个人动机开始压过事实本身。",
+      "participants": [
+        "张航远",
+        "叶依人",
+        "林倩"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C7",
+      "storyline": "investigation_team",
+      "title": "老吴把线索串成组织节点",
+      "summary": "老吴提供马先生、盼姐、符纸和失踪老人线索，采访组第一次抓到组织化痕迹。",
+      "participants": [
+        "叶依人",
+        "张航远",
+        "林倩",
+        "老吴"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C7",
+      "storyline": "daxian_control",
+      "title": "大仙祠从传闻变成节点",
+      "summary": "马三魁和盼姐不再只是传闻对象，而成为病患家庭被组织控制的可追踪节点。",
+      "participants": [
+        "马三魁",
+        "林盼儿",
+        "老吴"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C7",
+      "storyline": "zhang_fall",
+      "title": "把线索当成个人突破口",
+      "summary": "张航远把老吴线索理解成自己可以单独突破的机会，分流风险开始出现。",
+      "participants": [
+        "张航远",
+        "林盼儿",
+        "叶依人"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C8",
+      "storyline": "investigation_team",
+      "title": "三页材料完成初步归档",
+      "summary": "采访组三人把走访成果汇成三页材料，事实链从感性采访进入结构化整理。",
+      "participants": [
+        "叶依人",
+        "张航远",
+        "林倩"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C8",
+      "storyline": "tv_media_power",
+      "title": "汇报后口径被限制",
+      "summary": "采访组向熊丽汇报后，电视台开始收束表达边界，材料被纳入可控传播路径。",
+      "participants": [
+        "熊丽",
+        "叶依人",
+        "张航远"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C8",
+      "storyline": "yang_inner_circle",
+      "title": "上山建立风险清单",
+      "summary": "莫妮卡上山找禹树，把采访材料转成杨家近身圈内部的风险清单和事件网络。",
+      "participants": [
+        "莫妮卡",
+        "禹树",
+        "叶依人",
+        "林倩"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C9",
+      "storyline": "daxian_control",
+      "title": "法会把苦难包装成庇护",
+      "summary": "马三魁在法会中把维权失败、病痛和恐惧包装成大仙庇护，控制结构正面显形。",
+      "participants": [
+        "马三魁",
+        "林盼儿",
+        "叶依人"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C9",
+      "storyline": "investigation_team",
+      "title": "三人进入法会但判断分裂",
+      "summary": "采访组三人同处法会现场，却对马三魁、病患和控制机制形成不同判断。",
+      "participants": [
+        "叶依人",
+        "张航远",
+        "林倩"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C9",
+      "storyline": "yiren_pov",
+      "title": "看见真实苦难被二次利用",
+      "summary": "叶依人在法会中看见马三魁并非凭空造假，而是在真实苦难上建立支配。",
+      "participants": [
+        "叶依人",
+        "马三魁",
+        "林盼儿"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C10",
+      "storyline": "investigation_team",
+      "title": "法会后三人正式分流",
+      "summary": "法会结束后三人不再共享同一判断，采访组内部从协作转向分岔。",
+      "participants": [
+        "叶依人",
+        "张航远",
+        "林倩"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C10",
+      "storyline": "daxian_control",
+      "title": "控制不是全假而是借真成势",
+      "summary": "叶依人与莫妮卡复盘后确认，马三魁的控制力量来自真实苦难被重新组织。",
+      "participants": [
+        "马三魁",
+        "叶依人",
+        "莫妮卡"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C10",
+      "storyline": "zhang_fall",
+      "title": "林盼儿打开私人空间",
+      "summary": "林盼儿进入张航远私人空间，张航远的个人坠落线从职业误读转向情感捕获。",
+      "participants": [
+        "张航远",
+        "林盼儿"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C10",
+      "storyline": "yang_inner_circle",
+      "title": "莫妮卡重估马三魁风险",
+      "summary": "莫妮卡把大仙祠问题从迷信闹剧重估为可以撬动旧区和舆论的现实风险。",
+      "participants": [
+        "莫妮卡",
+        "叶依人",
+        "禹树"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C10",
+      "storyline": "yiren_pov",
+      "title": "从揭假转向理解控制逻辑",
+      "summary": "叶依人放弃把大仙祠简单揭假，转而理解为什么病患家庭愿意进入这套控制。",
+      "participants": [
+        "叶依人",
+        "莫妮卡",
+        "林盼儿"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C11",
+      "storyline": "yiren_pov",
+      "title": "理解她们进不去的门槛",
+      "summary": "叶依人通过林盼儿和老李一家意识到，真正的门槛在上层场域和资源入口。",
+      "participants": [
+        "叶依人",
+        "林盼儿",
+        "老李一家"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C11",
+      "storyline": "daxian_control",
+      "title": "老李一家暴露控制后果",
+      "summary": "老李一家的处境说明大仙祠控制不止是仪式，而是对失能家庭的现实替代。",
+      "participants": [
+        "林盼儿",
+        "老李一家",
+        "马三魁"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C11",
+      "storyline": "yang_inner_circle",
+      "title": "莫妮卡推动进入上层场域",
+      "summary": "杨家近身圈把叶依人推向慈善晚宴，让采访问题进入资源调配场。",
+      "participants": [
+        "莫妮卡",
+        "叶依人"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C11",
+      "storyline": "city_charity_redevelopment",
+      "title": "慈善晚宴门槛浮出",
+      "summary": "慈善晚宴成为旧区问题和病患救助进入上层资源场的必要入口。",
+      "participants": [
+        "叶依人",
+        "钢铁主席",
+        "基金会代表"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C12",
+      "storyline": "city_charity_redevelopment",
+      "title": "救助被转译成执行路径",
+      "summary": "病患救助被转译成病历、档案、补助、转介和照护路径，旧区问题获得制度入口。",
+      "participants": [
+        "叶依人",
+        "钢铁主席",
+        "基金会代表"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C12",
+      "storyline": "yiren_pov",
+      "title": "学会把求助包装成议题",
+      "summary": "叶依人开始用公共议题语言表达病患救助，不再只依赖采访现场的情绪力量。",
+      "participants": [
+        "叶依人",
+        "莫妮卡",
+        "钢铁主席"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C12",
+      "storyline": "yang_inner_circle",
+      "title": "近身圈协助搭出路径",
+      "summary": "莫妮卡和近身圈把叶依人的表达推入可执行路径，避免问题只停在控诉层面。",
+      "participants": [
+        "莫妮卡",
+        "叶依人",
+        "林倩"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C13",
+      "storyline": "yang_clan_power",
+      "title": "楼上内场绑定裁决票",
+      "summary": "杨氏家族权力场把旧社区改造、资金和裁决票绑在一起，开始公开交锋。",
+      "participants": [
+        "家主系代表",
+        "二房传媒线",
+        "沈砚清",
+        "叶依人"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C13",
+      "storyline": "city_charity_redevelopment",
+      "title": "旧社区改造进入五比五",
+      "summary": "旧社区改造从慈善入口进入裁决结构，五比五把风险推到台面。",
+      "participants": [
+        "钢铁主席",
+        "基金会代表",
+        "副局长",
+        "叶依人"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C13",
+      "storyline": "yiren_pov",
+      "title": "被迫接住五比五风险",
+      "summary": "叶依人在楼上内场被迫接住五比五后的风险，个人成长线进入公开承压阶段。",
+      "participants": [
+        "叶依人",
+        "莫妮卡",
+        "钢铁主席"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C14",
+      "storyline": "yiren_pov",
+      "title": "接招并提出暂缓条件",
+      "summary": "叶依人把羞辱和压力转成筛查、基金、救助、转介、暂缓清退和媒体口径条件。",
+      "participants": [
+        "叶依人",
+        "莫妮卡"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C14",
+      "storyline": "yang_clan_power",
+      "title": "各方被迫承认阶段条件",
+      "summary": "杨氏家族权力场被迫承认暂缓清退与救助先行条件，交锋暂时落入叶依人节奏。",
+      "participants": [
+        "叶依人",
+        "家主系代表",
+        "二房传媒线",
+        "沈砚清"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C14",
+      "storyline": "city_charity_redevelopment",
+      "title": "暂缓改造换救助先行",
+      "summary": "旧区改造议题被压成暂缓改造、筛查救助和专项基金先行的阶段输出。",
+      "participants": [
+        "叶依人",
+        "钢铁主席",
+        "基金会代表"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C14",
+      "storyline": "yang_inner_circle",
+      "title": "莫妮卡截断后续羞辱",
+      "summary": "莫妮卡在会后截断继续羞辱，近身圈完成对叶依人公开承压后的保护和吸收。",
+      "participants": [
+        "莫妮卡",
+        "叶依人"
+      ],
+      "sourceRefs": [
+        "C1-C14 source definition"
+      ]
+    },
+    {
+      "chapter": "C15",
+      "storyline": "yang_clan_power",
+      "title": "会议结论成为高层定调",
+      "summary": "楼上内场的投票结果被转化成所有人明面上必须执行的城市口径。",
+      "participants": [
+        "钢铁主席",
+        "莫妮卡",
+        "沈砚清",
+        "周启衡"
+      ],
+      "sourceRefs": [
+        "E029"
+      ]
+    },
+    {
+      "chapter": "C15",
+      "storyline": "tv_media_power",
+      "title": "电视台推出民生专区",
+      "summary": "采访报道被系统吸收，从揭黑叙事改成民生宣传和救助配合。",
+      "participants": [
+        "叶依人",
+        "张航远",
+        "林倩",
+        "凯里",
+        "周启衡",
+        "电视台相关授权者"
+      ],
+      "sourceRefs": [
+        "E030"
+      ]
+    },
+    {
+      "chapter": "C15",
+      "storyline": "city_charity_redevelopment",
+      "title": "救助筛查进入筹备期",
+      "summary": "基金、互助协会、志愿者和医疗筛查开始对接人、表格、场地和资源。",
+      "participants": [
+        "叶依人",
+        "钢铁主席",
+        "基金会代表",
+        "志愿者队伍"
+      ],
+      "sourceRefs": [
+        "E031"
+      ]
+    },
+    {
+      "chapter": "C15",
+      "storyline": "yiren_pov",
+      "title": "被吸收入监督配置",
+      "summary": "叶依人拒绝单纯荣誉化安排，坚持继续去一线访谈和收集资料。",
+      "participants": [
+        "叶依人",
+        "莫妮卡"
+      ],
+      "sourceRefs": [
+        "E031"
+      ]
+    },
+    {
+      "chapter": "C15",
+      "storyline": "yang_inner_circle",
+      "title": "莫妮卡信用回升",
+      "summary": "莫妮卡通过临场反转稳定家主系局面，获得阶段性政治信用。",
+      "participants": [
+        "莫妮卡",
+        "杨家主系",
+        "沈砚清"
+      ],
+      "sourceRefs": [
+        "E034"
+      ]
+    },
+    {
+      "chapter": "C15",
+      "storyline": "zhang_fall",
+      "title": "发现自己被边缘化",
+      "summary": "张航远发现新闻、基金、口径和叶依人身份吸收了事件中心，开始寻找新的爆点。",
+      "participants": [
+        "张航远",
+        "叶依人",
+        "林倩",
+        "凯里"
+      ],
+      "sourceRefs": [
+        "E035"
+      ]
+    },
+    {
+      "chapter": "C16",
+      "storyline": "investigation_team",
+      "title": "三天缓冲继续走访",
+      "summary": "采访组在筹备期继续访谈、登记意向和收集资料，表面节奏放慢。",
+      "participants": [
+        "叶依人",
+        "张航远",
+        "林倩"
+      ],
+      "sourceRefs": [
+        "E031"
+      ]
+    },
+    {
+      "chapter": "C16",
+      "storyline": "yiren_pov",
+      "title": "看见群众复杂性",
+      "summary": "叶依人发现受苦不等于纯洁，救助必须面对恐惧、粗鄙、贪小便宜和说不清诉求。",
+      "participants": [
+        "叶依人",
+        "病患家属代表",
+        "老工人群体"
+      ],
+      "sourceRefs": [
+        "E032"
+      ]
+    },
+    {
+      "chapter": "C16",
+      "storyline": "daxian_control",
+      "title": "林盼儿双线诱导",
+      "summary": "林盼儿对张航远走照顾求助路线，对叶依人走责任使命路线。",
+      "participants": [
+        "林盼儿",
+        "张航远",
+        "叶依人"
+      ],
+      "sourceRefs": [
+        "E033"
+      ]
+    },
+    {
+      "chapter": "C16",
+      "storyline": "zhang_fall",
+      "title": "接受私人空间渗透",
+      "summary": "张航远允许林盼儿几乎每晚进入出租屋，开始被连续捕获。",
+      "participants": [
+        "张航远",
+        "林盼儿"
+      ],
+      "sourceRefs": [
+        "E033",
+        "E035"
+      ]
+    },
+    {
+      "chapter": "C17",
+      "storyline": "city_charity_redevelopment",
+      "title": "热闹进场变成善意秩序机器",
+      "summary": "志愿者、基金、医疗筛查和电视台民生团队大规模进入旧社区。",
+      "participants": [
+        "叶依人",
+        "志愿者队伍",
+        "基金会代表",
+        "医疗社工",
+        "老工人群体"
+      ],
+      "sourceRefs": [
+        "E036"
+      ]
+    },
+    {
+      "chapter": "C17",
+      "storyline": "yang_inner_circle",
+      "title": "禹树低调入镜",
+      "summary": "禹树在楼道口检查烧黑插排、异常香灰和符纸残片，不急于解释。",
+      "participants": [
+        "禹树",
+        "叶依人",
+        "林倩"
+      ],
+      "sourceRefs": [
+        "E037"
+      ]
+    },
+    {
+      "chapter": "C17",
+      "storyline": "chemistry_evidence_collaboration",
+      "title": "化学小姑娘建立取样规范",
+      "summary": "化学小姑娘提醒志愿者不要乱收符纸、药瓶、香灰和符水残留，与林倩形成默契。",
+      "participants": [
+        "林倩",
+        "家主派化学小姑娘",
+        "志愿者队伍"
+      ],
+      "sourceRefs": [
+        "E038"
+      ]
+    },
+    {
+      "chapter": "C17",
+      "storyline": "yiren_pov",
+      "title": "看见救助也会灼伤",
+      "summary": "叶依人同时看见救助的必要性和善意秩序机器对旧社区的压迫感。",
+      "participants": [
+        "叶依人",
+        "老工人群体",
+        "志愿者队伍"
+      ],
+      "sourceRefs": [
+        "E036"
+      ]
+    },
+    {
+      "chapter": "C18",
+      "storyline": "chemistry_evidence_collaboration",
+      "title": "病例与样品被分开登记",
+      "summary": "林倩和化学小姑娘按车间、工种、症状、符水、香灰和药瓶残留拆开登记。",
+      "participants": [
+        "林倩",
+        "家主派化学小姑娘",
+        "病患家属代表"
+      ],
+      "sourceRefs": [
+        "E039"
+      ]
+    },
+    {
+      "chapter": "C18",
+      "storyline": "investigation_team",
+      "title": "职业病疑云回到材料链",
+      "summary": "采访组把职业病从苦情叙事拆回病历、工龄、岗位和接触源。",
+      "participants": [
+        "叶依人",
+        "张航远",
+        "林倩"
+      ],
+      "sourceRefs": [
+        "E039"
+      ]
+    },
+    {
+      "chapter": "C18",
+      "storyline": "daxian_control",
+      "title": "共同苦难叙事被拆开",
+      "summary": "群众第一次具体质疑为何不同症状和接触源都被马三魁说成同一种毒和同一条符水救命路。",
+      "participants": [
+        "马三魁",
+        "林盼儿",
+        "病患家属代表",
+        "老人信众"
+      ],
+      "sourceRefs": [
+        "E039"
+      ]
+    },
+    {
+      "chapter": "C19",
+      "storyline": "daxian_control",
+      "title": "马三魁重新收拢群众",
+      "summary": "马三魁用闭门护法、集体忏悔和断根话术把松动人群拉回大仙祠。",
+      "participants": [
+        "马三魁",
+        "林盼儿",
+        "老人信众",
+        "老工人群体"
+      ],
+      "sourceRefs": [
+        "E040"
+      ]
+    },
+    {
+      "chapter": "C19",
+      "storyline": "zhang_fall",
+      "title": "把拆解误读成冷酷管理",
+      "summary": "张航远把林倩的数据拆解和志愿者秩序化工作理解成系统清洗。",
+      "participants": [
+        "张航远",
+        "林盼儿",
+        "林倩"
+      ],
+      "sourceRefs": [
+        "E041"
+      ]
+    },
+    {
+      "chapter": "C19",
+      "storyline": "yiren_pov",
+      "title": "面对保护权争夺",
+      "summary": "叶依人意识到群众被不同力量争夺保护权和解释权。",
+      "participants": [
+        "叶依人",
+        "马三魁",
+        "老工人群体"
+      ],
+      "sourceRefs": [
+        "E040"
+      ]
+    },
+    {
+      "chapter": "C20",
+      "storyline": "daxian_control",
+      "title": "镜头下的流血冲突",
+      "summary": "马三魁集中老人对抗志愿者和电视台，现场出现抢夺、推挤和流血。",
+      "participants": [
+        "马三魁",
+        "林盼儿",
+        "老人信众",
+        "电视台相关授权者"
+      ],
+      "sourceRefs": [
+        "E042"
+      ]
+    },
+    {
+      "chapter": "C20",
+      "storyline": "city_charity_redevelopment",
+      "title": "志愿救助变公共危机",
+      "summary": "清理楼道、消防排查和确认老人安全的救助工作被推成公共危机。",
+      "participants": [
+        "志愿者队伍",
+        "医疗社工",
+        "基金会代表",
+        "叶依人"
+      ],
+      "sourceRefs": [
+        "E042",
+        "E043"
+      ]
+    },
+    {
+      "chapter": "C20",
+      "storyline": "tv_media_power",
+      "title": "冲突素材进入镜头",
+      "summary": "冲突现场变成双方都能剪辑和利用的视频素材。",
+      "participants": [
+        "张航远",
+        "电视台相关授权者",
+        "周启衡"
+      ],
+      "sourceRefs": [
+        "E042"
+      ]
+    },
+    {
+      "chapter": "C20",
+      "storyline": "zhang_fall",
+      "title": "张航远现场起坏作用",
+      "summary": "张航远拼命拍摄并接受林盼儿诱导，让现场解释向大仙祠一侧倾斜。",
+      "participants": [
+        "张航远",
+        "林盼儿"
+      ],
+      "sourceRefs": [
+        "E042"
+      ]
+    },
+    {
+      "chapter": "C20",
+      "storyline": "yiren_pov",
+      "title": "摆平流血现场",
+      "summary": "叶依人让镜头后撤，要求第三方医护和女性社工确认老人安全，并逼马三魁让人自己出来说话。",
+      "participants": [
+        "叶依人",
+        "马三魁",
+        "医疗社工",
+        "老人信众"
+      ],
+      "sourceRefs": [
+        "E043"
+      ]
+    },
+    {
+      "chapter": "C21",
+      "storyline": "tv_media_power",
+      "title": "两版视频引爆舆论",
+      "summary": "电视台和二房线把现场剪成救助遭邪教阻挠和年轻人欺负病人两种版本。",
+      "participants": [
+        "熊丽",
+        "周启衡",
+        "二房传媒线",
+        "叶依人"
+      ],
+      "sourceRefs": [
+        "E044"
+      ]
+    },
+    {
+      "chapter": "C21",
+      "storyline": "yang_inner_circle",
+      "title": "大房调查系统查账查人",
+      "summary": "禹树、杨心蕊、老林、林倩和化学小姑娘分头查补贴、香火钱、伪诉讼和样品。",
+      "participants": [
+        "禹树",
+        "杨心蕊",
+        "老林",
+        "林倩",
+        "家主派化学小姑娘"
+      ],
+      "sourceRefs": [
+        "E044"
+      ]
+    },
+    {
+      "chapter": "C21",
+      "storyline": "chemistry_evidence_collaboration",
+      "title": "符水香灰初筛咬合",
+      "summary": "化学证据能提示异常残留，但不能直接替代司法鉴定。",
+      "participants": [
+        "林倩",
+        "家主派化学小姑娘",
+        "禹树"
+      ],
+      "sourceRefs": [
+        "E044"
+      ]
+    },
+    {
+      "chapter": "C21",
+      "storyline": "daxian_control",
+      "title": "半真半假旧厂材料被放出",
+      "summary": "马三魁一侧放出过于整齐的旧厂化学制剂记录和病人工种名单，引导调查走向漂亮闭环。",
+      "participants": [
+        "马三魁",
+        "林盼儿",
+        "张航远"
+      ],
+      "sourceRefs": [
+        "E044"
+      ]
+    },
+    {
+      "chapter": "C22",
+      "storyline": "zhang_fall",
+      "title": "张航远与林盼儿越界",
+      "summary": "张航远把林盼儿误判成关键受害者，在私人空间和越界亲密中被套牢。",
+      "participants": [
+        "张航远",
+        "林盼儿"
+      ],
+      "sourceRefs": [
+        "E041"
+      ]
+    },
+    {
+      "chapter": "C22",
+      "storyline": "daxian_control",
+      "title": "林盼儿套住张航远",
+      "summary": "林盼儿用柔弱、克制、求助和我只信你的话术套住张航远。",
+      "participants": [
+        "林盼儿",
+        "张航远"
+      ],
+      "sourceRefs": [
+        "E041"
+      ]
+    },
+    {
+      "chapter": "C22",
+      "storyline": "yiren_pov",
+      "title": "被理解成已经被吸收",
+      "summary": "张航远把叶依人、领导小组、基金会和莫妮卡的关系理解成她被系统吸收。",
+      "participants": [
+        "张航远",
+        "叶依人",
+        "莫妮卡"
+      ],
+      "sourceRefs": [
+        "E041"
+      ]
+    },
+    {
+      "chapter": "C23",
+      "storyline": "chemistry_evidence_collaboration",
+      "title": "姐妹线稳住林倩",
+      "summary": "化学小姑娘用样品、标签和残留差异把林倩从情绪和漂亮闭环里拉回来。",
+      "participants": [
+        "林倩",
+        "家主派化学小姑娘"
+      ],
+      "sourceRefs": [
+        "E045"
+      ]
+    },
+    {
+      "chapter": "C23",
+      "storyline": "investigation_team",
+      "title": "林倩再拉出部分老人",
+      "summary": "林倩再次把一部分老人从马三魁仪式中拉出来，群众拉锯进入第二轮。",
+      "participants": [
+        "林倩",
+        "叶依人",
+        "病患家属代表"
+      ],
+      "sourceRefs": [
+        "E045"
+      ]
+    },
+    {
+      "chapter": "C23",
+      "storyline": "zhang_fall",
+      "title": "张航远话术继续拉扯",
+      "summary": "张航远的正义姿态和群众苦难继续影响林倩判断。",
+      "participants": [
+        "张航远",
+        "林倩"
+      ],
+      "sourceRefs": [
+        "E045"
+      ]
+    },
+    {
+      "chapter": "C23",
+      "storyline": "yiren_pov",
+      "title": "叶依人保留细节疑虑",
+      "summary": "叶依人被张航远刺中但更成熟，从细节中保留疑虑。",
+      "participants": [
+        "叶依人",
+        "张航远"
+      ],
+      "sourceRefs": [
+        "E045"
+      ]
+    },
+    {
+      "chapter": "C24",
+      "storyline": "daxian_control",
+      "title": "闭门护法升级",
+      "summary": "马三魁夫妇把核心信众、关键老人和老吴老婆重新收进大仙祠体系。",
+      "participants": [
+        "马三魁",
+        "林盼儿",
+        "老吴老婆",
+        "老人信众"
+      ],
+      "sourceRefs": [
+        "E046"
+      ]
+    },
+    {
+      "chapter": "C24",
+      "storyline": "zhang_fall",
+      "title": "把陷阱包装成风险控制",
+      "summary": "张航远以最懂风险、最能接近底层为名，说服叶依人和林倩不要带太多人。",
+      "participants": [
+        "张航远",
+        "叶依人",
+        "林倩",
+        "林盼儿"
+      ],
+      "sourceRefs": [
+        "E046"
+      ]
+    },
+    {
+      "chapter": "C24",
+      "storyline": "investigation_team",
+      "title": "核心证据线索引三人深入",
+      "summary": "叶依人、林倩和张航远获得核心证据线索，准备进入大仙祠或旧厂暗处。",
+      "participants": [
+        "叶依人",
+        "林倩",
+        "张航远"
+      ],
+      "sourceRefs": [
+        "E046"
+      ]
+    },
+    {
+      "chapter": "C25",
+      "storyline": "daxian_control",
+      "title": "三人深入敌境",
+      "summary": "三人进入大仙祠后殿、旧厂暗处或供奉空间后被自然分开。",
+      "participants": [
+        "叶依人",
+        "林倩",
+        "张航远",
+        "马三魁"
+      ],
+      "sourceRefs": [
+        "E046"
+      ]
+    },
+    {
+      "chapter": "C25",
+      "storyline": "zhang_fall",
+      "title": "背叛现实爆发",
+      "summary": "张航远先用自以为正义的话术指责叶依人，再把她带入羞辱、控制和载体标记风险。",
+      "participants": [
+        "张航远",
+        "叶依人",
+        "林盼儿"
+      ],
+      "sourceRefs": [
+        "E046"
+      ]
+    },
+    {
+      "chapter": "C25",
+      "storyline": "yiren_pov",
+      "title": "进入载体标记风险",
+      "summary": "叶依人没有法术，只能在现实空间里识别香炉、红线、镜面和符灰位置。",
+      "participants": [
+        "叶依人",
+        "张航远",
+        "马三魁"
+      ],
+      "sourceRefs": [
+        "E047"
+      ]
+    },
+    {
+      "chapter": "C25",
+      "storyline": "lvyu_hidden_network",
+      "title": "供奉空间露出幕后节点",
+      "summary": "敌境中的香炉、符灰、红线和甜腻香味露出吕玉节点存在。",
+      "participants": [
+        "吕玉",
+        "禹树",
+        "叶依人",
+        "马三魁"
+      ],
+      "sourceRefs": [
+        "E047"
+      ]
+    },
+    {
+      "chapter": "C26",
+      "storyline": "yiren_pov",
+      "title": "叶依人用小知识反制",
+      "summary": "叶依人避开符水和甜腻香味，用强光、断电、开窗和破坏香炉节奏争取时间。",
+      "participants": [
+        "叶依人",
+        "禹树",
+        "张航远"
+      ],
+      "sourceRefs": [
+        "E047"
+      ]
+    },
+    {
+      "chapter": "C26",
+      "storyline": "chemistry_evidence_collaboration",
+      "title": "账册样品拼出前台伪造",
+      "summary": "林倩和化学小姑娘从账册、样品和符水残留中确认前台伪造和控制。",
+      "participants": [
+        "林倩",
+        "家主派化学小姑娘",
+        "禹树"
+      ],
+      "sourceRefs": [
+        "E047",
+        "E048"
+      ]
+    },
+    {
+      "chapter": "C26",
+      "storyline": "daxian_control",
+      "title": "马三魁前台体系崩塌",
+      "summary": "马三魁的职业病闭环、符水控制和香头体系同时暴露。",
+      "participants": [
+        "马三魁",
+        "林盼儿",
+        "老吴老婆"
+      ],
+      "sourceRefs": [
+        "E048"
+      ]
+    },
+    {
+      "chapter": "C26",
+      "storyline": "lvyu_hidden_network",
+      "title": "吕玉必须亲自收尾",
+      "summary": "前台失败后，吕玉只能从幕后进入前台收尾。",
+      "participants": [
+        "吕玉",
+        "禹树",
+        "叶依人"
+      ],
+      "sourceRefs": [
+        "E048"
+      ]
+    },
+    {
+      "chapter": "C27",
+      "storyline": "zhang_fall",
+      "title": "林盼儿放出张航远把柄",
+      "summary": "林盼儿把张航远的正义包装、私人越界和敌境背叛串成反咬材料。",
+      "participants": [
+        "林盼儿",
+        "张航远",
+        "林倩",
+        "叶依人"
+      ],
+      "sourceRefs": [
+        "E048"
+      ]
+    },
+    {
+      "chapter": "C27",
+      "storyline": "daxian_control",
+      "title": "林盼儿带火种逃向吕玉",
+      "summary": "林盼儿带着张航远线把柄、叶依人载体信息、符水香火和信众名单逃向吕玉。",
+      "participants": [
+        "林盼儿",
+        "老吴老婆",
+        "吕玉"
+      ],
+      "sourceRefs": [
+        "E048"
+      ]
+    },
+    {
+      "chapter": "C27",
+      "storyline": "lvyu_hidden_network",
+      "title": "载体信息转入幕后",
+      "summary": "叶依人被标记为载体的信息和信众名单从前台香头线转入吕玉线。",
+      "participants": [
+        "吕玉",
+        "林盼儿",
+        "叶依人"
+      ],
+      "sourceRefs": [
+        "E048"
+      ]
+    },
+    {
+      "chapter": "C27",
+      "storyline": "investigation_team",
+      "title": "林倩情感判断崩裂",
+      "summary": "林倩受到张航远和林盼儿反转冲击，确认自己的情感判断曾被误导。",
+      "participants": [
+        "林倩",
+        "叶依人",
+        "张航远"
+      ],
+      "sourceRefs": [
+        "E045",
+        "E048"
+      ]
+    },
+    {
+      "chapter": "C28",
+      "storyline": "lvyu_hidden_network",
+      "title": "吕玉下场施压杨家",
+      "summary": "吕玉借信众香火、符纸残留、符水样品和吸灵网络向杨家施压。",
+      "participants": [
+        "吕玉",
+        "杨家主系",
+        "禹树"
+      ],
+      "sourceRefs": [
+        "E048"
+      ]
+    },
+    {
+      "chapter": "C28",
+      "storyline": "yiren_pov",
+      "title": "现实脱困与幕后拆解重合",
+      "summary": "读者随后明白，叶依人在现实空间的打断动作正好配合禹树拆解吕玉节点。",
+      "participants": [
+        "叶依人",
+        "禹树",
+        "吕玉"
+      ],
+      "sourceRefs": [
+        "E047",
+        "E048"
+      ]
+    },
+    {
+      "chapter": "C28",
+      "storyline": "chemistry_evidence_collaboration",
+      "title": "数据样品和斗法合成破局链",
+      "summary": "化学证据、数据网络和禹树斗法不再并列，而是合成同一条破局链。",
+      "participants": [
+        "林倩",
+        "家主派化学小姑娘",
+        "禹树"
+      ],
+      "sourceRefs": [
+        "E048"
+      ]
+    },
+    {
+      "chapter": "C28",
+      "storyline": "yang_inner_circle",
+      "title": "禹树低调拆解节点",
+      "summary": "禹树在另一层面拆解吕玉节点，不抢走叶依人的现实胜利。",
+      "participants": [
+        "禹树",
+        "叶依人",
+        "莫妮卡"
+      ],
+      "sourceRefs": [
+        "E048"
+      ]
+    },
+    {
+      "chapter": "C29",
+      "storyline": "lvyu_hidden_network",
+      "title": "旧供奉协议压向杨家",
+      "summary": "吕玉以旧供奉协议和保厂承诺压杨家。",
+      "participants": [
+        "吕玉",
+        "杨家主系",
+        "禹树"
+      ],
+      "sourceRefs": []
+    },
+    {
+      "chapter": "C29",
+      "storyline": "yang_clan_power",
+      "title": "杨氏集团对峙",
+      "summary": "杨家主旧协议暴露，叶依人被推到前台。",
+      "participants": [
+        "杨家主系",
+        "莫妮卡",
+        "叶依人",
+        "吕玉"
+      ],
+      "sourceRefs": []
+    },
+    {
+      "chapter": "C29",
+      "storyline": "yang_inner_circle",
+      "title": "莫妮卡负责家族对接",
+      "summary": "莫妮卡负责家族对接，杨心蕊稳住资料。",
+      "participants": [
+        "莫妮卡",
+        "杨心蕊",
+        "叶依人"
+      ],
+      "sourceRefs": []
+    },
+    {
+      "chapter": "C29",
+      "storyline": "city_charity_redevelopment",
+      "title": "资源争夺战被接上",
+      "summary": "致命采访与城市资源争夺战正式连接。",
+      "participants": [
+        "钢铁主席",
+        "基金会代表",
+        "叶依人"
+      ],
+      "sourceRefs": []
+    },
+    {
+      "chapter": "C30",
+      "storyline": "lvyu_hidden_network",
+      "title": "吕玉第一次败退",
+      "summary": "禹树切断部分节点，吕玉第一次败退但退回不败之地。",
+      "participants": [
+        "禹树",
+        "吕玉"
+      ],
+      "sourceRefs": []
+    },
+    {
+      "chapter": "C30",
+      "storyline": "chemistry_evidence_collaboration",
+      "title": "传感器样品五味分类协同",
+      "summary": "传感器、数据表、化学样品和五味符纸分类一起成为拆解工具。",
+      "participants": [
+        "禹树",
+        "林倩",
+        "家主派化学小姑娘"
+      ],
+      "sourceRefs": []
+    },
+    {
+      "chapter": "C30",
+      "storyline": "yang_inner_circle",
+      "title": "低耗法术切断节点",
+      "summary": "禹树用低耗法术和现实样品切断部分吸灵节点。",
+      "participants": [
+        "禹树",
+        "杨心蕊",
+        "莫妮卡"
+      ],
+      "sourceRefs": []
+    },
+    {
+      "chapter": "C31",
+      "storyline": "lvyu_hidden_network",
+      "title": "不败之地显形",
+      "summary": "大仙祠深处成为吕玉经营多年的吸灵场。",
+      "participants": [
+        "吕玉",
+        "禹树"
+      ],
+      "sourceRefs": []
+    },
+    {
+      "chapter": "C31",
+      "storyline": "daxian_control",
+      "title": "大仙祠深处成为吸灵场",
+      "summary": "病人、符纸、香火、旧厂化学污染和供奉阵法纠缠在一起。",
+      "participants": [
+        "吕玉",
+        "马三魁",
+        "老人信众"
+      ],
+      "sourceRefs": []
+    },
+    {
+      "chapter": "C31",
+      "storyline": "chemistry_evidence_collaboration",
+      "title": "现实病灶与邪修手段纠缠",
+      "summary": "普通调查手段失效，样品链必须与非自然结构判断合并。",
+      "participants": [
+        "林倩",
+        "家主派化学小姑娘",
+        "禹树"
+      ],
+      "sourceRefs": []
+    },
+    {
+      "chapter": "C32",
+      "storyline": "chemistry_evidence_collaboration",
+      "title": "林倩崩裂后被证据拉回",
+      "summary": "化学小姑娘帮助林倩把崩裂落回具体证据。",
+      "participants": [
+        "林倩",
+        "家主派化学小姑娘"
+      ],
+      "sourceRefs": [
+        "E045"
+      ]
+    },
+    {
+      "chapter": "C32",
+      "storyline": "investigation_team",
+      "title": "三人关系裂缝显形",
+      "summary": "张航远遗留伤害让采访组三人关系彻底裂开。",
+      "participants": [
+        "叶依人",
+        "林倩",
+        "张航远"
+      ],
+      "sourceRefs": [
+        "E045"
+      ]
+    },
+    {
+      "chapter": "C32",
+      "storyline": "zhang_fall",
+      "title": "遗留情绪泥潭",
+      "summary": "张航远造成的正义姿态和漂亮闭环仍在拖拽林倩。",
+      "participants": [
+        "张航远",
+        "林倩"
+      ],
+      "sourceRefs": [
+        "E045"
+      ]
+    },
+    {
+      "chapter": "C32",
+      "storyline": "yiren_pov",
+      "title": "重新校准林倩站位",
+      "summary": "叶依人和林倩在裂缝中重新校准立场。",
+      "participants": [
+        "叶依人",
+        "林倩"
+      ],
+      "sourceRefs": [
+        "E045"
+      ]
+    },
+    {
+      "chapter": "C33",
+      "storyline": "lvyu_hidden_network",
+      "title": "禹树把吸灵网络建模",
+      "summary": "禹树把信众反应、符水残留、五味符纸和吸灵术转成可拆解网络。",
+      "participants": [
+        "禹树",
+        "吕玉"
+      ],
+      "sourceRefs": []
+    },
+    {
+      "chapter": "C33",
+      "storyline": "chemistry_evidence_collaboration",
+      "title": "五味符纸转成信号分类",
+      "summary": "五味符纸从玄学物件转成信号分类和反馈网络节点。",
+      "participants": [
+        "禹树",
+        "林倩",
+        "家主派化学小姑娘"
+      ],
+      "sourceRefs": []
+    },
+    {
+      "chapter": "C34",
+      "storyline": "lvyu_hidden_network",
+      "title": "正面击溃吸灵网络",
+      "summary": "禹树破坏节点同步，让吕玉吸灵网络反噬。",
+      "participants": [
+        "禹树",
+        "吕玉"
+      ],
+      "sourceRefs": []
+    },
+    {
+      "chapter": "C34",
+      "storyline": "chemistry_evidence_collaboration",
+      "title": "数据与样品破坏节点同步",
+      "summary": "传感网络、符纸数据和化学样品共同定位节点节律。",
+      "participants": [
+        "禹树",
+        "林倩",
+        "家主派化学小姑娘"
+      ],
+      "sourceRefs": []
+    },
+    {
+      "chapter": "C34",
+      "storyline": "yiren_pov",
+      "title": "现实动作补上关键节奏",
+      "summary": "叶依人的现实动作补上破局节奏，避免胜利只属于禹树。",
+      "participants": [
+        "叶依人",
+        "禹树"
+      ],
+      "sourceRefs": []
+    },
+    {
+      "chapter": "C35",
+      "storyline": "lvyu_hidden_network",
+      "title": "吕玉败亡或重创",
+      "summary": "吕玉败亡或重创，继续恶化的根被拔掉。",
+      "participants": [
+        "吕玉",
+        "禹树",
+        "叶依人"
+      ],
+      "sourceRefs": []
+    },
+    {
+      "chapter": "C35",
+      "storyline": "tv_media_power",
+      "title": "电视台和二房线进入清算",
+      "summary": "电视台和二房传媒线暴露，熊丽和周启衡线进入清算。",
+      "participants": [
+        "熊丽",
+        "周启衡",
+        "二房传媒线"
+      ],
+      "sourceRefs": []
+    },
+    {
+      "chapter": "C35",
+      "storyline": "yang_clan_power",
+      "title": "城市资源战开启下一阶段",
+      "summary": "杨家、二房、城市资源方和叶依人进入下一阶段争夺。",
+      "participants": [
+        "杨家主系",
+        "莫妮卡",
+        "叶依人"
+      ],
+      "sourceRefs": []
+    },
+    {
+      "chapter": "C35",
+      "storyline": "zhang_fall",
+      "title": "正义包装彻底破裂",
+      "summary": "张航远的正义包装彻底破裂，后续只剩清算或审判空间。",
+      "participants": [
+        "张航远",
+        "叶依人",
+        "林倩"
+      ],
+      "sourceRefs": []
+    },
+    {
+      "chapter": "C35",
+      "storyline": "city_charity_redevelopment",
+      "title": "病人不会立刻痊愈",
+      "summary": "病人不会立刻痊愈，但继续恶化的根被拔掉，救助和城市资源问题进入下一阶段。",
+      "participants": [
+        "叶依人",
+        "基金会代表",
+        "医疗社工",
+        "老工人群体"
+      ],
+      "sourceRefs": []
+    }
+  ],
+  "migrationGuidance": {
+    "generatedStoryFile": "story-c1-c35-outline-preview-v0.1.json",
+    "manifestId": "c1-c35-outline-preview-v0-1",
+    "keepCurrentDefault": true,
+    "note": "该数据集用于界面预览和结构校对，不把 C15-C35 规划段升级为正文事实。"
+  }
+}
