@@ -13,6 +13,7 @@ function readText(relativePath) {
 }
 
 for (const requiredPath of [
+  "src/app/event-bindings.js",
   "src/app/route.js",
   "src/data/story-loader.js",
   "src/state/persisted-state.js",
@@ -28,6 +29,7 @@ const appSource = readAppSource(import.meta.url);
 
 assert(mainJs.includes('from "./data/story-loader.js"'), "main.js must import story loading from data/story-loader.js.");
 assert(mainJs.includes('from "./state/persisted-state.js"'), "main.js must import persisted state from state/persisted-state.js.");
+assert(mainJs.includes('from "./app/event-bindings.js"'), "main.js must import DOM event binding from app/event-bindings.js.");
 assert(mainJs.includes('from "./app/route.js"'), "main.js must import initial route handling from app/route.js.");
 assert(mainJs.includes('from "./timeline/geometry.js"'), "main.js must import timeline geometry from timeline/geometry.js.");
 assert(mainJs.includes('from "./timeline/hit-test.js"'), "main.js must import hit testing from timeline/hit-test.js.");
@@ -43,6 +45,7 @@ assert(!mainJs.includes("function hideDetails("), "main.js must not define detai
 assert(!mainJs.includes("function labelColumnHitTest("), "main.js must not define label hit testing after P2.4.6.");
 assert(!mainJs.includes("function hitTest("), "main.js must not define hit testing after P2.4.6.");
 assert(!mainJs.includes("function applyInitialRoute("), "main.js must not define initial route handling after P2.4.6.");
+assert(!mainJs.includes(".addEventListener("), "main.js must not bind DOM events directly after P2.4.7.");
 assert(appSource.includes("function validateStoryManifest("), "Story manifest validation must remain present in app source.");
 assert(appSource.includes("function loadPersistedState("), "Persisted state loading must remain present in app source.");
 assert(appSource.includes("function savePersistedState("), "Persisted state saving must remain present in app source.");
@@ -51,5 +54,6 @@ assert(appSource.includes("function axisRangeToScreen("), "Axis range projection
 assert(appSource.includes("function updateInspectorEvent("), "Event Inspector rendering must remain present in app source.");
 assert(appSource.includes("function createHitTester("), "Hit tester factory must remain present in app source.");
 assert(appSource.includes("function applyInitialRoute("), "Initial route handling must remain present in app source.");
+assert(appSource.includes("function bindAppEvents("), "DOM event binding must remain present in app source.");
 
 console.log("Module boundary validation passed.");
