@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/novel-writing-tools/narrative-timeline-projection-dataset.schema.json",
+  "title": "基准时间轴投影数据集",
+  "description": "供基准时间轴页面读取的叙事对象投影数据，不是最终结构化小说数据库。",
+  "type": "object",
+  "required": ["meta", "timelineConfig", "chapters", "characters", "tracks", "events"],
+  "additionalProperties": true,
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["name", "version", "datasetType", "projectionTarget", "modelVersion"],
+      "additionalProperties": true,
+      "properties": {
+        "name": { "type": "string" },
+        "version": { "type": "string" },
+        "datasetType": { "const": "narrativeTimelineProjection" },
+        "projectionTarget": { "const": "baselineTimeline" },
+        "modelVersion": { "type": "string" },
+        "source": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      }
+    },
+    "timelineConfig": {
+      "type": "object",
+      "required": ["defaultStart", "defaultEnd"],
+      "additionalProperties": false,
+      "properties": {
+        "defaultStart": { "type": "string" },
+        "defaultEnd": { "type": "string" }
+      }
+    },
+    "chapters": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/chapter" }
+    },
+    "characters": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/character" }
+    },
+    "tracks": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/track" }
+    },
+    "events": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/event" }
+    }
+  },
+  "$defs": {
+    "chapter": {
+      "type": "object",
+      "required": ["id", "title", "startAt", "endAt", "input", "inside", "output"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "startAt": { "type": "string" },
+        "endAt": { "type": "string" },
+        "input": { "type": "string" },
+        "inside": { "type": "string" },
+        "output": { "type": "string" }
+      }
+    },
+    "character": {
+      "type": "object",
+      "required": ["name", "short", "color", "soft"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "short": { "type": "string" },
+        "color": { "type": "string" },
+        "soft": { "type": "string" }
+      }
+    },
+    "track": {
+      "type": "object",
+      "required": ["id", "name", "sub", "expanded", "characters", "color", "soft"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "sub": { "type": "string" },
+        "expanded": { "type": "boolean" },
+        "color": { "type": "string" },
+        "soft": { "type": "string" },
+        "characters": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "event": {
+      "type": "object",
+      "required": ["id", "kind", "track", "startAt", "endAt", "title", "code", "visualState", "input", "output", "risk"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "kind": { "enum": ["story", "character"] },
+        "track": { "type": "string" },
+        "character": { "type": "string" },
+        "participantName": { "type": "string" },
+        "startAt": { "type": "string" },
+        "endAt": { "type": "string" },
+        "title": { "type": "string" },
+        "roleBrief": { "type": "string" },
+        "code": { "type": "string" },
+        "visualState": { "enum": ["normal", "warn", "risk", "key", "background", "continuing"] },
+        "tone": { "type": "string", "description": "旧版兼容字段；新数据不应依赖 tone 决定主色。" },
+        "action": { "type": "string" },
+        "relationChange": { "type": "string" },
+        "inspectorSummary": { "type": "string" },
+        "input": { "type": "string" },
+        "output": { "type": "string" },
+        "risk": { "type": "string" },
+        "visibility": { "enum": ["explicit", "background"] }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "kind": { "const": "character" } },
+            "required": ["kind"]
+          },
+          "then": {
+            "required": ["character", "participantName", "roleBrief", "action", "relationChange", "inspectorSummary"]
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/src/styles/main.css">
+  <title>叙事验证工具 基准时间轴原型 V1</title>
+</head>
+<body>
+  <div class="frame">
+    <div class="app">
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <div class="topbar-title">基准时间轴原型 V1<span>横轴由真实日期驱动，章节覆盖正文切片。</span></div>
+          </div>
+          <div class="route">时间轴 / <strong id="route-state">画布模式</strong> / <span id="data-source-state">DATA 内置演示数据</span></div>
+        </header>
+
+        <div class="toolbar">
+          <div>
+            <h3>基准时间轴画布</h3>
+          </div>
+
+          <label class="story-settings" aria-label="基准时间轴投影数据集选择">
+            <span>投影数据集</span>
+            <select id="storySelect">
+              <option value="">加载中</option>
+            </select>
+          </label>
+
+          <div class="time-settings" aria-label="时间范围设置">
+            <span>起</span>
+            <input id="timelineStart" type="datetime-local" value="2025-07-07T08:00">
+            <span>止</span>
+            <input id="timelineEnd" type="datetime-local" value="2025-08-01T00:00">
+            <button id="applyTimeline" type="button">应用</button>
+          </div>
+
+          <div class="axis-settings" aria-label="轴模式切换">
+            <span>轴模式</span>
+            <button type="button" class="active" data-axis-mode="realTime">真实时间</button>
+            <button type="button" data-axis-mode="chapterEqual">章节等宽</button>
+          </div>
+
+          <label class="zoom-control">
+            <span>缩放</span>
+            <input id="zoomSlider" type="range" min="45" max="750" value="72">
+            <strong id="zoomLabel">72%</strong>
+          </label>
+
+          <div class="tool-buttons" aria-label="画布工具">
+            <button id="zoomOut" type="button">缩小</button>
+            <button id="resetView" type="button" class="active">复位</button>
+            <button id="zoomIn" type="button">放大</button>
+            <button id="expandAll" type="button">全展</button>
+            <button id="wideMode" type="button">宽屏</button>
+            <button id="resetDatasetState" type="button">重置状态</button>
+          </div>
+        </div>
+
+        <section class="workspace">
+          <section class="canvas-zone">
+
+            <div class="canvas-wrap" id="canvasWrap">
+              <canvas id="timelineCanvas" aria-label="Canvas 多轨时间线"></canvas>
+            </div>
+
+          </section>
+
+          <aside class="inspector">
+            <section class="inspect-card accent" id="selectionCard">
+              <div class="eyebrow" id="selectionKind">No Selection</div>
+              <h3 id="selectionTitle">尚未选中对象</h3>
+               <p id="selectionDesc">请在画布中点击章节、主线标题、人物条或事件块。系统会先显示 Inspector，不会自动进入详情。</p>
+              <div class="tag-list" id="selectionTags">
+                <span class="tag">WAITING</span>
+              </div>
+            </section>
+
+            <div class="inspect-body">
+              <section class="inspect-card" id="summaryPanel">
+                <h3>Inspector 摘要</h3>
+                <div class="kv">
+                  <div><span>坐标</span><strong id="summaryCoord">未选中</strong></div>
+                  <div><span>轨道</span><strong id="summaryTrack">未选中</strong></div>
+                  <div><span>输入</span><strong id="summaryInput">等待选择对象。</strong></div>
+                  <div><span>输出</span><strong id="summaryOutput">等待选择对象。</strong></div>
+                  <div><span>风险</span><strong id="summaryRisk">等待选择对象。</strong></div>
+                </div>
+              </section>
+
+              <section class="inspect-card detail-panel" id="eventDetail">
+                <h3>事件检查器</h3>
+                <div class="logic-item"><strong>事件输入</strong><p id="eventInput">等待选择事件。</p></div>
+                <div class="logic-item warn"><strong>事件内部</strong><p id="eventInside">等待选择事件。</p></div>
+                <div class="logic-item risk"><strong>事件输出</strong><p id="eventOutput">等待选择事件。</p></div>
+              </section>
+
+              <section class="inspect-card detail-panel" id="chapterDetail">
+                <h3>章节函数</h3>
+                <div class="logic-item"><strong>章节输入</strong><p id="chapterInput">等待选择章节。</p></div>
+                <div class="logic-item warn"><strong>黑盒运作</strong><p id="chapterInside">等待选择章节。</p></div>
+                <div class="logic-item risk"><strong>章节输出</strong><p id="chapterOutput">等待选择章节。</p></div>
+              </section>
+
+            </div>
+
+            <div class="action-stack">
+              <button id="enterEvent" class="primary-action" type="button" disabled>拆解事件</button>
+              <button id="enterChapter" class="secondary-action" type="button" disabled>进入章节函数</button>
+              <button id="backToCanvas" class="secondary-action" type="button">回到画布状态</button>
+            </div>
+          </aside>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "defaultStoryId": "current",
+  "stories": [
+    {
+      "id": "current",
+      "label": "当前投影数据 C1-C5",
+      "file": "story-current.json",
+      "description": "当前基准时间轴投影数据集，保留原先的故事事件、剧情线投影和人物条混合结构。"
+    },
+    {
+      "id": "c1-c5-resplit-v0-1",
+      "label": "C1-C5 事件重拆样稿 v0.1",
+      "file": "story-c1-c5-resplit-v0.1.json",
+      "description": "按事件拆分规则重拆后的基准时间轴投影数据集，用于检查事件粒度。"
+    },
+    {
+      "id": "c1-c14-storyline-preview-v0-1",
+      "label": "C1-C14 故事线分类预览 v0.1",
+      "file": "story-c1-c14-storylines-preview-v0.1.json",
+      "description": "由故事线定义转写的基准时间轴投影数据集，用于验证顶层故事线、章节归属和对象域降级。"
+    }
+  ]
+}

@@ -1,0 +1,683 @@
+{
+  "meta": {
+    "name": "致命采访 C1-C5 真实样板数据",
+    "version": "0.3.0",
+    "source": "基于第002卷第001章至第005章正文，参考《致命采访-分章大纲》《致命采访-分章简纲》《致命采访-事件脉络》抽取。",
+    "updatedAt": "2026-06-23"
+  },
+  "timelineConfig": {
+    "defaultStart": "2025-07-05T09:00",
+    "defaultEnd": "2025-07-10T02:00"
+  },
+  "chapters": [
+    {
+      "id": "C1",
+      "title": "厂门口丢失的符",
+      "startAt": "2025-07-05T09:30",
+      "endAt": "2025-07-07T12:20",
+      "input": "电视台确定皮革厂改革专题，叶依人被推回采访前台。",
+      "inside": "熊丽压制叶依人并安排张航远；采访现场先呈现改革正面，再被老妇丢符撕开裂口。",
+      "output": "采访线从改革宣传转向病患家庭和符纸异常。"
+    },
+    {
+      "id": "C2",
+      "title": "逼仄小屋里的男人",
+      "startAt": "2025-07-07T16:27",
+      "endAt": "2025-07-07T22:00",
+      "input": "老妇要求采访组去家里看惨状，厂门口冲突留下强现场刺激。",
+      "inside": "采访组进入老家属楼，确认病患家庭真实困境；叶依人因现场危险决定撤离。",
+      "output": "素材被熊丽认定可用，张航远被训斥后出现受挫和代偿。"
+    },
+    {
+      "id": "C3",
+      "title": "第二天的暗访",
+      "startAt": "2025-07-08T07:30",
+      "endAt": "2025-07-08T13:30",
+      "input": "张航远受挫后想补充核实，叶依人也放不下老妇家的安全。",
+      "inside": "两人分别私下回到老家属区，老妇失控暴起，张航远救下叶依人并受伤。",
+      "output": "张航远的正义叙述刺中叶依人，但她意识到此事牵涉杨家旧账。"
+    },
+    {
+      "id": "C4",
+      "title": "听溪茶舍的冷静",
+      "startAt": "2025-07-09T01:30",
+      "endAt": "2025-07-09T14:00",
+      "input": "叶依人被旧厂苦难、张航远勇气和杨家关系同时压住。",
+      "inside": "叶依人深夜找禹树，禹树冷拆事实链；次日家庭会议把采访问题转成产业旧账和核查任务。",
+      "output": "林倩提出名单、诊断、补贴和联系网络的数据化方案。"
+    },
+    {
+      "id": "C5",
+      "title": "电视台的正式任务",
+      "startAt": "2025-07-09T15:27",
+      "endAt": "2025-07-10T01:00",
+      "input": "家庭会议后，旧厂问题已进入杨家风险视野，但电视台仍掌握剪辑和采访口径。",
+      "inside": "熊丽正式安排一周跟进报道；莫妮卡要求林倩以个人助理身份入组。",
+      "output": "三人调查组形成，张航远把正式任务误解为正义授权并暴露更深风险。"
+    }
+  ],
+  "characters": {
+    "yiren": {
+      "name": "叶依人",
+      "short": "叶",
+      "color": "#087268",
+      "soft": "#e0f0ed"
+    },
+    "zhang": {
+      "name": "张航远",
+      "short": "张",
+      "color": "#b42b40",
+      "soft": "#f3d7de"
+    },
+    "xiongli": {
+      "name": "熊丽",
+      "short": "熊",
+      "color": "#536761",
+      "soft": "#edf2f0"
+    },
+    "yangxinrui": {
+      "name": "杨心蕊",
+      "short": "杨",
+      "color": "#a66a10",
+      "soft": "#f3e4c8"
+    },
+    "monica": {
+      "name": "莫妮卡",
+      "short": "莫",
+      "color": "#315f83",
+      "soft": "#dbe8f1"
+    },
+    "yushu": {
+      "name": "禹树",
+      "short": "禹",
+      "color": "#6b4f86",
+      "soft": "#e9e1f0"
+    },
+    "linqian": {
+      "name": "林倩",
+      "short": "林",
+      "color": "#a66a10",
+      "soft": "#f3e4c8"
+    },
+    "laofu": {
+      "name": "丢符老妇",
+      "short": "老",
+      "color": "#6f7d79",
+      "soft": "#e7ecea"
+    }
+  },
+  "tracks": [
+    {
+      "id": "main",
+      "name": "故事主轴",
+      "sub": "采访裂口到正式任务",
+      "expanded": false,
+      "characters": [],
+      "color": "#536761",
+      "soft": "#edf2f0"
+    },
+    {
+      "id": "interview",
+      "name": "采访线",
+      "sub": "叶依人行动",
+      "expanded": true,
+      "characters": [
+        "yiren",
+        "zhang",
+        "linqian"
+      ],
+      "color": "#087268",
+      "soft": "#dcefed"
+    },
+    {
+      "id": "temple",
+      "name": "符与病患线",
+      "sub": "大仙祠前置信号",
+      "expanded": true,
+      "characters": [
+        "laofu",
+        "yiren",
+        "zhang"
+      ],
+      "color": "#67558a",
+      "soft": "#e7e2ef"
+    },
+    {
+      "id": "family",
+      "name": "杨家旧账线",
+      "sub": "产业风险内化",
+      "expanded": true,
+      "characters": [
+        "yiren",
+        "yushu",
+        "monica",
+        "yangxinrui",
+        "linqian"
+      ],
+      "color": "#5e6840",
+      "soft": "#e8ecd8"
+    },
+    {
+      "id": "media",
+      "name": "电视台线",
+      "sub": "口径和剪辑权",
+      "expanded": false,
+      "characters": [
+        "xiongli",
+        "yiren",
+        "zhang"
+      ],
+      "color": "#315f83",
+      "soft": "#dbe8f1"
+    },
+    {
+      "id": "proof",
+      "name": "职业病证据线",
+      "sub": "样本与数据边界",
+      "expanded": false,
+      "characters": [
+        "yiren",
+        "linqian",
+        "zhang"
+      ],
+      "color": "#4f6f5f",
+      "soft": "#e1ebe6"
+    },
+    {
+      "id": "zhang",
+      "name": "张航远线",
+      "sub": "正义感与失控风险",
+      "expanded": true,
+      "characters": [
+        "zhang",
+        "yiren",
+        "xiongli"
+      ],
+      "color": "#7a4f68",
+      "soft": "#eadfe5"
+    }
+  ],
+  "events": [
+    {
+      "id": "E001",
+      "kind": "story",
+      "track": "main",
+      "startAt": "2025-07-05T09:30",
+      "endAt": "2025-07-07T09:20",
+      "title": "电视台确定皮革厂专题",
+      "code": "E001 / C1",
+      "input": "皮革厂改革与员工持股被定为深度专题，叶依人被高层推到前台。",
+      "output": "叶依人重新进入记者身份，张航远作为新助理进入采访组。",
+      "risk": "如果只看成普通工作安排，会漏掉电视台和杨家利益的前置压力。",
+      "visualState": "normal"
+    },
+    {
+      "id": "E002",
+      "kind": "story",
+      "track": "main",
+      "startAt": "2025-07-07T11:50",
+      "endAt": "2025-07-07T12:20",
+      "title": "厂门口老妇丢符",
+      "code": "E002 / C1",
+      "input": "正面采访刚结束，皮革厂改革叙事仍保持体面。",
+      "output": "老妇抓住叶依人要求去家里看惨状，符纸与病患家庭第一次进入镜头。",
+      "risk": "这是全卷第一个裂口，不能被写成单纯闹事。",
+      "visualState": "risk"
+    },
+    {
+      "id": "E003",
+      "kind": "story",
+      "track": "main",
+      "startAt": "2025-07-07T16:27",
+      "endAt": "2025-07-07T18:40",
+      "title": "老家属楼惨状",
+      "code": "E003 / C2",
+      "input": "老妇把采访组带进厂区对面的老家属楼。",
+      "output": "采访组确认病患家庭困境真实，但现场存在窥视、威胁和失控风险。",
+      "risk": "苦难不能直接被消费成素材，必须保留采访伦理和现场危险。",
+      "visualState": "normal"
+    },
+    {
+      "id": "E004",
+      "kind": "story",
+      "track": "zhang",
+      "startAt": "2025-07-07T18:40",
+      "endAt": "2025-07-08T02:00",
+      "title": "张航远受挫与暗面浮现",
+      "code": "E004 / C2-C3",
+      "input": "熊丽肯定素材冲突性，同时训斥张航远不懂分寸。",
+      "output": "张航远把职业受挫转成个人化情绪，为第二天私自暗访埋下动机。",
+      "risk": "他不是单纯热血记者，能力、欲望和自负必须同时被看见。",
+      "visualState": "risk"
+    },
+    {
+      "id": "E005",
+      "kind": "story",
+      "track": "main",
+      "startAt": "2025-07-08T07:30",
+      "endAt": "2025-07-08T12:30",
+      "title": "第二天暗访与老妇暴起",
+      "code": "E005 / C3",
+      "input": "张航远以补充核实名义私下回访，叶依人也低调探望老妇。",
+      "output": "老妇失控暴起，张航远救下叶依人；两人短暂拉近，职业病疑云转向群体性问题。",
+      "risk": "动作场面只是表层，核心是采访组发现自己无法掌控现场秩序。",
+      "visualState": "risk"
+    },
+    {
+      "id": "E006",
+      "kind": "story",
+      "track": "main",
+      "startAt": "2025-07-09T01:30",
+      "endAt": "2025-07-09T13:30",
+      "title": "听溪茶舍与家庭会议",
+      "code": "E006 / C4",
+      "input": "叶依人被张航远的正义叙述触动，也意识到皮革厂牵涉杨家旧账。",
+      "output": "禹树和家庭会议把情绪性采访拆成名单、诊断、补贴和网络核查任务。",
+      "risk": "这一章的作用是降温，不是给苦难一个即时道德答案。",
+      "visualState": "warn"
+    },
+    {
+      "id": "E007",
+      "kind": "story",
+      "track": "main",
+      "startAt": "2025-07-09T15:27",
+      "endAt": "2025-07-10T00:30",
+      "title": "电视台正式任务与林倩入组",
+      "code": "E007 / C5",
+      "input": "前期素材被电视台认可，杨家内部也已意识到调查风险。",
+      "output": "跟进报道正式化，林倩以个人助理身份入组，三人调查组形成。",
+      "risk": "正式任务是授权也是包装，电视台仍保留剪辑和定性权。",
+      "visualState": "normal"
+    },
+    {
+      "id": "I001",
+      "kind": "story",
+      "track": "interview",
+      "startAt": "2025-07-05T09:30",
+      "endAt": "2025-07-07T12:20",
+      "title": "采访从改革宣传裂开",
+      "code": "C1",
+      "input": "叶依人按正面改革专题进入现场，张航远暗中捕捉旧厂裂缝。",
+      "output": "厂门口老妇让采访线转向病患家庭和符纸异常。",
+      "risk": "采访主线必须压住宣传线与猎奇线。",
+      "visualState": "normal"
+    },
+    {
+      "id": "I002",
+      "kind": "story",
+      "track": "interview",
+      "startAt": "2025-07-07T16:27",
+      "endAt": "2025-07-08T13:30",
+      "title": "个案回访变成现场失控",
+      "code": "C2-C3",
+      "input": "采访组想确认老妇家的真实处境。",
+      "output": "个案不再只是采访对象，而暴露出楼道邻里、病患家庭和安全边界。",
+      "risk": "不能把事件写成简单的勇敢深入，现场风险是实质约束。",
+      "visualState": "risk"
+    },
+    {
+      "id": "I003",
+      "kind": "story",
+      "track": "interview",
+      "startAt": "2025-07-09T15:27",
+      "endAt": "2025-07-09T23:30",
+      "title": "正式跟进报道获批",
+      "code": "C5",
+      "input": "电视台看到素材价值，张航远渴望继续追查。",
+      "output": "采访线从零散行动转为一周跟进报道。",
+      "risk": "跟进报道的名义光明，但口径仍受电视台控制。",
+      "visualState": "normal"
+    },
+    {
+      "id": "T001",
+      "kind": "story",
+      "track": "temple",
+      "startAt": "2025-07-07T11:50",
+      "endAt": "2025-07-08T12:30",
+      "title": "符纸异常和病患精神结构显形",
+      "code": "C1-C3",
+      "input": "老妇围绕符纸崩溃，病患家庭的痛苦无法用普通劳资纠纷解释。",
+      "output": "大仙祠尚未明牌，但符纸、恐惧和家属互相窥视已经成为前置信号。",
+      "risk": "此阶段只能写前兆，不能提前把大仙祠结论说死。",
+      "visualState": "warn"
+    },
+    {
+      "id": "T002",
+      "kind": "story",
+      "track": "temple",
+      "startAt": "2025-07-08T08:40",
+      "endAt": "2025-07-09T15:27",
+      "title": "附近十几家成为悬置问题",
+      "code": "C3-C5",
+      "input": "老妇多次提到附近还有类似家庭，但事实来源混杂。",
+      "output": "问题被禹树和林倩拆成名单、诊断和联系网络。",
+      "risk": "群体性不能只靠一句口述成立，必须后续样本化。",
+      "visualState": "warn"
+    },
+    {
+      "id": "F001",
+      "kind": "story",
+      "track": "family",
+      "startAt": "2025-07-09T01:30",
+      "endAt": "2025-07-09T13:30",
+      "title": "杨家旧账被放到桌面",
+      "code": "C4",
+      "input": "叶依人把私下遭遇告诉禹树和家庭会议。",
+      "output": "老林交代皮革厂历史承诺和多年补贴，杨心蕊意识到改革会被旧账反噬。",
+      "risk": "家族线不能替代采访线，只能解释为什么事情不能简单热血推进。",
+      "visualState": "warn"
+    },
+    {
+      "id": "F002",
+      "kind": "story",
+      "track": "family",
+      "startAt": "2025-07-09T19:30",
+      "endAt": "2025-07-09T22:30",
+      "title": "莫妮卡安排林倩入组",
+      "code": "C5",
+      "input": "莫妮卡担心叶依人被电视台、病患和张航远情绪裹挟。",
+      "output": "林倩以个人助理身份加入，既协助采访，也私下记录风险。",
+      "risk": "林倩的身份必须保持隐蔽，否则会破坏采访合法性和家族边界。",
+      "visualState": "normal"
+    },
+    {
+      "id": "M001",
+      "kind": "story",
+      "track": "media",
+      "startAt": "2025-07-05T09:30",
+      "endAt": "2025-07-07T12:20",
+      "title": "熊丽压制叶依人并配置助理",
+      "code": "C1",
+      "input": "叶依人刚从事业低谷回到正式采访。",
+      "output": "熊丽用传播逻辑压制她，并把张航远安插到采访组。",
+      "risk": "熊丽既是管理者也是口径风险源，不能只写成普通上司。",
+      "visualState": "normal"
+    },
+    {
+      "id": "M002",
+      "kind": "story",
+      "track": "media",
+      "startAt": "2025-07-07T18:40",
+      "endAt": "2025-07-07T21:30",
+      "title": "素材审片和责任切割",
+      "code": "C2",
+      "input": "采访组带回正面改革和老家属楼冲突素材。",
+      "output": "熊丽认为素材能用，但把风险责任压回张航远和叶依人身上。",
+      "risk": "电视台不是中立容器，它会选择性吸收冲突。",
+      "visualState": "normal"
+    },
+    {
+      "id": "M003",
+      "kind": "story",
+      "track": "media",
+      "startAt": "2025-07-09T15:27",
+      "endAt": "2025-07-09T16:30",
+      "title": "跟进报道被包装为正面回访",
+      "code": "C5",
+      "input": "前期素材有传播价值，也有风险。",
+      "output": "电视台以改革回访名义允许继续拍摄，但禁止提前定性职业病。",
+      "risk": "这个授权会被张航远误读成正义支持。",
+      "visualState": "normal"
+    },
+    {
+      "id": "P001",
+      "kind": "story",
+      "track": "proof",
+      "startAt": "2025-07-07T16:27",
+      "endAt": "2025-07-09T13:30",
+      "title": "病患事实从个案转向清单",
+      "code": "C2-C4",
+      "input": "老妇家庭惨状真实，但证据仍主要来自口述和现场感受。",
+      "output": "林倩提出名单、工龄、车间、症状、补贴和联系网络的结构化方案。",
+      "risk": "不能提前裁决职业病，只能把可核查事实列出来。",
+      "visualState": "warn"
+    },
+    {
+      "id": "P002",
+      "kind": "story",
+      "track": "proof",
+      "startAt": "2025-07-09T19:30",
+      "endAt": "2025-07-09T23:30",
+      "title": "资料助理身份确立",
+      "code": "C5",
+      "input": "第二轮跟进报道需要有人记录、拍照和整理名单。",
+      "output": "林倩进入采访组，职业病证据线获得方法支撑。",
+      "risk": "她不是采访装饰，而是后续数据线的入口。",
+      "visualState": "warn"
+    },
+    {
+      "id": "Z001",
+      "kind": "story",
+      "track": "zhang",
+      "startAt": "2025-07-05T09:30",
+      "endAt": "2025-07-07T12:20",
+      "title": "新闻敏感度与自我证明启动",
+      "code": "C1",
+      "input": "张航远被安排为叶依人的新助理。",
+      "output": "他捕捉旧厂负面空镜，并在老妇出现时推动摄影机重新开机。",
+      "risk": "他的专业敏感和表现欲同时启动。",
+      "visualState": "risk"
+    },
+    {
+      "id": "Z002",
+      "kind": "story",
+      "track": "zhang",
+      "startAt": "2025-07-08T07:30",
+      "endAt": "2025-07-08T13:30",
+      "title": "暗访救人与正义叙事",
+      "code": "C3",
+      "input": "受挫后他私下回到老家属区补充核实。",
+      "output": "他救下叶依人，并把职业病问题表述成不能假装看不见的道德任务。",
+      "risk": "这份正义感真实，但会被后续个人欲望污染。",
+      "visualState": "normal"
+    },
+    {
+      "id": "Z003",
+      "kind": "story",
+      "track": "zhang",
+      "startAt": "2025-07-09T15:27",
+      "endAt": "2025-07-10T01:00",
+      "title": "正式任务误读与私人失控",
+      "code": "C5",
+      "input": "熊丽给了他正式参与大稿子的机会。",
+      "output": "他把任务理解成正义被支持，夜里失控并被勒索，手机损毁。",
+      "risk": "这里只记录人物风险，不把私人失控当成采访线主事件。",
+      "visualState": "risk"
+    },
+    {
+      "id": "CE-I-yiren-1",
+      "kind": "character",
+      "track": "interview",
+      "character": "yiren",
+      "startAt": "2025-07-05T09:30",
+      "endAt": "2025-07-07T12:20",
+      "title": "从主持人回到记者位置",
+      "code": "叶依人",
+      "input": "她被熊丽压着接下皮革厂专题。",
+      "output": "她在镜头前找回专业状态，却被老妇的痛苦拖进真实裂口。",
+      "risk": "不能只写她被动，她仍在主动维持采访伦理。",
+      "visibility": "explicit",
+      "visualState": "normal"
+    },
+    {
+      "id": "CE-I-yiren-2",
+      "kind": "character",
+      "track": "interview",
+      "character": "yiren",
+      "startAt": "2025-07-07T16:27",
+      "endAt": "2025-07-08T13:30",
+      "title": "控制拍摄边界并私下回访",
+      "code": "叶依人",
+      "input": "她看见老妇家惨状，担心继续拍摄会伤害当事人。",
+      "output": "她先撤离，后又低调回访，显示同情和职业边界并存。",
+      "risk": "她的同情不是无脑热血，必须和风险判断同场出现。",
+      "visibility": "explicit",
+      "visualState": "normal"
+    },
+    {
+      "id": "CE-I-zhang-1",
+      "kind": "character",
+      "track": "interview",
+      "character": "zhang",
+      "startAt": "2025-07-07T09:30",
+      "endAt": "2025-07-08T13:30",
+      "title": "捕捉裂缝并推进暗访",
+      "code": "张航远",
+      "input": "他看见正面改革叙事里的不协调表情和旧设备。",
+      "output": "他从暗中补拍发展到私自回访，推动采访线获得强烈现场。",
+      "risk": "人物条要表现能力和越界风险同步增长。",
+      "visibility": "explicit",
+      "visualState": "risk"
+    },
+    {
+      "id": "CE-I-linqian-1",
+      "kind": "character",
+      "track": "interview",
+      "character": "linqian",
+      "startAt": "2025-07-09T12:25",
+      "endAt": "2025-07-09T23:30",
+      "title": "从家庭会议进入调查组",
+      "code": "林倩",
+      "input": "她先在家庭会议中提出数据化方案。",
+      "output": "她被莫妮卡安排成叶依人的个人助理，进入下一轮采访。",
+      "risk": "她的公开身份和真实任务不同，后续必须保持双层语义。",
+      "visibility": "explicit",
+      "visualState": "warn"
+    },
+    {
+      "id": "CE-T-laofu-1",
+      "kind": "character",
+      "track": "temple",
+      "character": "laofu",
+      "startAt": "2025-07-07T11:50",
+      "endAt": "2025-07-08T12:30",
+      "title": "丢符崩溃到暴起",
+      "code": "丢符老妇",
+      "input": "她因符纸丢失在厂门口崩溃，向电视台求助。",
+      "output": "她把采访组带到病患家庭，又在第二天失控暴起。",
+      "risk": "她既是苦难入口，也是失控现场，不应被简化成纯受害者。",
+      "visibility": "explicit",
+      "visualState": "risk"
+    },
+    {
+      "id": "CE-T-yiren-bg-1",
+      "kind": "character",
+      "track": "temple",
+      "character": "yiren",
+      "startAt": "2025-07-08T13:30",
+      "endAt": "2025-07-09T15:27",
+      "title": "符纸问题后台发酵",
+      "code": "叶依人",
+      "input": "她已经看见符纸和病患家庭之间的异常联系。",
+      "output": "她在家庭会议里把问题转述出来，等待被事实化。",
+      "risk": "这是后台状态，不代表大仙祠已经被正文正面揭示。",
+      "visibility": "background",
+      "visualState": "background"
+    },
+    {
+      "id": "CE-F-yushu-1",
+      "kind": "character",
+      "track": "family",
+      "character": "yushu",
+      "startAt": "2025-07-09T02:05",
+      "endAt": "2025-07-09T13:00",
+      "title": "冷拆事实链",
+      "code": "禹树",
+      "input": "叶依人带着情绪和遭遇找他求助。",
+      "output": "他把问题拆成事实来源、诊断、名单、老妇暴起和电视台剪辑风险。",
+      "risk": "他不是安慰者，而是把叙事从情绪拉回结构的人。",
+      "visibility": "explicit",
+      "visualState": "warn"
+    },
+    {
+      "id": "CE-F-monica-1",
+      "kind": "character",
+      "track": "family",
+      "character": "monica",
+      "startAt": "2025-07-09T12:25",
+      "endAt": "2025-07-09T22:30",
+      "title": "设置保护和观察边界",
+      "code": "莫妮卡",
+      "input": "她听见叶依人继续参与电视台任务。",
+      "output": "她同意但加条件，让林倩随行并私下汇报。",
+      "risk": "她不是阻止真相，而是在控制叶依人的暴露面。",
+      "visibility": "explicit",
+      "visualState": "normal"
+    },
+    {
+      "id": "CE-F-yang-1",
+      "kind": "character",
+      "track": "family",
+      "character": "yangxinrui",
+      "startAt": "2025-07-07T09:30",
+      "endAt": "2025-07-09T13:30",
+      "title": "改革成果与旧账反噬",
+      "code": "杨心蕊",
+      "input": "她在采访中呈现员工持股和厂区新气象。",
+      "output": "家庭会议让她意识到旧病患家庭可能反噬改革叙事。",
+      "risk": "她既是改革代表，也是旧账风险承受者。",
+      "visibility": "explicit",
+      "visualState": "warn"
+    },
+    {
+      "id": "CE-M-xiongli-1",
+      "kind": "character",
+      "track": "media",
+      "character": "xiongli",
+      "startAt": "2025-07-05T09:30",
+      "endAt": "2025-07-09T16:30",
+      "title": "以管理口径吸收冲突",
+      "code": "熊丽",
+      "input": "她借新媒体逻辑打压叶依人，并要求采访有冲突。",
+      "output": "她既训斥张航远，又把跟进报道包装成正式任务。",
+      "risk": "她推动冲突但规避责任，是电视台线的核心压力源。",
+      "visibility": "explicit",
+      "visualState": "normal"
+    },
+    {
+      "id": "CE-P-linqian-1",
+      "kind": "character",
+      "track": "proof",
+      "character": "linqian",
+      "startAt": "2025-07-09T12:25",
+      "endAt": "2025-07-09T23:30",
+      "title": "数据化入口",
+      "code": "林倩",
+      "input": "家庭会议需要把口述苦难转为可核查材料。",
+      "output": "她提出名单、工龄、车间、症状和补贴记录，随后入组执行。",
+      "risk": "证据线必须避免被张航远的直觉判断带偏。",
+      "visibility": "explicit",
+      "visualState": "warn"
+    },
+    {
+      "id": "CE-Z-zhang-1",
+      "kind": "character",
+      "track": "zhang",
+      "character": "zhang",
+      "startAt": "2025-07-05T09:30",
+      "endAt": "2025-07-10T01:00",
+      "title": "从专业敏感滑向失控风险",
+      "code": "张航远",
+      "input": "他以年轻记者的敏感捕捉到旧厂裂缝。",
+      "output": "他获得正式任务后误读授权，私人欲望和暴力风险被暴露。",
+      "risk": "这是连续人物线，不应拆成互不关联的爽点片段。",
+      "visibility": "explicit",
+      "visualState": "risk"
+    },
+    {
+      "id": "CE-Z-yiren-bg-1",
+      "kind": "character",
+      "track": "zhang",
+      "character": "yiren",
+      "startAt": "2025-07-08T12:30",
+      "endAt": "2025-07-10T01:00",
+      "title": "被张航远理想化",
+      "code": "叶依人",
+      "input": "她被张航远救下，并向他发出鼓励。",
+      "output": "她在张航远线里被投射为正义认可和私人欲望对象。",
+      "risk": "这是张航远视角里的后台投射，不能混同于叶依人的主观动机。",
+      "visibility": "background",
+      "visualState": "background"
+    }
+  ]
+}
