@@ -18,7 +18,7 @@ assert(
 );
 
 assert(
-  /hitRegions\.push\(\{\s*type:\s*"event",\s*id:\s*item\.id,\s*x:\s*drawX,\s*y:\s*y - 3,\s*w:\s*drawWidth,\s*h:\s*height \+ 6\s*\}\)/s.test(html),
+  /hitRegions\.push\(\{\s*type:\s*"event",\s*id:\s*item\.id,\s*x:\s*drawX,\s*y:\s*hitY,\s*w:\s*drawWidth,\s*h:\s*hitHeight\s*\}\)/s.test(html),
   "事件命中区没有使用裁剪后的 drawX/drawWidth。"
 );
 

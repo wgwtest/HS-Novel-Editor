@@ -58,6 +58,12 @@
       padding: 18px;
     }
 
+    .frame.wide-mode {
+      width: 100vw;
+      height: 100vh;
+      padding: 10px 12px;
+    }
+
     .app {
       height: 100%;
       display: grid;
@@ -504,6 +510,7 @@
             <button id="resetView" type="button" class="active">复位</button>
             <button id="zoomIn" type="button">放大</button>
             <button id="expandAll" type="button">全展</button>
+            <button id="wideMode" type="button">宽屏</button>
             <button id="resetDatasetState" type="button">重置状态</button>
           </div>
         </div>
@@ -682,13 +689,17 @@
     const state = {
       scale: DEFAULT_VIEW_SCALE,
       offsetX: 0,
+      offsetY: 0,
       axisMode: "realTime",
+      isWideMode: false,
       selected: null,
       detailMode: "summary",
       hover: null,
       isDragging: false,
       dragStartX: 0,
+      dragStartY: 0,
       dragStartOffset: 0,
+      dragStartOffsetY: 0,
       moved: false
     };
 
@@ -841,6 +852,27 @@
       document.getElementById("timelineEnd").value = endValue;
     }
 
+    function updateWideModeButton() {
+      const button = document.getElementById("wideMode");
+      if (!button) return;
+      button.classList.toggle("active", state.isWideMode);
+      button.textContent = state.isWideMode ? "定宽" : "宽屏";
+    }
+
+    function applyWideModeClass() {
+      document.querySelector(".frame").classList.toggle("wide-mode", state.isWideMode);
+      updateWideModeButton();
+    }
+
+    function setWideMode(enabled) {
+      if (state.isWideMode === Boolean(enabled)) return;
+      state.isWideMode = Boolean(enabled);
+      applyWideModeClass();
+      resizeCanvas();
+      document.getElementById("route-state").textContent = state.isWideMode ? "宽屏模式" : "定宽模式";
+      persistCurrentDatasetState();
+    }
+
     function captureCurrentDatasetState() {
       const selected = state.selected ? { ...state.selected } : null;
       return {
@@ -850,6 +882,8 @@
         timelineEnd: document.getElementById("timelineEnd").value,
         scale: state.scale,
         offsetX: state.offsetX,
+        offsetY: state.offsetY,
+        isWideMode: state.isWideMode,
         selected,
         expandedTrackIds: tracks
           .filter((track) => track.characters.length > 0 && track.expanded)
@@ -913,14 +947,17 @@
       setTimelineInputValues(timelineConfig.defaultStart, timelineConfig.defaultEnd);
       state.scale = DEFAULT_VIEW_SCALE;
       state.offsetX = 0;
+      state.offsetY = 0;
       state.axisMode = AXIS_MODE_REAL;
+      state.isWideMode = false;
       state.selected = null;
       state.detailMode = "summary";
       applyTrackExpansion(null);
+      applyWideModeClass();
       hideDetails();
       updateInspectorEmpty();
-      clampOffset();
-      draw();
+      clampOffsets();
+      resizeCanvas();
     }
 
     function applyDatasetViewState(viewState) {
@@ -948,13 +985,16 @@
         ? Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, Number(viewState.scale)))
         : DEFAULT_VIEW_SCALE;
       state.offsetX = Number.isFinite(Number(viewState.offsetX)) ? Number(viewState.offsetX) : 0;
+      state.offsetY = Number.isFinite(Number(viewState.offsetY)) ? Number(viewState.offsetY) : 0;
+      state.isWideMode = Boolean(viewState.isWideMode);
       state.selected = null;
       state.detailMode = "summary";
       applyTrackExpansion(viewState.expandedTrackIds);
+      applyWideModeClass();
       hideDetails();
       updateInspectorEmpty();
-      clampOffset();
-      draw();
+      clampOffsets();
+      resizeCanvas();
       applyPersistedSelection(viewState.selected);
     }
 
@@ -1037,7 +1077,7 @@
         applyDatasetViewState(getDatasetViewState(activeStoryId));
         return;
       }
-      clampOffset();
+      clampOffsets();
       draw();
     }
 
@@ -1074,6 +1114,7 @@
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      clampOffsets();
       draw();
     }
 
@@ -1090,12 +1131,40 @@
       state.offsetX = Math.max(0, Math.min(maxOffset(), state.offsetX));
     }
 
+    function bodyViewportHeight() {
+      return Math.max(0, canvas.clientHeight - world.headerHeight);
+    }
+
+    function bodyContentHeight() {
+      return tracks.reduce((total, track) => {
+        const characterRows = track.expanded ? track.characters.length * world.characterHeight : 0;
+        return total + world.trackHeight + characterRows;
+      }, 0);
+    }
+
+    function maxOffsetY() {
+      return Math.max(0, bodyContentHeight() - bodyViewportHeight());
+    }
+
+    function clampOffsetY() {
+      state.offsetY = Math.max(0, Math.min(maxOffsetY(), state.offsetY));
+    }
+
+    function clampOffsets() {
+      clampOffset();
+      clampOffsetY();
+    }
+
     function screenToWorldX(x) {
       return (x - world.labelWidth) / state.scale + state.offsetX;
     }
 
     function worldToScreenX(x) {
       return world.labelWidth + (x - state.offsetX) * state.scale;
+    }
+
+    function rowScreenY(y) {
+      return y - state.offsetY;
     }
 
     function parseTime(value) {
@@ -1547,14 +1616,22 @@
     }
 
     function drawTracks(w, h) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, world.headerHeight, w, Math.max(0, h - world.headerHeight));
+      ctx.clip();
       rowLayout.forEach((row, index) => {
         const selectedTrack = state.selected?.type === "track" && state.selected.id === row.trackId;
         const selectedCharacter = state.selected?.type === "character" && state.selected.id === row.id;
         const track = trackById(row.trackId);
         const character = row.type === "character" ? characterById(row.characterId) : null;
         const isTrack = row.type === "track";
-        const y = row.y;
+        const y = rowScreenY(row.y);
         const rh = row.height;
+        const visibleY = Math.max(y, world.headerHeight);
+        const visibleBottom = Math.min(y + rh, h);
+        const visibleH = visibleBottom - visibleY;
+        if (visibleH <= 0) return;
 
         ctx.fillStyle = isTrack ? (index % 2 === 0 ? "#ffffff" : "#fcfdfc") : "#fbfdfc";
         ctx.fillRect(world.labelWidth, y, w - world.labelWidth, rh);
@@ -1584,7 +1661,7 @@
             ctx.fillText(`${track.characters.length} 人`, world.labelWidth - 14, y + 31);
             ctx.textAlign = "left";
           }
-          hitRegions.push({ type: "track", id: track.id, x: 0, y, w: world.labelWidth, h: rh });
+          hitRegions.push({ type: "track", id: track.id, x: 0, y: visibleY, w: world.labelWidth, h: visibleH });
         } else {
           ctx.strokeStyle = character.color;
           ctx.lineWidth = 2;
@@ -1598,9 +1675,10 @@
           ctx.fillStyle = colors.ink;
           ctx.font = "700 11px Microsoft YaHei UI";
           ctx.fillText(character.name, 52, y + 14);
-          hitRegions.push({ type: "character", id: row.id, track: row.trackId, character: row.characterId, x: 0, y, w: world.labelWidth, h: rh });
+          hitRegions.push({ type: "character", id: row.id, track: row.trackId, character: row.characterId, x: 0, y: visibleY, w: world.labelWidth, h: visibleH });
         }
       });
+      ctx.restore();
 
       ctx.save();
       ctx.beginPath();
@@ -1636,10 +1714,14 @@
         if (!range) return;
         const x = range.x;
         const height = isCharacter ? 20 : 38;
-        const y = row.y + (isCharacter ? Math.round((row.height - height) / 2) : Math.max(4, (row.height - height) / 2));
+        const y = rowScreenY(row.y) + (isCharacter ? Math.round((row.height - height) / 2) : Math.max(4, (row.height - height) / 2));
         const width = range.width;
         const display = eventDisplayRect(x, width, w);
         if (!display) return;
+        const hitY = Math.max(y - 3, world.headerHeight);
+        const hitBottom = Math.min(y + height + 3, canvas.clientHeight);
+        const hitHeight = hitBottom - hitY;
+        if (hitHeight <= 0) return;
         const drawX = display.x;
         const drawWidth = display.width;
         const visual = eventVisual(item);
@@ -1701,7 +1783,7 @@
         }
         ctx.restore();
 
-        hitRegions.push({ type: "event", id: item.id, x: drawX, y: y - 3, w: drawWidth, h: height + 6 });
+        hitRegions.push({ type: "event", id: item.id, x: drawX, y: hitY, w: drawWidth, h: hitHeight });
       });
 
       ctx.restore();
@@ -1803,6 +1885,7 @@
       if (region.type === "chapter") updateInspectorChapter(region.id);
       if (region.type === "track") updateInspectorTrack(region.id, { toggle: !options.restore });
       if (region.type === "character") updateInspectorCharacter(region.track, region.character);
+      clampOffsets();
       draw();
       if (options.persist !== false) persistCurrentDatasetState();
     }
@@ -1996,6 +2079,7 @@
       document.getElementById("zoomLabel").textContent = `${zoom}%`;
       document.getElementById("zoomSlider").value = zoom;
       updateAxisModeButtons();
+      updateWideModeButton();
     }
 
     function axisModeLabel() {
@@ -2038,7 +2122,7 @@
       if (!focusSelectedOnAxis()) {
         state.offsetX = 0;
       }
-      clampOffset();
+      clampOffsets();
       updateAxisModeButtons();
       draw();
       document.getElementById("route-state").textContent = `轴模式：${axisModeLabel()}`;
@@ -2060,7 +2144,7 @@
       state.selected = null;
       state.detailMode = "summary";
       hideDetails();
-      clampOffset();
+      clampOffsets();
       updateInspectorEmpty();
       draw();
       document.getElementById("route-state").textContent = "时间范围已应用";
@@ -2072,7 +2156,7 @@
       const worldAtAnchor = screenToWorldX(anchorX);
       state.scale = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, nextScale));
       state.offsetX = worldAtAnchor - (anchorX - world.labelWidth) / state.scale;
-      if (oldScale !== state.scale) clampOffset();
+      if (oldScale !== state.scale) clampOffsets();
       draw();
       persistCurrentDatasetState();
     }
@@ -2091,7 +2175,9 @@
       }
       state.isDragging = true;
       state.dragStartX = event.clientX;
+      state.dragStartY = event.clientY;
       state.dragStartOffset = state.offsetX;
+      state.dragStartOffsetY = state.offsetY;
       state.moved = false;
       canvas.classList.add("dragging");
     });
@@ -2099,9 +2185,11 @@
     canvas.addEventListener("pointermove", (event) => {
       if (!state.isDragging) return;
       const dx = event.clientX - state.dragStartX;
-      if (Math.abs(dx) > 3) state.moved = true;
+      const dy = event.clientY - state.dragStartY;
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) state.moved = true;
       state.offsetX = state.dragStartOffset - dx / state.scale;
-      clampOffset();
+      state.offsetY = state.dragStartOffsetY - dy;
+      clampOffsets();
       draw();
     });
 
@@ -2144,17 +2232,20 @@
       tracks.forEach((track) => {
         if (track.characters.length > 0) track.expanded = true;
       });
+      clampOffsets();
       draw();
       persistCurrentDatasetState();
     });
     document.getElementById("resetView").addEventListener("click", () => {
       state.scale = DEFAULT_VIEW_SCALE;
       state.offsetX = 0;
+      state.offsetY = 0;
       state.detailMode = "summary";
       hideDetails();
       draw();
       persistCurrentDatasetState();
     });
+    document.getElementById("wideMode").addEventListener("click", () => setWideMode(!state.isWideMode));
     document.getElementById("resetDatasetState").addEventListener("click", () => resetDatasetState());
     document.getElementById("enterEvent").addEventListener("click", enterEventDetail);
     document.getElementById("enterChapter").addEventListener("click", enterChapterDetail);
@@ -2203,11 +2294,12 @@
         tracks.forEach((track) => {
           if (track.characters.length > 0) track.expanded = true;
         });
+        clampOffsets();
         draw();
       } else if (hash === "zoomed") {
         state.scale = ZOOM_MAX;
         state.offsetX = timeToWorld("2025-07-07T12:00");
-        clampOffset();
+        clampOffsets();
         updateStateLabels();
         draw();
       }

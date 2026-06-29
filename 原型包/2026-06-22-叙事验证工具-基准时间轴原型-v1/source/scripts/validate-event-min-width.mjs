@@ -44,8 +44,8 @@ assert(
 );
 
 assert(
-  /hitRegions\.push\(\{\s*type:\s*"event",\s*id:\s*item\.id,\s*x:\s*drawX,\s*y:\s*y - 3,\s*w:\s*drawWidth,\s*h:\s*height \+ 6\s*\}\)/s.test(html),
-  "Event hit region must use drawX/drawWidth after min-width calculation."
+  /hitRegions\.push\(\{\s*type:\s*"event",\s*id:\s*item\.id,\s*x:\s*drawX,\s*y:\s*hitY,\s*w:\s*drawWidth,\s*h:\s*hitHeight\s*\}\)/s.test(html),
+  "Event hit region must use drawX/drawWidth after min-width calculation and clipped vertical bounds."
 );
 
 const clippedMatch = html.match(/function clippedEventRect\(x, width, viewportWidth\) \{[\s\S]*?\n    \}/);
