@@ -19,6 +19,8 @@ export function readAppSource(metaUrl) {
   const parts = [
     fs.readFileSync(path.join(appRoot, "index.html"), "utf8"),
     fs.readFileSync(path.join(appRoot, "src", "main.js"), "utf8"),
+    fs.readFileSync(path.join(appRoot, "src", "data", "story-loader.js"), "utf8"),
+    fs.readFileSync(path.join(appRoot, "src", "state", "persisted-state.js"), "utf8"),
     fs.readFileSync(path.join(appRoot, "src", "styles", "main.css"), "utf8")
   ];
 

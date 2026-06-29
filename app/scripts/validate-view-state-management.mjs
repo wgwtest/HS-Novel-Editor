@@ -29,8 +29,8 @@ const requiredSnippets = [
   ["function applyDefaultDatasetViewState(", "Missing default state restore."],
   ["function resetDatasetState(", "Missing dataset reset interaction handler."],
   ['id="resetDatasetState"', "Missing reset-state toolbar button."],
-  ["localStorage.getItem(VIEW_STATE_STORAGE_KEY)", "Missing localStorage read."],
-  ["localStorage.setItem(VIEW_STATE_STORAGE_KEY", "Missing localStorage write."],
+  ["getItem(VIEW_STATE_STORAGE_KEY)", "Missing persisted state read."],
+  ["setItem(VIEW_STATE_STORAGE_KEY", "Missing persisted state write."],
   ["expandedTrackIds", "Missing expanded-track dataset state."],
   ["persistCurrentDatasetState()", "Missing persistence calls after state mutations."]
 ];

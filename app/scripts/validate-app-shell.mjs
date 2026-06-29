@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { readAppSource } from "./app-validation-helpers.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const appRoot = path.resolve(__dirname, "..");
@@ -28,6 +29,7 @@ for (const requiredPath of [
 
 const indexHtml = readText("index.html");
 const mainJs = readText("src/main.js");
+const appSource = readAppSource(import.meta.url);
 const css = readText("src/styles/main.css");
 const packageJson = JSON.parse(readText("package.json"));
 
@@ -37,7 +39,7 @@ assert(!indexHtml.includes("<style>"), "app/index.html must not keep the large i
 assert(!indexHtml.includes("<script>"), "app/index.html must not keep the large inline script block.");
 assert(!mainJs.includes("<style>"), "src/main.js must not contain HTML style tags.");
 assert(mainJs.includes("function boot("), "src/main.js must keep the existing boot flow for this migration stage.");
-assert(mainJs.includes('const STORY_DATA_BASE_URL = "public/data"'), "src/main.js must read copied app data from public/data.");
+assert(appSource.includes('const STORY_DATA_BASE_URL = "public/data"'), "app source must read copied app data from public/data.");
 assert(!mainJs.includes('"data/stories/index.json"'), "src/main.js must not keep the prototype-only data/stories manifest path.");
 assert(css.includes("#timelineCanvas"), "Extracted CSS must include timeline canvas styling.");
 assert(packageJson.scripts?.dev, "package.json must define npm run dev.");

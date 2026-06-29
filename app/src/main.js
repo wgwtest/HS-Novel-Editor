@@ -1,3 +1,18 @@
+import {
+  loadLegacyStoryData as fetchLegacyStoryData,
+  loadStoryManifest as loadStoryManifestCatalog,
+  loadStoryProjection,
+  storyUrl as resolveStoryUrl
+} from "./data/story-loader.js";
+import {
+  VIEW_STATE_VERSION,
+  clearDatasetViewState as removeDatasetViewState,
+  getDatasetViewState as readDatasetViewState,
+  loadPersistedState as loadPersistedStateFromStorage,
+  savePersistedState as savePersistedStateToStorage,
+  setDatasetViewState as writeDatasetViewState
+} from "./state/persisted-state.js";
+
     const canvas = document.getElementById("timelineCanvas");
     const wrap = document.getElementById("canvasWrap");
     const ctx = canvas.getContext("2d");
@@ -138,10 +153,6 @@
       start: parseTime(timelineConfig.defaultStart),
       end: parseTime(timelineConfig.defaultEnd)
     };
-    const STORY_DATA_BASE_URL = "public/data";
-    const STORY_MANIFEST_URL = `${STORY_DATA_BASE_URL}/stories/index.json`;
-    const VIEW_STATE_STORAGE_KEY = "hs-novel-editor:timeline-view-state:v1";
-    const VIEW_STATE_VERSION = 1;
     const storyCatalog = [];
     let persistedViewState = null;
     let defaultExpandedTrackIds = new Set();
@@ -200,72 +211,25 @@
       document.getElementById("data-source-state").textContent = `DATA ${storyDataSource}`;
     }
 
-    function normalizePersistedState(value = {}) {
-      const datasets = value.datasets && typeof value.datasets === "object" && !Array.isArray(value.datasets)
-        ? value.datasets
-        : {};
-      return {
-        version: VIEW_STATE_VERSION,
-        activeStoryId: typeof value.activeStoryId === "string" ? value.activeStoryId : "",
-        datasets
-      };
-    }
-
-    function loadPersistedState() {
-      try {
-        const raw = localStorage.getItem(VIEW_STATE_STORAGE_KEY);
-        if (!raw) return normalizePersistedState();
-        const parsed = JSON.parse(raw);
-        return normalizePersistedState(parsed);
-      } catch (error) {
-        return normalizePersistedState();
-      }
-    }
-
-    function savePersistedState(nextState) {
-      persistedViewState = normalizePersistedState(nextState);
-      try {
-        localStorage.setItem(VIEW_STATE_STORAGE_KEY, JSON.stringify(persistedViewState));
-      } catch (error) {
-        // localStorage can fail in private or quota-limited browser contexts.
-      }
-    }
-
     function ensurePersistedViewState() {
-      if (!persistedViewState) persistedViewState = loadPersistedState();
+      if (!persistedViewState) persistedViewState = loadPersistedStateFromStorage();
       return persistedViewState;
     }
 
     function getDatasetViewState(storyId = activeStoryId) {
-      if (!storyId) return null;
-      const viewState = ensurePersistedViewState();
-      const datasetState = viewState.datasets[storyId];
-      return datasetState && typeof datasetState === "object" ? datasetState : null;
+      return readDatasetViewState(ensurePersistedViewState(), storyId);
     }
 
     function setDatasetViewState(storyId, viewState) {
-      if (!storyId) return;
-      const current = ensurePersistedViewState();
-      savePersistedState({
-        ...current,
-        activeStoryId: storyId,
-        datasets: {
-          ...current.datasets,
-          [storyId]: viewState
-        }
-      });
+      persistedViewState = savePersistedStateToStorage(
+        writeDatasetViewState(ensurePersistedViewState(), storyId, viewState)
+      );
     }
 
     function clearDatasetViewState(storyId = activeStoryId) {
-      if (!storyId) return;
-      const current = ensurePersistedViewState();
-      const datasets = { ...current.datasets };
-      delete datasets[storyId];
-      savePersistedState({
-        ...current,
-        activeStoryId: storyId,
-        datasets
-      });
+      persistedViewState = savePersistedStateToStorage(
+        removeDatasetViewState(ensurePersistedViewState(), storyId)
+      );
     }
 
     function isValidAxisMode(mode) {
@@ -429,22 +393,6 @@
       document.getElementById("route-state").textContent = "当前数据集状态已重置";
     }
 
-    function validateStoryManifest(manifest) {
-      if (!manifest || typeof manifest !== "object") throw new Error("stories/index.json 必须是对象。");
-      if (!Array.isArray(manifest.stories) || manifest.stories.length === 0) throw new Error("stories/index.json 缺少 stories 数组。");
-      return manifest.stories.map((item) => {
-        if (!item || typeof item !== "object") throw new Error("stories 条目必须是对象。");
-        if (!item.id || !item.label || !item.file) throw new Error("stories 条目必须包含 id、label、file。");
-        if (item.file.includes("..") || item.file.includes("/") || item.file.includes("\\")) throw new Error(`非法 story 文件名：${item.file}`);
-        return {
-          id: String(item.id),
-          label: String(item.label),
-          file: String(item.file),
-          description: item.description ? String(item.description) : ""
-        };
-      });
-    }
-
     function renderStoryOptions() {
       const select = document.getElementById("storySelect");
       select.innerHTML = "";
@@ -467,12 +415,9 @@
     }
 
     async function loadStoryManifest() {
-      const response = await fetch(STORY_MANIFEST_URL, { cache: "no-store" });
-      if (!response.ok) throw new Error(`读取 stories/index.json 失败：HTTP ${response.status}`);
-      const manifest = await response.json();
-      const list = validateStoryManifest(manifest);
+      const { manifest, list } = await loadStoryManifestCatalog();
       storyCatalog.splice(0, storyCatalog.length, ...list);
-      persistedViewState = loadPersistedState();
+      persistedViewState = loadPersistedStateFromStorage();
       activeStoryId = persistedViewState.activeStoryId && list.some((item) => item.id === persistedViewState.activeStoryId)
         ? persistedViewState.activeStoryId
         : manifest.defaultStoryId && list.some((item) => item.id === manifest.defaultStoryId)
@@ -482,15 +427,13 @@
     }
 
     function storyUrl(item) {
-      return `${STORY_DATA_BASE_URL}/stories/${item.file}`;
+      return resolveStoryUrl(item);
     }
 
     async function applySelectedStory(storyId, options = {}) {
       const item = storyCatalog.find((story) => story.id === storyId);
       if (!item) throw new Error(`未找到基准时间轴投影数据集：${storyId}`);
-      const response = await fetch(storyUrl(item), { cache: "no-store" });
-      if (!response.ok) throw new Error(`读取 ${item.file} 失败：HTTP ${response.status}`);
-      const data = await response.json();
+      const data = await loadStoryProjection(item);
       applyStoryData(data);
       activeStoryId = item.id;
       storyDataSource = `${item.label}`;
@@ -507,11 +450,9 @@
     }
 
     async function loadLegacyStoryData() {
-      const response = await fetch(`${STORY_DATA_BASE_URL}/story.json`, { cache: "no-store" });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await response.json();
+      const { source, data } = await fetchLegacyStoryData();
       applyStoryData(data);
-      storyDataSource = `${STORY_DATA_BASE_URL}/story.json`;
+      storyDataSource = source;
       storyDataError = "";
     }
 
